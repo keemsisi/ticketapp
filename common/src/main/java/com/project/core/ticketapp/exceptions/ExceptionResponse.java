@@ -7,7 +7,6 @@ import java.util.Date;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder(toBuilder = true)
 public class ExceptionResponse {
 

@@ -9,7 +9,6 @@ import javax.persistence.Entity;
 
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 public class Group {
