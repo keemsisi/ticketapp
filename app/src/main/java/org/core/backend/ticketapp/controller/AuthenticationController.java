@@ -1,7 +1,0 @@
-package org.core.backend.ticketapp.controller;
-
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController(value = "/auth")
-public class AuthenticationController {
-}
