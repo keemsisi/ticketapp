@@ -27,7 +27,7 @@ public interface UnitRepository extends JpaRepository<Unit, UUID>, PagingAndSort
     Optional<Unit> findByDepartmentIdAndName(UUID departmentId, String name);
 
     @Query(value = "SELECT * FROM unit WHERE name LIKE CONCAT('%', :name,'%') AND " +
-            " department_id = :departmentId AND tenant_id=:tenantId", nativeQuery = true)
-    Page<Unit> findAll(String name, UUID departmentId, UUID tenantId, Pageable pageable);
+            " department_id = :departmentId ", nativeQuery = true)
+    Page<Unit> findAll(String name, UUID departmentId, Pageable pageable);
 
 }

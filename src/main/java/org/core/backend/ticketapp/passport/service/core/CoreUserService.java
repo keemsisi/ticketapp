@@ -451,7 +451,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     }
 
     public int updatePasswordExpiryDate(Date passwordExpiryDate, UUID tenantId) {
-        return userRepository.updatePasswordExpiryDate(passwordExpiryDate, tenantId);
+        return userRepository.updatePasswordExpiryDate(passwordExpiryDate);
     }
 
     public int updatePasswordExpiryDateToNull(UUID tenantId) {

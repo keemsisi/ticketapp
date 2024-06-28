@@ -30,18 +30,18 @@ public interface WorkflowRepository extends JpaRepository<Workflow, UUID>, Pagin
     @Query(value = "SELECT * FROM workflow WHERE id = ?1", nativeQuery = true)
     Optional<Workflow> findByUUID(UUID id);
 
-    @Query(value = "SELECT * FROM workflow WHERE module_id = ?1 AND tenant_id=?2", nativeQuery = true)
-    List<Workflow> findByModuleId(UUID id, UUID tenantId);
+    @Query(value = "SELECT * FROM workflow WHERE module_id = ?1 ", nativeQuery = true)
+    List<Workflow> findByModuleId(UUID id);
 
-    @Query(value = "SELECT * FROM workflow WHERE LOWER(name) LIKE CONCAT('%', LOWER(?2),'%') AND module_id = ?1 AND tenant_id=?3", nativeQuery = true)
-    List<Workflow> findByModuleIdAndName(UUID id,String name, UUID tenantId);
+    @Query(value = "SELECT * FROM workflow WHERE LOWER(name) LIKE CONCAT('%', LOWER(?2),'%') AND module_id = ?1 ", nativeQuery = true)
+    List<Workflow> findByModuleIdAndName(UUID id,String name);
 
     @Modifying
     @Query(value = "DELETE FROM workflow WHERE id = ?1", nativeQuery = true)
     void deleteByUUID(UUID id);
 
-    @Query(value = "SELECT * FROM workflow WHERE COALESCE(LOWER(name),'') LIKE CONCAT('%', :name,'%') AND is_deleted = false AND tenant_id=:tenantId",
+    @Query(value = "SELECT * FROM workflow WHERE COALESCE(LOWER(name),'') LIKE CONCAT('%', :name,'%') AND is_deleted = false ",
             nativeQuery = true)
-    Page<Workflow> getAllByName(String name, UUID tenantId, Pageable pageable);
+    Page<Workflow> getAllByName(String name, Pageable pageable);
 
 }

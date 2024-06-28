@@ -23,16 +23,16 @@ public class PricingSubscriptionDao {
     private JwtTokenUtil jwtTokenUtil;
 
     public Page<PricingSubscription> getAll(String name, Pageable pageable) {
-        UUID tenantId = jwtTokenUtil.getUser().getTenantId();
         int limit = pageable.getPageSize();
         long offSet = pageable.getOffset();
-        String sqlQ = String.format(name == null ? "SELECT * FROM department WHERE tenant_id='%s'\n" + " LIMIT " + limit + " OFFSET " + offSet + "; " : "SELECT * FROM department WHERE tenant_id='%s' AND COALESCE(LOWER(name),'') LIKE '%" + name + "%'" + " \n" + " LIMIT " + limit + " OFFSET " + offSet + "; ", tenantId, tenantId);
-        var cscFactory = new CallableStatementCreatorFactory(sqlQ + "SELECT COUNT(*) FROM department;");
+        String sqlQ = String.format(name == null ? "SELECT * FROM pricing_subscription LIMIT " + limit + " OFFSET " + offSet + "; "
+                : "SELECT * FROM pricing_subscription WHERE COALESCE(LOWER(name),'') LIKE '%" + name + "%'" + " \n" + " LIMIT " + limit + " OFFSET " + offSet + "; ");
+        var cscFactory = new CallableStatementCreatorFactory(sqlQ + "SELECT COUNT(*) FROM pricing_subscription;");
         var returnedParams = Arrays.<SqlParameter>asList(
-                new SqlReturnResultSet("departments", BeanPropertyRowMapper.newInstance(PricingSubscription.class)),
+                new SqlReturnResultSet("pricingSubscription", BeanPropertyRowMapper.newInstance(PricingSubscription.class)),
                 new SqlReturnResultSet("count", BeanPropertyRowMapper.newInstance(LongWrapper.class)));
         CallableStatementCreator csc = cscFactory.newCallableStatementCreator(new HashMap<>());
         Map<String, Object> results = jdbcTemplate.call(csc, returnedParams);
-        return PageableExecutionUtils.getPage((List<PricingSubscription>) results.get("departments"), pageable, () -> ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount());
+        return PageableExecutionUtils.getPage((List<PricingSubscription>) results.get("pricingSubscription"), pageable, () -> ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount());
     }
 }

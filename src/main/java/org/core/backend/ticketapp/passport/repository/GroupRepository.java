@@ -17,8 +17,8 @@ import java.util.UUID;
 @Repository
 public interface GroupRepository extends JpaRepository<Group, UUID>, PagingAndSortingRepository<Group, UUID> {
 
-    @Query(value = "SELECT * FROM groups WHERE LOWER(name) = LOWER(?1) AND tenant_id=?2", nativeQuery = true)
-    Optional<Group> findByName(String name, UUID tenantId);
+    @Query(value = "SELECT * FROM groups WHERE LOWER(name) = LOWER(?1) ", nativeQuery = true)
+    Optional<Group> findByName(String name);
 
     @Query(value = "SELECT * FROM groups WHERE id = ?1", nativeQuery = true)
     Optional<Group> findByUUID(UUID id);
@@ -27,7 +27,7 @@ public interface GroupRepository extends JpaRepository<Group, UUID>, PagingAndSo
     @Query(value = "DELETE FROM groups WHERE id = ?1", nativeQuery = true)
     int deleteByUUID(UUID id);
 
-    @Query(value = "SELECT * FROM groups WHERE COALESCE(LOWER(name),'') LIKE CONCAT('%', :name,'%') AND is_deleted = false AND tenant_id=:tenantId",
+    @Query(value = "SELECT * FROM groups WHERE COALESCE(LOWER(name),'') LIKE CONCAT('%', :name,'%') AND is_deleted = false ",
                 nativeQuery = true)
-        Page<Group> getAll(String name, UUID tenantId, Pageable pageable);
+        Page<Group> getAll(String name, Pageable pageable);
 }

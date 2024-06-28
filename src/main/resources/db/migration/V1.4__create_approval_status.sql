@@ -1,0 +1,1 @@
+CREATE TYPE workflow_approval_status_enum AS ENUM ('APPROVED','PENDING','REJECTED','DECLINED');

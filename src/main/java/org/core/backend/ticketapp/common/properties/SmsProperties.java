@@ -12,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 @Setter
 @Validated
 @Configuration
-@ConfigurationProperties(prefix = "smsApi")
+@ConfigurationProperties(prefix = "sms.api")
 public class SmsProperties {
     @NotBlank
     private String from;

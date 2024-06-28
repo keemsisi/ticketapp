@@ -19,19 +19,19 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface INotificationDao {
-    List<NotificationSubscriber> getAllMatchingSubscriberCurrentSessionIds(String actionName, UUID tenantId);
+    List<NotificationSubscriber> getAllMatchingSubscriberCurrentSessionIds(String actionName);
 
-    Map<String, Object> getUserNotificationStats(List<String> actionNames, List<String> roles, UUID userId, UUID tenantId);
+    Map<String, Object> getUserNotificationStats(List<String> actionNames, List<String> roles, UUID userId);
 
-    List<UserNotificationGroupByDateCreatedWrapper> getUserNotificationsReceivedByDateRange(List<String> actionNames, Date startDate, Date endDate, UUID tenantId);
+    List<UserNotificationGroupByDateCreatedWrapper> getUserNotificationsReceivedByDateRange(List<String> actionNames, Date startDate, Date endDate);
 
-    Page<Notification> getUserUnreadNotificationPaged(UUID userId, UUID tenantId, Pageable pageable, Sort.Direction direction);
+    Page<Notification> getUserUnreadNotificationPaged(UUID userId, Pageable pageable, Sort.Direction direction);
 
-    List<Notification> getUserUnreadNotificationUnPaged(UUID userId, UUID tenantId);
+    List<Notification> getUserUnreadNotificationUnPaged(UUID userId);
 
     int updateNotificationProcessor(UUID notificationId, String remark, String status, LocalDateTime startDate, LocalDateTime endDate);
 
-    List<Notification> getAllNotifications(UUID userId, List<String> scope, UUID tenantId, PageRequestParam prp) throws ParseException;
+    List<Notification> getAllNotifications(UUID userId, List<String> scope, PageRequestParam prp) throws ParseException;
 
     List<NotificationIdDTOMap> getAllPendingPushNotificationProcessorStatusUpdate();
 

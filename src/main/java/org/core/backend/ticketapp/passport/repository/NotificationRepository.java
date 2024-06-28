@@ -30,28 +30,14 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "AND n.tenant_id=?1", nativeQuery = true)
-    Page<Notification> getAllByTenantIdPaged(UUID tenantId, Pageable pageable);
-
-
-    @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
-            "LEFT JOIN users u ON u.id = n.requested_by " +
-            "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.tenant_id=?1", nativeQuery = true)
-    List<Notification> getAllByTenantId(UUID tenantId);
-
+            "WHERE n.approval_status=CAST(?1 AS workflow_approval_status_enum) AND n.notification_type = ?3 ", nativeQuery = true)
+    List<Notification> getAllByStatus(String status, String notificationType);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.approval_status=CAST(?1 AS workflow_approval_status_enum) AND n.tenant_id=?2 AND n.notification_type = ?3 ", nativeQuery = true)
-    List<Notification> getAllByStatus(String status, UUID tenantId, String notificationType);
-
-    @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
-            "LEFT JOIN users u ON u.id = n.requested_by " +
-            "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.approval_status=CAST(?1 AS workflow_approval_status_enum) AND n.tenant_id=?2 AND n.notification_type = ?3 ", nativeQuery = true)
-    Page<Notification> getAllByStatus(String status, UUID tenantId, String notificationType, Pageable pageable);
+            "WHERE n.approval_status=CAST(?1 AS workflow_approval_status_enum) AND n.notification_type = ?3 ", nativeQuery = true)
+    Page<Notification> getAllByStatus(String status, String notificationType, Pageable pageable);
 
     @Deprecated
     @Modifying
@@ -61,91 +47,91 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.action_name=?1 AND n.approval_status=CAST(?2 AS workflow_approval_status_enum) AND n.tenant_id=?3", nativeQuery = true)
-    List<Notification> getAllByActionNameAndStatus(String actionName, String approvalStatus, UUID tenantId);
+            "WHERE n.action_name=?1 AND n.approval_status=CAST(?2 AS workflow_approval_status_enum) ", nativeQuery = true)
+    List<Notification> getAllByActionNameAndStatus(String actionName, String approvalStatus);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.action_name=?1 AND n.approval_status=CAST(?2 AS workflow_approval_status_enum) AND n.tenant_id=?3", nativeQuery = true)
-    Page<Notification> getAllByActionNameAndStatusPaged(String actionName, String approvalStatus, UUID tenantId, Pageable pageable);
+            "WHERE n.action_name=?1 AND n.approval_status=CAST(?2 AS workflow_approval_status_enum) ", nativeQuery = true)
+    Page<Notification> getAllByActionNameAndStatusPaged(String actionName, String approvalStatus, Pageable pageable);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.action_name=?1 AND n.tenant_id=?2", nativeQuery = true)
-    List<Notification> getAllByActionName(String actionName, UUID tenantId);
+            "WHERE n.action_name=?1 ", nativeQuery = true)
+    List<Notification> getAllByActionName(String actionName);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.action_name=?1 AND n.tenant_id=?2", nativeQuery = true)
-    Page<Notification> getAllByActionName(String actionName, UUID tenantId, Pageable pageable);
+            "WHERE n.action_name=?1 ", nativeQuery = true)
+    Page<Notification> getAllByActionName(String actionName, Pageable pageable);
 
-    @Query(value = "SELECT action_name FROM notification WHERE id IN ?1 AND tenant_id=?2", nativeQuery = true)
-    List<String> getActionNamesByNotificationIds(List<UUID> notificationId, UUID tenantId);
-
-    @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
-            "LEFT JOIN users u ON u.id = n.requested_by " +
-            "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE NOT EXISTS (SELECT 1 FROM read_notification rn WHERE rn.user_id=?1 AND n.id =rn.notification_id) " +
-            "AND n.action_name IN ?2 AND n.tenant_id=?3 ORDER BY n.date_created DESC LIMIT 25", nativeQuery = true)
-    List<Notification> getAllUserUnreadNotificationsUnPaged(UUID userId, List<String> userPermissions, UUID tenantId);
+    @Query(value = "SELECT action_name FROM notification WHERE id IN ?1 ", nativeQuery = true)
+    List<String> getActionNamesByNotificationIds(List<UUID> notificationId);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
             "WHERE NOT EXISTS (SELECT 1 FROM read_notification rn WHERE rn.user_id=?1 AND n.id =rn.notification_id) " +
-            "AND n.action_name IN ?2 AND n.tenant_id=?3", nativeQuery = true)
-    Page<Notification> getAllUserUnreadNotificationsPaged(UUID userId, List<String> userPermissions, UUID tenantId, Pageable pageable);
+            "AND n.action_name IN ?2 ORDER BY n.date_created DESC LIMIT 25", nativeQuery = true)
+    List<Notification> getAllUserUnreadNotificationsUnPaged(UUID userId, List<String> userPermissions);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.action_name=?1 AND n.approval_status=CAST(?2 AS workflow_approval_status_enum) AND n.date_created >= CAST(?3 AS TIMESTAMP) AND n.date_created <= CAST(?4 AS TIMESTAMP) AND n.tenant_id=?5", nativeQuery = true)
-    List<Notification> getAllByActionNameAndStatusAndStartDateAndEndDateUnPaged(String actionName, String status, Date startDate, Date endDate, UUID tenantId);
+            "WHERE NOT EXISTS (SELECT 1 FROM read_notification rn WHERE rn.user_id=?1 AND n.id =rn.notification_id) " +
+            "AND n.action_name IN ?2 ", nativeQuery = true)
+    Page<Notification> getAllUserUnreadNotificationsPaged(UUID userId, List<String> userPermissions, Pageable pageable);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.action_name=?1 AND n.date_created >= CAST(?2 AS TIMESTAMP) AND n.date_created <= CAST(?3 AS TIMESTAMP) AND n.tenant_id=?4", nativeQuery = true)
-    List<Notification> getAllByActionNameAndStartDateAndEndDateUnPaged(String actionName, Date startDate, Date endDate, UUID tenantId);
+            "WHERE n.action_name=?1 AND n.approval_status=CAST(?2 AS workflow_approval_status_enum) AND n.date_created >= CAST(?3 AS TIMESTAMP) AND n.date_created <= CAST(?4 AS TIMESTAMP) ", nativeQuery = true)
+    List<Notification> getAllByActionNameAndStatusAndStartDateAndEndDateUnPaged(String actionName, String status, Date startDate, Date endDate);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.approval_status=CAST(?1 AS workflow_approval_status_enum) AND n.date_created >= CAST(?2 AS TIMESTAMP) AND n.date_created <= CAST(?3 AS TIMESTAMP) AND n.tenant_id=?4", nativeQuery = true)
-    List<Notification> getAllByStatusAndStartDateAndEndDateUnPaged(String status, Date startDate, Date endDate, UUID tenantId);
+            "WHERE n.action_name=?1 AND n.date_created >= CAST(?2 AS TIMESTAMP) AND n.date_created <= CAST(?3 AS TIMESTAMP) ", nativeQuery = true)
+    List<Notification> getAllByActionNameAndStartDateAndEndDateUnPaged(String actionName, Date startDate, Date endDate);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.action_name=?1 AND n.approval_status=CAST(?2 AS workflow_approval_status_enum) AND n.date_created >= CAST(?3 AS TIMESTAMP) AND n.date_created <= CAST(?4 AS TIMESTAMP) AND n.tenant_id=?5", nativeQuery = true)
-    Page<Notification> getAllByActionNameAndStatusAndStartDateAndEndDatePaged(String actionName, String approvalStatus, Date startDate, Date endDate, UUID tenantId, Pageable pageable);
+            "WHERE n.approval_status=CAST(?1 AS workflow_approval_status_enum) AND n.date_created >= CAST(?2 AS TIMESTAMP) AND n.date_created <= CAST(?3 AS TIMESTAMP) ", nativeQuery = true)
+    List<Notification> getAllByStatusAndStartDateAndEndDateUnPaged(String status, Date startDate, Date endDate);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.action_name=?1 AND n.date_created >= CAST(?2 AS TIMESTAMP) AND n.date_created <= CAST(?3 AS TIMESTAMP) AND n.tenant_id=?4", nativeQuery = true)
-    Page<Notification> getAllByActionNameAndStartDateAndEndDatePaged(String actionName, Date startDate, Date endDate, UUID tenantId, Pageable pageable);
+            "WHERE n.action_name=?1 AND n.approval_status=CAST(?2 AS workflow_approval_status_enum) AND n.date_created >= CAST(?3 AS TIMESTAMP) AND n.date_created <= CAST(?4 AS TIMESTAMP) ", nativeQuery = true)
+    Page<Notification> getAllByActionNameAndStatusAndStartDateAndEndDatePaged(String actionName, String approvalStatus, Date startDate, Date endDate, Pageable pageable);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.approval_status=CAST(?1 AS workflow_approval_status_enum) AND n.date_created >= CAST(?2 AS TIMESTAMP) AND n.date_created <= CAST(?3 AS TIMESTAMP) AND n.tenant_id=?4", nativeQuery = true)
-    Page<Notification> getAllStatusAndStartDateAndEndDatePaged(String status, Date startDate, Date endDate, UUID tenantId, Pageable pageable);
+            "WHERE n.action_name=?1 AND n.date_created >= CAST(?2 AS TIMESTAMP) AND n.date_created <= CAST(?3 AS TIMESTAMP) ", nativeQuery = true)
+    Page<Notification> getAllByActionNameAndStartDateAndEndDatePaged(String actionName, Date startDate, Date endDate, Pageable pageable);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.date_created >= CAST(?1 AS TIMESTAMP) AND n.date_created <= CAST(?2 AS TIMESTAMP) AND n.tenant_id=?3 AND n.notification_type = ?4", nativeQuery = true)
-    List<Notification> getAllStartDateAndEndDateUnPaged(Date startDate, Date endDate, UUID tenantId, String notificationType);
+            "WHERE n.approval_status=CAST(?1 AS workflow_approval_status_enum) AND n.date_created >= CAST(?2 AS TIMESTAMP) AND n.date_created <= CAST(?3 AS TIMESTAMP) ", nativeQuery = true)
+    Page<Notification> getAllStatusAndStartDateAndEndDatePaged(String status, Date startDate, Date endDate, Pageable pageable);
 
     @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
             "LEFT JOIN users u ON u.id = n.requested_by " +
             "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
-            "WHERE n.date_created >= CAST(?1 AS TIMESTAMP) AND n.date_created <= CAST(?2 AS TIMESTAMP) AND n.tenant_id=?3 AND n.notification_type = ?4", nativeQuery = true)
-    Page<Notification> getAllStartDateAndEndDatePaged(Date startDate, Date endDate, UUID tenantId, String notificationType, Pageable pageable);
+            "WHERE n.date_created >= CAST(?1 AS TIMESTAMP) AND n.date_created <= CAST(?2 AS TIMESTAMP) AND n.notification_type = ?4", nativeQuery = true)
+    List<Notification> getAllStartDateAndEndDateUnPaged(Date startDate, Date endDate, String notificationType);
+
+    @Query(value = "SELECT CONCAT(u.first_name,' ',u.last_name) AS requested_by_name, sa.sms_alert AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
+            "LEFT JOIN users u ON u.id = n.requested_by " +
+            "LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id " +
+            "WHERE n.date_created >= CAST(?1 AS TIMESTAMP) AND n.date_created <= CAST(?2 AS TIMESTAMP) AND n.notification_type = ?4", nativeQuery = true)
+    Page<Notification> getAllStartDateAndEndDatePaged(Date startDate, Date endDate, String notificationType, Pageable pageable);
 
     @Modifying
     @Query(value = "UPDATE notification SET processed_in_app_status_update=true, date_modified=CURRENT_TIMESTAMP WHERE id = ?1", nativeQuery = true)
