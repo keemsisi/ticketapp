@@ -12,16 +12,16 @@
     <groupId>com.project.core.ticketapp</groupId>
     <artifactId>ticketapp</artifactId>
     <version>0.0.1</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <name>ticketapp</name>
     <description>Ticket Application Backend</description>
     <modules>
-        <module>../passport</module>
-        <module>../meeting</module>
-        <module>../common</module>
-        <module>../qr-core</module>
-        <module>../notification</module>
-        <module>../payment</module>
+<!--        <module>../passport</module>-->
+<!--        <module>../meeting</module>-->
+<!--        <module>../common</module>-->
+<!--        <module>../qr-core</module>-->
+<!--        <module>../notification</module>-->
+<!--        <module>../payment</module>-->
     </modules>
 
     <properties>
@@ -67,7 +67,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -254,10 +253,6 @@
                 <configuration>
                     <release>17</release>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
