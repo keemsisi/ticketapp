@@ -42,7 +42,7 @@ public class GroupService extends BaseRepoService<Group> {
     }
 
     public Optional<Group> getByName(String name) {
-        return repository.findByName(name, jwtTokenUtil.getUser().getTenantId());
+        return repository.findByName(name);
     }
 
     public Optional<Group> getByUUID(UUID id) {
@@ -77,7 +77,7 @@ public class GroupService extends BaseRepoService<Group> {
 
     public Page<Group> getAll(String name, Pageable pageable) throws ParseException {
 
-        Page<Group> page = repository.getAll(name, jwtTokenUtil.getUser().getTenantId(), pageable);
+        Page<Group> page = repository.getAll(name, pageable);
 
         List<Group> modifiedList = new ArrayList<>(page.getContent());
 

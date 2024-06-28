@@ -39,7 +39,7 @@ public class PricingSubscriptionService extends BaseRepoService<PricingSubscript
     }
 
     public Optional<PricingSubscription> getByName(String name) {
-        return departmentRepository.findByName(name, jwtTokenUtil.getUser().getTenantId());
+        return departmentRepository.findByName(name);
     }
 
     public Optional<PricingSubscription> getByUUID(UUID id) {
