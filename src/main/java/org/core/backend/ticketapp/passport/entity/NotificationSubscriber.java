@@ -59,7 +59,7 @@ public class NotificationSubscriber {
     private String token;
 
     @Type(type = "JSONB")
-    @Column(name = "user_data", columnDefinition = "JSONB DEFAULT {}")
+    @Column(name = "user_data", columnDefinition = "JSONB DEFAULT null")
     private String userData;
 
     @Column(name = "unsubscribed", columnDefinition = "boolean")
@@ -99,7 +99,4 @@ public class NotificationSubscriber {
     @Type(type = "LIST-ARRAY")
     @Column(nullable = false, name = "subscriber_scope", columnDefinition = "text[]")
     private List<String> subscriberScope = Collections.emptyList();
-////    @Type(type = "BLOB")
-//    @Column(name = "socket_io_client_serialised_object")
-//    private SocketIOClientObj socketIOClientSerialisedObject;
 }

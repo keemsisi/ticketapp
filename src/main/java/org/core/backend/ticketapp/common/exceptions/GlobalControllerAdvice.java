@@ -23,26 +23,12 @@ import java.util.Optional;
 @RestControllerAdvice
 public class GlobalControllerAdvice extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ExceptionResponse> handConstraintValidationException(final ConstraintViolationException exception) {
-        return exception(exception, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-
     @ResponseBody
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<GenericResponse<?>> handleInternalServerExceptions(ApplicationException ex) {
         log.error(ex.getMessage(), ex);
         return ResponseEntity.status(ex.getHttpStatus())
                 .body(new GenericResponse<>(ex.getCode(), ex.getMessage(), ex.getData()));
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public GenericResponse<?> handleInternalServerExceptions(HttpMediaTypeNotSupportedException ex) {
-        log.error(ex.getMessage(), ex);
-        return new GenericResponse<>("01", ex.getMessage(), null);
     }
 
     @ResponseBody
@@ -60,15 +46,6 @@ public class GlobalControllerAdvice extends ResponseEntityExceptionHandler {
     public GenericResponse<?> handleInternalServerExceptions(ConstraintViolationException ex) {
         log.error(ex.getMessage(), ex);
         return new GenericResponse<>("01", ex.getMessage(), null);
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(BindException.class)
-    public GenericResponse<?> bindExceptionHandler(BindException ex) {
-        log.error(ex.getMessage(), ex);
-        return new GenericResponse<>("01", "Oops! Please check all fields are entered correctly!",
-                null);
     }
 
     @ResponseBody
