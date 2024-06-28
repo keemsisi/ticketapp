@@ -47,9 +47,6 @@ public class NotificationSubscriber {
     private LocalDateTime lastSeen;
 
     @Column(nullable = false)
-    private UUID tenantId;
-
-    @Column(nullable = false)
     private UUID createdBy;
 
     @Column(name = "active")

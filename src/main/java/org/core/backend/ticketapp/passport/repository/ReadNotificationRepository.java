@@ -17,7 +17,7 @@ import java.util.UUID;
 @Transactional
 public interface ReadNotificationRepository extends JpaRepository<ReadNotification, UUID>, PagingAndSortingRepository<ReadNotification, UUID> {
     @Query(value = "SELECT * FROM notification n WHERE NOT EXISTS (SELECT 1 FROM read_notification rn  WHERE rn.user_id=?1 AND rn.notification_id=n.id)", nativeQuery = true)
-    List<Notification> getUserUnreadNotification(UUID userId, UUID tenantId);
+    List<Notification> getUserUnreadNotification(UUID userId);
 
     @Modifying
     @Query(value = "INSERT INTO read_notification(user_id , notification_id) VALUES(?1, ?2);", nativeQuery = true)

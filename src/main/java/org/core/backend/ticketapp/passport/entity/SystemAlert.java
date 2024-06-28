@@ -16,13 +16,10 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "system_alert", indexes = {@Index(name = "ix_tbl_tenant_col_tenant_uq", columnList = "tenant_id", unique = true)})
+@Table(name = "system_alert")
 public class SystemAlert {
     @Id
     private UUID id;
-
-    @Column(name = "tenant_id", nullable = false)
-    private UUID tenantId;
 
     @Column(name = "email_alert")
     private boolean emailAlert;

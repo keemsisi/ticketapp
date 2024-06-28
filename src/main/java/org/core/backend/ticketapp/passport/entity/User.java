@@ -155,10 +155,6 @@ public class User implements UserDetails {
     @Column(name = "password_created_on", columnDefinition = "TIMESTAMP default CURRENT_TIMESTAMP")
     private Instant passwordCreatedOn;
 
-    @Column(name = "tenant_id", nullable = false)
-    @ExcelColumn(columnName = "TENANT ID", failIfAbsent = false)
-    private UUID tenantId;
-
     @Column(name = "lock_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lockDate;

@@ -213,17 +213,13 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     @Transactional
     public List<User> createUserFromExcel(LoggedInUserDto loggedInUser, MultipartFile excelSheet) throws IOException {
         Integer rowCounter = 0;
-        UUID tenantId;
-        String tenantEmail;
         List<User> uploadedUsers = DocumentPojo.fromExcel(excelSheet.getInputStream(), User.class);
-        tenantId = loggedInUser.getTenantId();
         var usersToBeUploaded = new ArrayList<User>();
         var usersToBeSentMail = new ArrayList<User>();
         var dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         for (User user : uploadedUsers) {
             rowCounter++;
             user.setId(UUID.randomUUID());
-            user.setTenantId(tenantId);
             user.setCreatedOn(new Date());
             user.setCreatedBy(loggedInUser.getUserId());
             user.setFirstTimeLogin(true);
@@ -259,8 +255,6 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         User user = new User();
         BeanUtils.copyProperties(userDto, user);
         user.setId(UUID.randomUUID());
-        user.setTenantId(org.apache.commons.lang3.ObjectUtils.isNotEmpty(
-                userDto.getTenantId()) ? userDto.getTenantId() : loggedInUser.getTenantId());
         user.setCreatedOn(new Date());
         user.setCreatedBy(loggedInUser.getUserId());
         user.setFirstTimeLogin(true);
@@ -423,7 +417,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
                                 String phone,
                                 Pageable pageable) {
 
-        return userDao.getUsers(firstName, lastName, middleName, email, gender, phone, jwtTokenUtil.getUser().getTenantId(), pageable);
+        return userDao.getUsers(firstName, lastName, middleName, email, gender, phone, pageable);
     }
 
     public List<User> findUsers(String firstName, String lastName,
@@ -450,17 +444,8 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         return userRepository.findManagers();
     }
 
-    public int updatePasswordExpiryDate(Date passwordExpiryDate, UUID tenantId) {
-        return userRepository.updatePasswordExpiryDate(passwordExpiryDate);
-    }
-
-    public int updatePasswordExpiryDateToNull(UUID tenantId) {
-        return userRepository.updatePasswordExpiryDateToNull(tenantId);
-    }
-
     public Page<User> listLockedUsers(String firstName, String lastName, String email, String dateOn, String dateBefore, String dateAfter, String startDate, String endDate, Pageable pageable) throws ParseException {
         Pattern p, q;
-        UUID tenantId = jwtTokenUtil.getUser().getTenantId();
         if (dateOn == null && dateBefore == null && dateAfter == null && startDate == null && endDate == null) {
             page = userRepository.listLockedUser(firstName, lastName, email, pageable);
         } else if (dateOn != null) {
@@ -495,18 +480,6 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         user.setLoginAttempt(user.getLoginAttempt() + 1);
         user.setLastFailedLogin(new Date());
         userRepository.saveAndFlush(user);
-    }
-
-    private void validateTenantEmail(String tenantEmail, String newUserEmail, Integer counter) {
-        if (!tenantEmail.contains("@"))
-            throw new ApplicationException(400, "invalid_email", String.format("Invalid email address supplied [%s]", tenantEmail));
-        if (!newUserEmail.contains("@"))
-            throw new ApplicationException(400, "invalid_email", String.format("Row %s has an invalid email address '%s'", counter, newUserEmail));
-        var tenantDomainEmailPostfix = tenantEmail.substring(tenantEmail.indexOf("@"));
-        var newUserDomainEmailPostfix = newUserEmail.substring(newUserEmail.indexOf("@"));
-        if (!tenantDomainEmailPostfix.equalsIgnoreCase(newUserDomainEmailPostfix)) {
-            throw new ApplicationException(400, "domain_email_mismatched", String.format("Tenant domain email postfix " + tenantDomainEmailPostfix + " not matched with the new user domain email(%s)", newUserDomainEmailPostfix));
-        }
     }
 
     public void processUserLoginValidation(User user) {
@@ -600,7 +573,6 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         role.setName(roleDto.getName());
         role.setCreatedBy(user.getUserId());
         role.setCreatedOn(new Date());
-        role.setTenantId(user.getTenantId());
         role.setCode(StringUtil.normalizeWithUnderscore(roleDto.getName()));
         role.setNormalizedName(StringUtil.normalizeString(roleDto.getName()));
         role.setDescription(roleDto.getDescription());
@@ -617,8 +589,8 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     }
 
     @Deprecated
-    public Page<Role> getAll(String name, UUID tenantId, Pageable pageable) {
-        Page<Role> page = roleRepository.getAll(name.toUpperCase(), tenantId, pageable);
+    public Page<Role> getAll(String name, Pageable pageable) {
+        Page<Role> page = roleRepository.getAll(name.toUpperCase(), pageable);
         List<Role> modifiedList = new ArrayList<>(page.getContent());
         for (Role role : modifiedList) {
             Set<UserRole> userRole = userRoleRepository.findAllByRoleId(role.getId());

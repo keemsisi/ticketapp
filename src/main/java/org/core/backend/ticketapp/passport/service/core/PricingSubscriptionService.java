@@ -32,7 +32,7 @@ public class PricingSubscriptionService extends BaseRepoService<PricingSubscript
 
     public Object getAll(String name, Pageable pageable) throws ParseException {
         if (pageable == null) {
-            return departmentRepository.getAll(name, jwtTokenUtil.getUser().getTenantId());
+            return departmentRepository.getAll(name);
         } else {
             return pricingSubscriptionDao.getAll(name, pageable);
         }

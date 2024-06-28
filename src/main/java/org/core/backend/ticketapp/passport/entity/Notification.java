@@ -41,8 +41,6 @@ public class Notification {
     @Column(columnDefinition = "UUID")
     private UUID id;
     @Column(nullable = false)
-    private UUID tenantId;
-    @Column(nullable = false)
     private UUID moduleId;
     @Column(nullable = false)
     private UUID requestedBy;

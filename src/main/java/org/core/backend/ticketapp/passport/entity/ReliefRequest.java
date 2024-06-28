@@ -59,9 +59,6 @@ public class ReliefRequest {
     @Column(columnDefinition = "jsonb") //{roles: [] , actions: []}
     private String roleAndActionInherited;
     @NotNull
-    @Column
-    private UUID tenantId;
-    @NotNull
     @Column(name = "is_deleted")
     private boolean isDeleted;
     @Column(name = "relief_officer_name")

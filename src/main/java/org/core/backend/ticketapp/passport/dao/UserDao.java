@@ -35,14 +35,8 @@ public class UserDao extends BaseDao {
     }
 
     public Optional<User> getUserByEmail(String email) {
-        //tenant.is_2fa_enabled
-        String sql = "SELECT users.*, unit.code AS unit, department.code AS department, tenant.password_expiration_in_days, " +
-                " tenant.account_lockout_duration_in_minutes, tenant.account_lockout_threshold_count, tenant.inactive_period_in_minutes, " +
-                " tenant.two_fa_enabled as two_fa_enabled" +
-                " FROM users " +
-                " LEFT JOIN unit ON users.unit_id = unit.id " +
-                " LEFT JOIN department ON users.department_id = department.id " +
-                " LEFT JOIN tenant ON users.tenant_id = tenant.id" +
+        String sql = "SELECT *" +
+                " FROM users u " +
                 " WHERE LOWER(users.email) = LOWER(?)";
         var rowMapper = BeanPropertyRowMapper.newInstance(User.class);
         var user = jdbcTemplate.query(sql, rowMapper, email);
@@ -108,12 +102,11 @@ public class UserDao extends BaseDao {
             String email,
             String gender,
             String phone,
-            UUID tenantId,
             Pageable pageable) {
         int limit = pageable.getPageSize();
         Long offSet = pageable.getOffset();
 
-        var sqlCondition = new StringBuilder(String.format(" LEFT JOIN department ud ON u.department_id = ud.id LEFT JOIN unit uu ON u.unit_id = uu.id  WHERE u.tenant_id='%s'", tenantId));
+        var sqlCondition = new StringBuilder(String.format(" WHERE 1=1 "));
         if (Objects.nonNull(firstName))
             sqlCondition.append(" AND COALESCE(LOWER(u.first_name),'') LIKE CONCAT('%', '" + firstName + "','%') ");
         if (Objects.nonNull(lastName))

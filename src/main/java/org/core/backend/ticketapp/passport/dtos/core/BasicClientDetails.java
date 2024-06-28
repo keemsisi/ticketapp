@@ -15,8 +15,6 @@ public class BasicClientDetails {
     private UUID id;
     @Column(name = "client_name")
     private String clientName;
-    @Column(name = "tenant_id")
-    private UUID tenantId;
     @Column(name = "client_logo")
     private String clientLogo;
     @Column(name = "client_owner")

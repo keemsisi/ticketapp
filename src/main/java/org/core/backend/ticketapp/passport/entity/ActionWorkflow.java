@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "action_workflow", indexes = {@Index(name = "ix_tbl_action_workflow_col_action_id__tenant_id_uq", columnList = "action_id, tenant_id", unique = true)})
+@Table(name = "action_workflow")
 public class ActionWorkflow {
 
     @Id
@@ -40,9 +40,6 @@ public class ActionWorkflow {
 
     @Column(name = "is_deleted")
     private boolean isDeleted;
-
-    @Column(name = "tenant_id")
-    private UUID tenantId;
 
     @Transient
     private String code;

@@ -20,9 +20,6 @@ public class Unit {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "tenant_id", nullable = false)
-    private UUID tenantId;
-
     @Column(name = "name")
     @NotBlank(message = "The name cannot be empty")
     private String name;

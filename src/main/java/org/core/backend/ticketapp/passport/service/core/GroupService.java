@@ -58,7 +58,6 @@ public class GroupService extends BaseRepoService<Group> {
         group.setCode(StringUtil.normalizeWithUnderscore(createGroupDTO.getName()));
         group.setCreatedOn(DateTime.now().toDate());
         group.setCreatedBy(user.getUserId());
-        group.setTenantId(user.getTenantId());
         Group response = repository.saveAndFlush(group);
         return response;
     }

@@ -15,5 +15,4 @@ public class NotificationConsumptionRequestDto {
     private String remark;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
-    private String tenantId;
 }
