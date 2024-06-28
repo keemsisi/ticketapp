@@ -29,7 +29,6 @@ public class MessageDto {
     ApprovalStatus status;
     @Enumerated(EnumType.STRING)
     NotificationType notificationType;
-    private UUID tenantId;
     private String title;
     private String description;
     private NotificationProcessorStatus processorStatus;

@@ -39,7 +39,7 @@ public interface ReminderNotificationRepository extends JpaRepository<ReminderNo
 
     @Query(value = "SELECT rn.id , rn.active , rn.count , rn.created_by  , rn.date_created , " +
             "rn.modified_on , rn.description , rn.is_deleted , rn.modified_by , " +
-            "rn.reminder_date , rn.repeat , rn.tenant_id , rn.title ,rn.user_id, " +
+            "rn.reminder_date , rn.repeat, rn.title ,rn.user_id, " +
             "u.email as user_email " +
             "FROM reminder_notification rn LEFT JOIN users u ON rn.user_id=u.id " +
             "WHERE rn.reminder_date<= CURRENT_TIMESTAMP AND rn.active=true AND rn.is_deleted=false", nativeQuery = true)

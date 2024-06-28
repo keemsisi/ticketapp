@@ -23,7 +23,7 @@ public class LevelService extends BaseRepoService<Levels> {
         super(repository);
     }
 
-    public Page<Levels> getAll(String name, UUID unitIdS, UUID tenantId, Pageable pageable) {
+    public Page<Levels> getAll(String name, UUID unitIdS, Pageable pageable) {
         UUID departmentIdE = unitIdS; //> 0 ? unitIdS : Long.MAX_VALUE;
 
         Page<Levels> page = levelRepository.findAll(name, unitIdS, departmentIdE, pageable);

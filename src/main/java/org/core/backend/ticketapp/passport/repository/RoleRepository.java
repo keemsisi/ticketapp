@@ -24,9 +24,9 @@ public interface RoleRepository extends JpaRepository<Role, UUID>, PagingAndSort
     @Query(value = "SELECT * FROM role WHERE code = ?1 ", nativeQuery = true)
     List<Role> getByCode(String code);
 
-    @Query(value = "SELECT * FROM role WHERE COALESCE(LOWER(name),'') LIKE CONCAT('%', ?1,'%') AND is_deleted = false AND tenant_id = ?2 ", nativeQuery = true)
-    Page<Role> getAll(String name, UUID tenantId, Pageable pageable);
+    @Query(value = "SELECT * FROM role WHERE COALESCE(LOWER(name),'') LIKE CONCAT('%', ?1,'%') AND is_deleted = false ", nativeQuery = true)
+    Page<Role> getAll(String name, Pageable pageable);
 
-    @Query(value = "SELECT * FROM role WHERE is_deleted = false AND tenant_id = ?1", nativeQuery = true)
-    Page<Role> getAll(UUID tenantId, Pageable pageable);
+    @Query(value = "SELECT * FROM role WHERE is_deleted = false", nativeQuery = true)
+    Page<Role> getAll(Pageable pageable);
 }

@@ -37,7 +37,7 @@ public class NotificationDao implements INotificationDao {
     private JdbcTemplate jdbcTemplate;
 
     @Deprecated
-    public List<User> filterAllowedUsers(String actionName, UUID tenantId, UUID moduleId) {
+    public List<User> filterAllowedUsers(String actionName, UUID moduleId) {
         String sql = "SELECT u.* FROM \"users\" u INNER JOIN (SELECT ua.user_id FROM \"action\" a\n" +
                 "INNER JOIN user_action ua \n" +
                 "\tON ua.action_id=a.id \n" +
@@ -46,10 +46,9 @@ public class NotificationDao implements INotificationDao {
                 "\t\t\tWHERE ua.user_id=ns.user_id \n" +
                 "\t\t\tAND ns.active=true \n" +
                 "\t\t\tAND ns.unsubscribed=false\n" +
-                "\t) AND a.code=? AND a.tenant_id=?\n" +
-                "\tAND a.module_id=?) AS t ON t.user_id=u.id;";
+                "\t) AND a.code=? ) AS t ON t.user_id=u.id;";
         var rowMapper = BeanPropertyRowMapper.newInstance(User.class);
-        return jdbcTemplate.query(sql, rowMapper, actionName, tenantId, moduleId);
+        return jdbcTemplate.query(sql, rowMapper, actionName);
     }
 
     @Override

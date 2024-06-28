@@ -17,5 +17,4 @@ public class SendEmailMessage {
     private List<To> tos;
     private String fromName;
     private String subject;
-    private String tenantId;
 }

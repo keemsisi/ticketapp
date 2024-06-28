@@ -18,9 +18,6 @@ public class Action {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "tenant_id")
-    private UUID tenantId;
-
     @Column(name = "module_id", nullable = false)
     private UUID moduleId;
 

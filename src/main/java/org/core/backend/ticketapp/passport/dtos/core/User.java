@@ -147,9 +147,6 @@ public class User implements UserDetails {
     @ExcelColumn(columnName = "Password Creation Date")
     private Date passwordCreatedOn;
 
-    @Column(name = "tenant_id", nullable = false)
-    private UUID tenantId;
-
     @Column(name = "lock_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lockDate;

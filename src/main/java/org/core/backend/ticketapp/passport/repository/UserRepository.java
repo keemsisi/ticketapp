@@ -98,10 +98,6 @@ public interface UserRepository extends JpaRepository<User, UUID>, PagingAndSort
     @Query(value = "UPDATE users set has_changed_password_after_expiry = 0, password_expiry_date = :passwordExpiryDate  ", nativeQuery = true)
     int updatePasswordExpiryDate(@Param("passwordExpiryDate") Date passwordExpiryDate);
 
-    @Modifying
-    @Query(value = "UPDATE users set has_changed_password_after_expiry = 0, password_expiry_date = null ", nativeQuery = true)
-    int updatePasswordExpiryDateToNull(@Param("tenantId") UUID tenantId);
-
     @Query(value = "SELECT u.* FROM users u WHERE LOWER(users.email) = LOWER(?1) AND password=?2", nativeQuery = true)
     User findByEmailAndPassword(String email, String password);
 }

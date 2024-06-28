@@ -30,9 +30,6 @@ public class WebSocketPushNotification {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "tenant_id", nullable = false)
-    private UUID tenantId;
-
     @Column(name = "notification_delivered", nullable = false)
     private boolean notificationDelivered;
 

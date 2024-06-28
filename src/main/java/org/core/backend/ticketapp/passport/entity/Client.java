@@ -39,10 +39,6 @@ public class Client implements ClientDetails, Serializable {
     @Type(type = "uuid")
     private UUID id = UUID.randomUUID();
 
-    @NotNull
-    @Column(name = "tenant_id")
-    private UUID tenantId;
-
     @NotBlank(message = "{client.name.required}")
     @Column(name = "client_name")
     private String clientName;

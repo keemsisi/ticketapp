@@ -8,9 +8,5 @@ import java.util.UUID;
 public interface ISystemAlert {
     SystemAlert get(UUID id);
 
-    SystemAlert getByTenantId();
-
-    SystemAlert getByTenantId(UUID tenantId);
-
     void update(SystemAlertDto systemAlertDto);
 }

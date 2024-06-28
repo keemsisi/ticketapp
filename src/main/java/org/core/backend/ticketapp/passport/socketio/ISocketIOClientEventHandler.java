@@ -15,7 +15,7 @@ public interface ISocketIOClientEventHandler {
 
     void connectDisconnectEventLogger(SocketIOClient client, String connectionType);
 
-    void storeNewSubscriber(UUID userId, String token, UUID tenantId, SocketIOClient socketIOClient, List<String> scope) throws JsonProcessingException;
+    void storeNewSubscriber(UUID userId, String token, SocketIOClient socketIOClient, List<String> scope) throws JsonProcessingException;
 
     void updateExistingSubscriber(NotificationSubscriber notificationSubscriber, String token, SocketIOClient socketIOClient, List<String> scope);
 }

@@ -24,10 +24,10 @@ public interface PricingSubscriptionRepository extends JpaRepository<PricingSubs
             nativeQuery = true)
     Page<PricingSubscription> getAll(String name, Pageable pageable);
 
-    @Query(value = "SELECT * FROM pricing_subscription WHERE tenant_id=:tenantId AND COALESCE(LOWER(name),'') LIKE CONCAT('%', :name,'%') " +
+    @Query(value = "SELECT * FROM pricing_subscription WHERE COALESCE(LOWER(name),'') LIKE CONCAT('%', :name,'%') " +
             " ORDER BY created_on DESC ",
             nativeQuery = true)
-    List<PricingSubscription> getAll(String name, UUID tenantId);
+    List<PricingSubscription> getAll(String name);
 
     @Query(value = "SELECT * FROM pricing_subscription WHERE LOWER(name) = Lower(?1) ", nativeQuery = true)
     Optional<PricingSubscription> findByName(String name);

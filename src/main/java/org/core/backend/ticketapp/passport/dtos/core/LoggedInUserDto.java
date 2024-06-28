@@ -47,7 +47,4 @@ public class LoggedInUserDto {
     private List<String> roles = new ArrayList<>();
 
     private List<String> scope = new ArrayList<>();
-
-    @JsonProperty("tenant_id")
-    private UUID tenantId;
 }

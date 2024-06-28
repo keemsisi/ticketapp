@@ -53,9 +53,6 @@ public class Workflow {
     @Column(name = "is_deleted")
     private boolean isDeleted;
 
-    @Column(name = "tenant_id")
-    private UUID tenantId;
-
     @Column(name = "module_id")
     private UUID moduleId;
 

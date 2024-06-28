@@ -122,8 +122,6 @@ public class UserDto{
 
     private Calendar passwordExpiryDate;
 
-    private UUID tenantId;
-
     private DateTime lockDate;
 
     private int loginAttempt;

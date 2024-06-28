@@ -26,9 +26,6 @@ public class Group {
         @Column(name = "code", nullable = false)
         private String code;
 
-        @Column(name = "tenant_id", nullable = false)
-        private UUID tenantId;
-
         @Column(name = "description")
         private String description;
 

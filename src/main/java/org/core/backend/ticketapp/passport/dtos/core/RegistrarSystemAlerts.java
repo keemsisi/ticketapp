@@ -16,10 +16,6 @@ public class RegistrarSystemAlerts {
     @Column(name = "id")
     private UUID id;
 
-    @CopyProperty(ignore = true)
-    @Column(name = "tenant_id")
-    private UUID tenantId;
-
     @Column(name = "active_directory")
     private boolean activeDirectory;
 

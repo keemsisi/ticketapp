@@ -32,7 +32,7 @@ public class ClientDao extends BaseDao {
     }
 
     public BasicClientDetails getBasicClientDetailsById(UUID clientId) {
-        String sql = "SELECT id, client_name, client_logo, tenant_id, client_owner, domains from api_client WHERE id = ?";
+        String sql = "SELECT id, client_name, client_logo, client_owner, domains from api_client WHERE id = ?";
         var details = getJdbcTemplate().query(sql, new BasicClientRowMapper(), clientId);
         return details.isEmpty() ? null : details.get(0);
     }

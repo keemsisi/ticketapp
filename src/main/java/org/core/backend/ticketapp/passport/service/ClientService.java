@@ -40,7 +40,6 @@ public class ClientService implements ClientDetailsService {
         client.setClientSecret(passwordEncoder.encode(clientSecret));
         client.setCreatedBy(userDto.getUserId());
         client.setCreatedOn(new Date());
-        client.setTenantId(userDto.getTenantId());
         client.setNormalizedName(StringUtil.normalizeWithUnderscore(clientDto.getClientName()));
         clientRepository.save(client);
 

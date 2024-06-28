@@ -20,5 +20,4 @@ public class MessagingServiceRequest {
     @NotEmpty(message = "text should not be empty")
     private String text;
     private String from;
-    private String tenantId;
 }

@@ -58,9 +58,7 @@ public class SocketIOClientConnectionHandler implements ISocketIOClientEventHand
             var permissions = coreUserService.getUserPermissions(user.getId()).get();
 
             String userId = user.getId().toString();
-            String tenantId = user.getTenantId().toString();
             UUID userUUID = UUID.fromString(userId);
-            UUID tenantIdUUID = UUID.fromString(tenantId);
             List<String> userScope = permissions.getActions();
             permissions.setPassword(null);
             var userData = objectMapper.writeValueAsString(permissions);
@@ -70,10 +68,10 @@ public class SocketIOClientConnectionHandler implements ISocketIOClientEventHand
                 Optional<NotificationSubscriber> notificationSubscriber = notificationSubscriberRepository.findByUserId(userFound.get().getId());
                 if (notificationSubscriber.isPresent()) {
                     updateExistingSubscriber(notificationSubscriber.get(), userData, client, userScope);
-                    sendAllUnreadNotificationsToUser(client, userUUID, userScope, tenantIdUUID, userData);
+                    sendAllUnreadNotificationsToUser(client, userUUID, userScope, userData);
                 } else {
-                    sendAllUnreadNotificationsToUser(client, userUUID, userScope, tenantIdUUID, userData);
-                    storeNewSubscriber(userUUID, userData, tenantIdUUID, client, userScope);
+                    sendAllUnreadNotificationsToUser(client, userUUID, userScope, userData);
+                    storeNewSubscriber(userUUID, userData, client, userScope);
                 }
             } else {
                 client.sendEvent("new_notification", "Oops! You can't access this service. Make sure you provide valid userAuth");
@@ -86,21 +84,21 @@ public class SocketIOClientConnectionHandler implements ISocketIOClientEventHand
         }
     }
 
-    private void sendAllUnreadNotificationsToUser(SocketIOClient client, UUID userId, List<String> userScope, UUID tenantId, String userData) {
+    private void sendAllUnreadNotificationsToUser(SocketIOClient client, UUID userId, List<String> userScope, String userData) {
         client.sendEvent("new_notification", notificationRepository.getAllUserUnreadNotificationsUnPaged(userId, userScope).stream().parallel().map(notification -> {
             Message message = new Message();
             MessageDto messageDto = new MessageDto(notification.getId(),
                     notification.getRequestedBy(), notification.getRequestedByName(), notification.getActionName(),
                     java.sql.Timestamp.valueOf(notification.getDateCreated()),
                     notification.getModuleId(), new Date(), notification.getApprovalStatus(),
-                    NotificationType.SUBSCRIPTION, notification.getTenantId(), null,
+                    NotificationType.SUBSCRIPTION, null,
                     notification.getDescription(), notification.getProcessorStatus(),
                     notification.getProcessorRemark());
             message.setMessage("Unread notification");
             message.setData(messageDto);
             return message;
         }).collect(Collectors.toList()));
-        log.info("TENANT_ID :{} USER_ID:{} SESSION_ID {} ", tenantId, userId, client.getSessionId());
+        log.info("USER_ID:{} SESSION_ID {} ", userId, client.getSessionId());
     }
 
     @OnDisconnect
@@ -163,7 +161,7 @@ public class SocketIOClientConnectionHandler implements ISocketIOClientEventHand
     }
 
     @Override
-    public void storeNewSubscriber(UUID userUUID, String userData, UUID tenantIdUUID, SocketIOClient socketIOClient, List<String> scope) {
+    public void storeNewSubscriber(UUID userUUID, String userData, SocketIOClient socketIOClient, List<String> scope) {
         Optional<User> userFound = userRepository.findByUUID(userUUID);
         if (userFound.isPresent()) {
             User user = userFound.get();
@@ -175,7 +173,6 @@ public class SocketIOClientConnectionHandler implements ISocketIOClientEventHand
             newNotificationSubscriber.setToken("ignored");
             newNotificationSubscriber.setUserData(userData);
             newNotificationSubscriber.setUserId(userUUID);
-            newNotificationSubscriber.setTenantId(tenantIdUUID);
             newNotificationSubscriber.setActive(true);
             newNotificationSubscriber.setDeleted(false);
             newNotificationSubscriber.setCurrentSessionId(socketIOClient.getSessionId());

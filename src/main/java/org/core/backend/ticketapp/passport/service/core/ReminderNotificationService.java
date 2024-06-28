@@ -63,7 +63,6 @@ public class ReminderNotificationService implements IReminderNotification {
         reminderNotification.setDateCreated(LocalDateTime.now());
         reminderNotification.setUserId(jwtTokenUtil.getUser().getUserId());
         reminderNotification.setCreatedBy(jwtTokenUtil.getUser().getUserId());
-        reminderNotification.setTenantId(jwtTokenUtil.getUser().getTenantId());
         reminderNotification.setActive(true);
         reminderNotification.setCount(0);
         reminderNotification = reminderNotificationRepository.save(reminderNotification);
@@ -208,7 +207,6 @@ public class ReminderNotificationService implements IReminderNotification {
                 .description(reminderNotification.getDescription())
                 .requestedBy(reminderNotification.getCreatedBy())
                 .id(reminderNotification.getId())
-                .tenantId(reminderNotification.getTenantId())
                 .notificationType(NotificationType.REMINDER)
                 .title(reminderNotification.getTitle())
                 .build();

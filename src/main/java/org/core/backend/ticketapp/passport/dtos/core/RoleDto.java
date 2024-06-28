@@ -41,9 +41,6 @@ public class RoleDto {
     @Column(name = "is_deleted")
     private boolean isDeleted;
 
-    @Column(name = "tenant_id")
-    private UUID tenantId;
-
     @Transient
     private List<BriefUserDetail> users = new ArrayList<>();
 }

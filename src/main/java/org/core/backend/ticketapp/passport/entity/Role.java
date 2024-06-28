@@ -46,9 +46,6 @@ public class Role {
     @Column(name = "is_deleted")
     private boolean isDeleted;
 
-    @Column(name = "tenant_id")
-    private UUID tenantId;
-
 
     @Transient
     @OneToMany(cascade = CascadeType.ALL)

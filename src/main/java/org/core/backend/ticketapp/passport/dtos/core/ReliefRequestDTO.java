@@ -25,7 +25,6 @@ public class ReliefRequestDTO {
     @NotNull
     private LocalDateTime endDate;
     private String remark;
-    private UUID tenantId;
     @Enumerated(value = EnumType.STRING)
     private ApprovalStatus approvalStatus;
 }

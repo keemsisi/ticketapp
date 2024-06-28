@@ -22,8 +22,6 @@ import java.util.UUID;
 public class NotificationRequestDto {
     private String id;
     @NotNull
-    private String tenantId; //A_E
-    @NotNull
     private String moduleId;//A_E
     @NotNull
     private String requestedBy;//A_E
