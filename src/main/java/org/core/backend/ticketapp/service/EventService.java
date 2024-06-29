@@ -3,7 +3,7 @@ package org.core.backend.ticketapp.service;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.dto.EventRequestDTO;
 import org.core.backend.ticketapp.entity.Event;
-import org.core.backend.ticketapp.exception.ResourceNotFoundException;
+import org.core.backend.ticketapp.common.enums.exception.ResourceNotFoundException;
 import org.core.backend.ticketapp.repository.EventRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;

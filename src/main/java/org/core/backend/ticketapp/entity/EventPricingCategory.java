@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.Id;
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 
 @Getter
@@ -13,12 +14,13 @@ import javax.persistence.*;
 @Data
 @Entity
 @Table(name = "category")
-public class Category {
+public class EventPricingCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "name")
-    private String name;
+    @NotBlank private String name;
+
+    @NotBlank private double price;
 }

@@ -18,7 +18,7 @@
     <modules>
 <!--        <module>../passport</module>-->
 <!--        <module>../meeting</module>-->
-<!--        <module>../common</module>-->
+<!--        <module>../org.core.backend.ticketapp.common</module>-->
 <!--        <module>../qr-core</module>-->
 <!--        <module>../notification</module>-->
 <!--        <module>../payment</module>-->

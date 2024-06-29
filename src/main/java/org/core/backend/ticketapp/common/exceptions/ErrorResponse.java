@@ -1,4 +1,4 @@
-package org.core.backend.ticketapp.exception;
+package org.core.backend.ticketapp.common.enums.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
