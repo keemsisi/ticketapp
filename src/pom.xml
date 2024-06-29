@@ -340,6 +340,10 @@
             <version>0.0.3</version>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>com.google.cloud</groupId>-->
+<!--            <artifactId>google-cloud-appengine-admin</artifactId>-->
+<!--        </dependency>-->
 
     </dependencies>
 
@@ -368,9 +372,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-        </dependencies>
-    </dependencyManagement>
 
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>26.42.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
 
 
     <build>
@@ -391,6 +404,17 @@
             </resource>
         </resources>
         <plugins>
+
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>appengine-maven-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <projectId>project-alpha-427516</projectId>
+                    <version>ticketapp-SNAPSHOT-0.0.1</version>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -401,10 +425,12 @@
                     </includes>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.8.2</version>
@@ -413,6 +439,7 @@
                     </altDeploymentRepository>
                 </configuration>
             </plugin>
+
             <plugin>
                 <artifactId>exec-maven-plugin</artifactId>
                 <groupId>org.codehaus.mojo</groupId>
@@ -430,6 +457,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <!-- READ THIS ELSE: This library uses an open non secure github organization to publicly
                  host the maven library, so you need to be part or the organization https://github.com/maven-packages
