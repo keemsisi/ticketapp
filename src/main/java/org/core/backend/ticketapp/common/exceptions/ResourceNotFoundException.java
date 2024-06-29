@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package org.core.backend.ticketapp.common.exceptions;
 
 import lombok.Getter;
@@ -39,4 +40,16 @@ public class ResourceNotFoundException extends RuntimeException{
         return String.format("%s with %s not found", resource, resourceId);
     }
 
+=======
+package org.core.backend.ticketapp.common.enums.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class ResourceNotFoundException extends RuntimeException {
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+>>>>>>> feature/events-api
 }
