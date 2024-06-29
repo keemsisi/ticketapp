@@ -39,7 +39,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v2/users/password/reset",
             "/api/v2/users/password/renew",
             "/api/v2/users/validate-2fa-auth",
-            "/api/v2/users/auth"
+            "/api/v2/users/auth",
+            "**/**"
 //            "/api/v2/uploads",
     };
 
