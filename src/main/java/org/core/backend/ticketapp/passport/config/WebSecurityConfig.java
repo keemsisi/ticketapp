@@ -35,13 +35,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/webjars/**",
             "/swagger**/**",
             "/.well-known/jwks.json",
-            "/api/v2/users/password/reset/email",
-            "/api/v2/users/password/reset",
-            "/api/v2/users/password/renew",
-            "/api/v2/users/validate-2fa-auth",
-            "/api/v2/users/auth",
+            "/api/v1/users/password/reset/email",
+            "/api/v1/users/password/reset",
+            "/api/v1/users/password/renew",
+            "/api/v1/users/validate-2fa-auth",
+            "/api/v1/users/auth",
             "**/**"
-//            "/api/v2/uploads",
+//            "/api/v1/uploads",
     };
 
     @Bean
