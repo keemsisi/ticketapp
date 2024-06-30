@@ -1,1 +1,0 @@
-UPDATE workflow SET name = 'default workflow' WHERE name='DEFAULT_WORKFLOW';

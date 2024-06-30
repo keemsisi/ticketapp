@@ -1,1 +1,0 @@
-CREATE INDEX ix_tbl_read_notification_col_notification_id__user_id_uq ON read_notification (user_id, notification_id);
