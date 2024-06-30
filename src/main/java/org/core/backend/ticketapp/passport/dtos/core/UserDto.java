@@ -85,9 +85,6 @@ public class UserDto{
     @ExcelColumn(columnName = "DEPARTMENT ID", failIfAbsent = false)
     private UUID departmentId;
 
-    @ExcelColumn(columnName = "UNIT ID", failIfAbsent = false)
-    private UUID unitId;
-
     @ExcelColumn(columnName = "CHN", failIfAbsent = false)
     private String chn = "";
 

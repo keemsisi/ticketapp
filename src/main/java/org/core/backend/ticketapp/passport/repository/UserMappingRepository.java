@@ -7,9 +7,7 @@ public class UserMappingRepository {
 
     public String queryProfile(String email) {
     			
-        String query = "SELECT users.*, department.name AS department, unit.name AS unit FROM users"+
-		" LEFT JOIN department ON users.department_id = department.id "+
-		" LEFT JOIN unit ON users.unit_id = unit.id "+
+        String query = "SELECT users.*, department.name AS department FROM users"+
 		" WHERE users.email = '"+ email +"'";
         
         return query;

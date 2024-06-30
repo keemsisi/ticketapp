@@ -85,9 +85,8 @@ public class UserDao extends BaseDao {
     }
 
     public Optional<User> getUserById(UUID id) {
-        String sql = "SELECT users.*, unit.name AS unit, department.name AS department " +
+        String sql = "SELECT users.*  " +
                 " FROM users" +
-                " LEFT JOIN unit ON users.unit_id = unit.id " +
                 " LEFT JOIN department ON users.department_id = department.id " +
                 " WHERE users.id = '" + id.toString() + "'";
         var user = jdbcTemplate.queryForObject(sql, BeanPropertyRowMapper.newInstance(User.class));
@@ -120,7 +119,7 @@ public class UserDao extends BaseDao {
         if (Objects.nonNull(phone))
             sqlCondition.append(" AND COALESCE(u.phone,'') LIKE CONCAT('%', '" + phone + "', '%')");
 
-        var userQuery = "SELECT u.*, ud.name as department, uu.name as unit FROM users u ".concat(sqlCondition.toString()).concat(" LIMIT " + limit + " OFFSET " + offSet + ";");
+        var userQuery = "SELECT u.*, ud.name as department FROM users u ".concat(sqlCondition.toString()).concat(" LIMIT " + limit + " OFFSET " + offSet + ";");
         var pageCount = "SELECT count(*) FROM users u ".concat(sqlCondition.toString());
 
         var cscFactory = new CallableStatementCreatorFactory(userQuery + pageCount);

@@ -223,7 +223,6 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
             user.setFirstTimeLogin(true);
             try {
                 user.setDob(dateFormat.parse(user.getDateOfBirth()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-                user.setUnitId(UUID.fromString(user.getUnitIdString()));
                 user.setDepartmentId(UUID.fromString(user.getDepartmentIdString()));
             } catch (ParseException e) {
                 throw new ApplicationException(400, "bad_date_of_birth", String.format("Date of birth format is bad at row %s, please use this format 'yyyy-MM-ddTHH:mm:ss'", rowCounter));

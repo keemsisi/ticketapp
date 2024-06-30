@@ -114,10 +114,6 @@ public class User implements UserDetails {
     @Column(name = "department_id")
     private UUID departmentId;
 
-    @ExcelColumn(columnName = "LEVEL ID", failIfAbsent = false)
-    @Column(name = "level_id")
-    private UUID levelId;
-
     @Column(name = "locked", columnDefinition = "bool default(false)")
     private boolean locked;
 
