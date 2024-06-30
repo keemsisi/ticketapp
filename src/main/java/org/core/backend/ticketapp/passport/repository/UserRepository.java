@@ -35,6 +35,7 @@ public interface UserRepository extends JpaRepository<User, UUID>, PagingAndSort
     Optional<User> findByUUID(UUID id);
 
     @Query(value = "SELECT u.* FROM users u " +
+            " AND COALESCE(LOWER(u.first_name),'') LIKE CONCAT('%', :firstName,'%') " +
             " AND COALESCE(LOWER(u.last_name),'') LIKE CONCAT('%', :lastName,'%') " +
             " AND COALESCE(LOWER(u.middle_name),'') LIKE CONCAT('%', :middleName,'%') " +
             " AND COALESCE(u.email,'') LIKE CONCAT('%', :email,'%') " +
