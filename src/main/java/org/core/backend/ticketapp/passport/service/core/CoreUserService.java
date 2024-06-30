@@ -18,9 +18,9 @@ import org.core.backend.ticketapp.common.util.Helpers;
 import org.core.backend.ticketapp.passport.dao.UserDao;
 import org.core.backend.ticketapp.passport.dtos.RoleDto;
 import org.core.backend.ticketapp.passport.dtos.core.*;
-import org.core.backend.ticketapp.passport.entity.*;
 import org.core.backend.ticketapp.passport.entity.ChangePassword;
 import org.core.backend.ticketapp.passport.entity.EmailVerification;
+import org.core.backend.ticketapp.passport.entity.*;
 import org.core.backend.ticketapp.passport.repository.EmailVerificationRepository;
 import org.core.backend.ticketapp.passport.repository.RoleRepository;
 import org.core.backend.ticketapp.passport.repository.UserRepository;
@@ -67,11 +67,11 @@ import java.util.stream.Stream;
 public class CoreUserService extends BaseRepoService<User> implements UserDetailsService {
 
     private static final String AUTH_2FA = "_AUTH_2FA";
+    @Autowired
+    private final SharedEnvironment sharedEnvironment;
     protected Page<User> page = Page.empty();
     @Autowired
     private EmailVerificationRepository emailVerificationRepository;
-    @Autowired
-    private final SharedEnvironment sharedEnvironment;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
     @Autowired
@@ -350,14 +350,12 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     public String previewUserCSV(Stream<User> userStream) {
         AtomicReference<String> text = new AtomicReference<>("FirstName, LastName, MiddleName, Email, DOB, Gender, Position Id, PricingSubscription Id, Unit id\n");
         userStream.forEach(user -> {
-            text.updateAndGet(v -> v + String.format("%s, %s, %s, %s, %s, %s, %d, %d, %d\n",
+            text.updateAndGet(v -> v + String.format("%s, %s, %s, %s, %s\n",
                     user.getFirstName().replaceAll(",", ""),
                     user.getLastName().replaceAll(",", ""),
                     user.getMiddleName() != null ? user.getMiddleName().replaceAll(",", "") : "",
                     user.getEmail().replaceAll(",", ""),
-                    user.getDob() != null ? user.getDob().toString().replaceAll(",", "") : "",
-                    user.getDepartmentId(),
-                    user.getUnitId()));
+                    user.getDob() != null ? user.getDob().toString().replaceAll(",", "") : ""));
         });
         return text.get();
     }
