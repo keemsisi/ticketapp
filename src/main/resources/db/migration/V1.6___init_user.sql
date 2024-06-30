@@ -13,5 +13,5 @@ false, false, '2022-09-19 15:47:13.150',
  NULL, false, '454a4983-aa86-4a51-b6e8-3efb450bcffd'::uuid, 0, '', '',
  '258d4be8-129d-42d9-b3e9-634fda834dcb'::uuid, '2023-12-10 12:53:43.651', '',
  '$2a$10$nYdn1mGteyz0ZIOPXVrFF.6r2PtsrTlaim.t.MLBbjNZC/jOBFO96', '2023-12-10 12:53:43.651',
- '09030863117', '', '', '', NULL);
+ '09030863117', '', '', '', NULL) ON CONFLICT DO NOTHING;
 

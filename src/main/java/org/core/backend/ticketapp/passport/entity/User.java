@@ -63,11 +63,6 @@ public class User implements UserDetails {
     @JsonIgnore
     private String departmentIdString;
 
-    @ExcelColumn(columnName = "UNIT ID", failIfAbsent = false)
-    @Transient
-    @JsonIgnore
-    private String unitIdString;
-
     @Column(name = "password")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
@@ -118,9 +113,6 @@ public class User implements UserDetails {
 
     @Column(name = "department_id")
     private UUID departmentId;
-
-    @Column(name = "unit_id")
-    private UUID unitId;
 
     @ExcelColumn(columnName = "LEVEL ID", failIfAbsent = false)
     @Column(name = "level_id")
@@ -193,8 +185,6 @@ public class User implements UserDetails {
     /* SECONDARY TABLES COLUMNS */
     @Transient
     private String department;
-    @Transient
-    private String unit;
     @Transient
     private int passwordExpirationInDays;
     @Transient
