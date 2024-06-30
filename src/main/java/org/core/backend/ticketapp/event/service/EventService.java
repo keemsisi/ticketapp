@@ -1,14 +1,15 @@
-package org.core.backend.ticketapp.service;
+package org.core.backend.ticketapp.event.service;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.dto.EventRequestDTO;
-import org.core.backend.ticketapp.entity.Event;
-import org.core.backend.ticketapp.common.enums.exception.ResourceNotFoundException;
-import org.core.backend.ticketapp.repository.EventRepository;
+import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
+import org.core.backend.ticketapp.event.dto.EventRequestDTO;
+import org.core.backend.ticketapp.event.entity.Event;
+import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,9 +25,9 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    public EventRequestDTO getEventById(Long id) {
+    public EventRequestDTO getEventById(UUID id) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
         return convertToDTO(event);
     }
 

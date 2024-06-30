@@ -1,22 +1,24 @@
-package org.core.backend.ticketapp.entity;
+package org.core.backend.ticketapp.event.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import org.core.backend.ticketapp.common.enums.EventApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
 import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.*;
+import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -25,19 +27,20 @@ import java.util.Map;
 @Data
 @Entity
 @Table(name = "event")
+@TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class Event {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(columnDefinition = "uuid not null default uuid_generate_v4()")
+    private UUID id;
 
     @NotBlank private String title;
 
     @NotBlank private String description;
 
-    @NotBlank private boolean physicalEvent;
+    @NotNull private boolean physicalEvent;
 
-    @NotBlank private boolean freeEvent;
+    @NotNull private boolean freeEvent;
 
     @NotNull private int ticketsAvailable;
 
@@ -49,7 +52,7 @@ public class Event {
 
     @NotNull private String streetAddress;
 
-    @NotBlank private EventCategoryEnum eventCategory;
+    @NotNull private EventCategoryEnum eventCategory;
 
     private String eventBanner = "event-banner.jpg";
 
@@ -62,20 +65,17 @@ public class Event {
 
     @NotNull private LocalTime eventTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
     @Enumerated(EnumType.STRING)
     private EventApprovalStatus approvalStatus;
 
     private boolean approvalRequired;
 
-    @ElementCollection
-    @CollectionTable(name = "event_seat_sections", joinColumns = @JoinColumn(name = "event_id"))
-    @MapKeyColumn(name = "section_name")
-    @Column(name = "seat_capacity")
-    private Map<String, Integer> seatSections;
+    @Column(name = "seat_sections", columnDefinition = "JSONB")
+    @Type(type = "JSONB")
+    private List<SeatSection> seatSections;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -85,6 +85,7 @@ public class Event {
 
     @PrePersist
     protected void onCreate() {
+        id = UUID.randomUUID();
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
@@ -94,6 +95,11 @@ public class Event {
         updatedAt = LocalDateTime.now();
     }
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Ticket> tickets = new ArrayList<>();
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class SeatSection {
+        private String name;
+        private Integer capacity;
+    }
 }

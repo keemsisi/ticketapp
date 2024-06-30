@@ -1,10 +1,9 @@
-package org.core.backend.ticketapp.entity;
+package org.core.backend.ticketapp.event.entity;
 
 import lombok.*;
 
 import javax.persistence.Id;
 import javax.persistence.*;
-
 
 @Getter
 @Setter
@@ -12,13 +11,15 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "wishlist")
-public class Wishlist {
+@Table(name = "subscription")
+public class Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "ticket_id")
-    private Integer ticketId;
+    @Column(name = "user_id")
+    private Integer userId;
 
+    @Column(name = "plan_id")
+    private Integer planId;
 }

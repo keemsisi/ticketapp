@@ -1,4 +1,4 @@
-package org.core.backend.ticketapp.entity;
+package org.core.backend.ticketapp.event.entity;
 
 import lombok.*;
 
