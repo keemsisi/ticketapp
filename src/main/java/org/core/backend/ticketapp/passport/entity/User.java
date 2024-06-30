@@ -188,6 +188,24 @@ public class User implements UserDetails {
     @Column(name = "deleted", columnDefinition = "bool default(false)")
     private boolean deleted;
 
+    @Column(name = "password_expiry_date")
+    private LocalDateTime passwordExpiryDate;
+    /* SECONDARY TABLES COLUMNS */
+    @Transient
+    private String department;
+    @Transient
+    private String unit;
+    @Transient
+    private int passwordExpirationInDays;
+    @Transient
+    private int accountLockoutDurationInMinutes;
+    @Transient
+    private int inactivePeriodInMinutes;
+    @Transient
+    private int accountLockoutThresholdCount;
+    @Transient
+    private boolean twoFaEnabled = false;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
@@ -217,21 +235,4 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return deactivated;
     }
-
-
-    /* SECONDARY TABLES COLUMNS */
-    @Transient
-    private String department;
-    @Transient
-    private String unit;
-    @Transient
-    private int passwordExpirationInDays;
-    @Transient
-    private int accountLockoutDurationInMinutes;
-    @Transient
-    private int inactivePeriodInMinutes;
-    @Transient
-    private int accountLockoutThresholdCount;
-    @Transient
-    private boolean twoFaEnabled = false;
 }
