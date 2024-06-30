@@ -1,0 +1,4 @@
+INSERT INTO public.api_client
+(id, access_token_validity_seconds, additional_information, authentication_email_required, client_description, client_logo, client_name, client_owner, client_secret, created_by, created_on, domains, email_required, grant_types, authorities, is_deleted, link_validity_seconds, modified_by, modified_on, normalized_name, phone_number_required, redirect_uri, refresh_token_validity_seconds, resources, "scope")
+VALUES('00f45cb6-b611-456f-9863-ab7152a4ba77'::uuid, 3600, NULL, true, 'General Backend Service', NULL, 'General APIs', 'Adeshina Lasisi', '$2a$04$60DbZIRgprQNavRTGmDObuZ0tGuD5kjsQaguilICNE/szoXg1vCIG', '258d4be8-129d-42d9-b3e9-634fda834dcb'::uuid, '2021-09-15 19:19:43.447', '{""}', true, '{"client_credentials","password"}', '{"passport"}', false, 300, NULL, '2022-09-19 17:24:08.846', NULL, false, '{}', 60, '{"passport"}', '{}')
+ON CONFLICT DO NOTHING;

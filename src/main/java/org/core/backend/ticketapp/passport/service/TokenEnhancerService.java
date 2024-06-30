@@ -68,9 +68,6 @@ public class TokenEnhancerService implements TokenEnhancer {
             if (user.isFirstTimeLogin()) {
                 additionalInformation.put("scope", List.of("first_time_login"));
             }
-            if (Objects.nonNull(user.getUnit())) {
-                additionalInformation.put("unit", user.getUnit());
-            }
         } else {
             String clientId = authentication.getOAuth2Request().getClientId();
             BasicClientDetails client = clientService.getBasicClientDetails(clientId);
