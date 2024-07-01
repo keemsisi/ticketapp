@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
@@ -21,6 +22,8 @@ public class TicketApp {
         SpringApplication.run(TicketApp.class, args);
     }
 
+    //prototype , singleton , request , session , custom, application, websocket
+    @Scope(value = "singleton")
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();

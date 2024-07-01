@@ -29,6 +29,8 @@ public class BeanConfig {
     private String username;
     @Value(value = "${spring.datasource.password}")
     private String password;
+    @Value(value = "${spring.flyway.enabled}")
+    private boolean enabled;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -45,13 +47,13 @@ public class BeanConfig {
         return dataSource;
     }
 
-    @Bean(initMethod = "migrate")
+    @Bean
     public Flyway flyway() {
-        final Flyway flyway = Flyway.configure()
-                .dataSource(dataSource()).locations(CLASS_PATH)
-                .baselineOnMigrate(true).load();
-        flyway.repair();
-        flyway.migrate();
+        final Flyway flyway = Flyway.configure().dataSource(dataSource()).locations(CLASS_PATH).baselineOnMigrate(true).load();
+        if (enabled) {
+            flyway.repair();
+            flyway.migrate();
+        }
         return flyway;
     }
 }
