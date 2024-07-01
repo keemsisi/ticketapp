@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.event.service;
 
 import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.event.dto.EventRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
@@ -45,9 +46,8 @@ public class EventService {
         final var savedEvent = eventRepository.save(event);
         final var seatSections = new ArrayList<EventSeatSections>();
         eventDTO.getSeatSections().forEach(seatSection -> {
-            final var seatSectionsVal = EventSeatSections.builder().eventId(savedEvent.getId())
-                    .acquired(0L).capacity(seatSection.getCapacity()).userId(userId)
-                    .name(seatSection.getName()).build();
+            final var seatSectionsVal = new EventSeatSections(savedEvent.getId(),
+                    userId, seatSection.getName(), seatSection.getCapacity(), 0L, ApprovalStatus.APPROVED);
             seatSections.add(seatSectionsVal);
         });
         eventSeatSectionsRepository.saveAll(seatSections);
