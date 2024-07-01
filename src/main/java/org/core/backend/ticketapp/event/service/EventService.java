@@ -48,7 +48,7 @@ public class EventService {
             final var seatSectionsVal = EventSeatSections.builder().eventId(savedEvent.getId())
                     .acquired(0L).capacity(seatSection.getCapacity()).userId(userId)
                     .name(seatSection.getName()).build();
-            seatSections.add(seatSectionsVal);c
+            seatSections.add(seatSectionsVal);
         });
         eventSeatSectionsRepository.saveAll(seatSections);
         return convertToDTO(savedEvent);
