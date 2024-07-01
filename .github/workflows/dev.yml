@@ -22,6 +22,7 @@ jobs:
         uses: actions/setup-java@v4.2.1
         with:
           java-version: 17
+          distribution: OpenJDK
           # Leave other fields as placeholders
 
       - name: Build with Maven
