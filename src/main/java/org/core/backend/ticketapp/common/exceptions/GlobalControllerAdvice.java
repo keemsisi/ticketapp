@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.method.annotation.MethodArgumentConversionNotSupportedException;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.validation.ConstraintViolationException;
 import java.util.Date;
@@ -19,7 +19,7 @@ import java.util.Optional;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalControllerAdvice extends ResponseEntityExceptionHandler {
+public class GlobalControllerAdvice extends DefaultResponseErrorHandler {
 
     @ResponseBody
     @ExceptionHandler(ApplicationException.class)

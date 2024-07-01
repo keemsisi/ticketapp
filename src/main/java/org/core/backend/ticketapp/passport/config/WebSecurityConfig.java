@@ -40,8 +40,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/users/password/renew",
             "/api/v1/users/validate-2fa-auth",
             "/api/v1/users/auth",
-            "**/**"
-//            "/api/v1/uploads",
+            "/api/v1/**"
+//          "/api/v1/uploads",
     };
 
     @Bean
