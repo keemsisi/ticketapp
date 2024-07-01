@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.thecarisma.CopyProperty;
 import io.github.thecarisma.ExcelColumn;
 import lombok.Data;
+import org.hibernate.annotations.OptimisticLockType;
+import org.hibernate.annotations.OptimisticLocking;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.type.PostgresUUIDType;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,6 +24,7 @@ import java.util.*;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @TypeDef(name = "UUID", typeClass = PostgresUUIDType.class)
+@OptimisticLocking(type = OptimisticLockType.VERSION)
 public class User implements UserDetails {
 
     @Id
@@ -191,6 +194,9 @@ public class User implements UserDetails {
     private int accountLockoutThresholdCount;
     @Transient
     private boolean twoFaEnabled = false;
+    @Version
+    @Column(name = "version", columnDefinition = "numeric(19,2) default 0")
+    private Long version;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

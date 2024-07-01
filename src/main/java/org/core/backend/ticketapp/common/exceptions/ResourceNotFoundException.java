@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
-public class ResourceNotFoundException extends RuntimeException{
+public class ResourceNotFoundException extends RuntimeException {
 
     private String resource;
     private String resourceId;
@@ -38,5 +38,4 @@ public class ResourceNotFoundException extends RuntimeException{
     public String getMessage() {
         return String.format("%s with %s not found", resource, resourceId);
     }
-
 }
