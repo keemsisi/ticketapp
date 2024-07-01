@@ -59,10 +59,13 @@ public class UserController {
     private SmsService smsService;
     @Autowired
     private UserAuthenticationService userAuthenticationService;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> viewUser(@PathVariable UUID id) {
+        System.out.println("RESPONSE >>> " + bCryptPasswordEncoder.encode("ac8ff284-535f-44ee-9d68-79b03dec935a"));
         Optional<User> user = userService.getUserById(id);
         if (!user.isPresent()) {
             return new ResponseEntity<>(

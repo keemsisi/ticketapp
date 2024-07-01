@@ -8,7 +8,7 @@ profile_picture_location, state_of_origin, password_expiry_date)
 VALUES('258d4be8-129d-42d9-b3e9-634fda834dcb'::uuid, 'Ilupeju', 'Lagos',
 'Nigeria', '454a4983-aa86-4a51-b6e8-3efb450bcffd'::uuid, '2022-09-19 15:47:13.150',
 false, false, '2022-09-19 15:47:13.150',
-'regtmpuser4@africaprudential.com', 'System', false, 'OTHERS', 'System Admin',
+'regtmpuser4@ticketapp.com', 'System', false, 'OTHERS', 'System Admin',
 '2024-06-24 18:02:53.123', '2024-06-28 17:32:49.222', 'Administrator', 'Ilupeju',
  NULL, false, '454a4983-aa86-4a51-b6e8-3efb450bcffd'::uuid, 0, '', '',
  '258d4be8-129d-42d9-b3e9-634fda834dcb'::uuid, '2023-12-10 12:53:43.651', '',
