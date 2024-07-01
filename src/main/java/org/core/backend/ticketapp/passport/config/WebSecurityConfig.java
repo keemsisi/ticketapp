@@ -20,13 +20,6 @@ import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private AuthenticationProviderConfig authenticationProvider;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private UserDetailsService userDetailsService;
-
     private static final String[] AUTH_WHITELIST = {
             "/actuator/**",
             "/v3/api-docs",
@@ -35,14 +28,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/webjars/**",
             "/swagger**/**",
             "/.well-known/jwks.json",
-            "/api/v2/users/password/reset/email",
-            "/api/v2/users/password/reset",
-            "/api/v2/users/password/renew",
-            "/api/v2/users/validate-2fa-auth",
-            "/api/v2/users/auth",
-            "**/**"
-//            "/api/v2/uploads",
+            "/api/v1/users/password/reset/email",
+            "/api/v1/users/password/reset",
+            "/api/v1/users/password/renew",
+            "/api/v1/users/validate-2fa-auth",
+            "/api/v1/users/auth"
     };
+    @Autowired
+    private AuthenticationProviderConfig authenticationProvider;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {

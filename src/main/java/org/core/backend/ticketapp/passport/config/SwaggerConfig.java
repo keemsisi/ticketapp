@@ -38,7 +38,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.ant("/api/v2/**"))
+                .paths(PathSelectors.ant("/api/v1/**"))
                 .build()
                 .protocols(newHashSet("https", "http"))
                 .securitySchemes(List.of(HttpAuthenticationScheme

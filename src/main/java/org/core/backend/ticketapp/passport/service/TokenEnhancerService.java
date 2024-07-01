@@ -27,6 +27,8 @@ public class TokenEnhancerService implements TokenEnhancer {
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer}")
     private String issuer;
+    @Value("${user.activity.idle.time}")
+    private Long userIdleTime;
 
     @Autowired
     private ClientService clientService;
@@ -49,7 +51,7 @@ public class TokenEnhancerService implements TokenEnhancer {
             additionalInformation.put("last_name", user.getLastName());
             additionalInformation.put("email", user.getEmail());
             additionalInformation.put("user_id", user.getId());
-            additionalInformation.put("idle_time", user.getInactivePeriodInMinutes());
+            additionalInformation.put("idle_time", userIdleTime);
             additionalInformation.put("exp", Instant.now().getEpochSecond() +
                     TimeUnit.SECONDS.convert(24 * 60, TimeUnit.MINUTES));
 
@@ -67,9 +69,6 @@ public class TokenEnhancerService implements TokenEnhancer {
 
             if (user.isFirstTimeLogin()) {
                 additionalInformation.put("scope", List.of("first_time_login"));
-            }
-            if (Objects.nonNull(user.getUnit())) {
-                additionalInformation.put("unit", user.getUnit());
             }
         } else {
             String clientId = authentication.getOAuth2Request().getClientId();

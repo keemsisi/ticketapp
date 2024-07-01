@@ -35,9 +35,7 @@ public class UserDao extends BaseDao {
     }
 
     public Optional<User> getUserByEmail(String email) {
-        String sql = "SELECT *" +
-                " FROM users u " +
-                " WHERE LOWER(users.email) = LOWER(?)";
+        String sql = "SELECT * FROM users u WHERE LOWER(u.email) = LOWER(?)";
         var rowMapper = BeanPropertyRowMapper.newInstance(User.class);
         var user = jdbcTemplate.query(sql, rowMapper, email);
         if (user.isEmpty()) {
@@ -85,11 +83,7 @@ public class UserDao extends BaseDao {
     }
 
     public Optional<User> getUserById(UUID id) {
-        String sql = "SELECT users.*, unit.name AS unit, department.name AS department " +
-                " FROM users" +
-                " LEFT JOIN unit ON users.unit_id = unit.id " +
-                " LEFT JOIN department ON users.department_id = department.id " +
-                " WHERE users.id = '" + id.toString() + "'";
+        String sql = String.format("SELECT users.*  FROM users WHERE users.id = '%s'", id.toString());
         var user = jdbcTemplate.queryForObject(sql, BeanPropertyRowMapper.newInstance(User.class));
         return Optional.of(user);
     }
@@ -120,7 +114,7 @@ public class UserDao extends BaseDao {
         if (Objects.nonNull(phone))
             sqlCondition.append(" AND COALESCE(u.phone,'') LIKE CONCAT('%', '" + phone + "', '%')");
 
-        var userQuery = "SELECT u.*, ud.name as department, uu.name as unit FROM users u ".concat(sqlCondition.toString()).concat(" LIMIT " + limit + " OFFSET " + offSet + ";");
+        var userQuery = "SELECT u.*, ud.name as department FROM users u ".concat(sqlCondition.toString()).concat(" LIMIT " + limit + " OFFSET " + offSet + ";");
         var pageCount = "SELECT count(*) FROM users u ".concat(sqlCondition.toString());
 
         var cscFactory = new CallableStatementCreatorFactory(userQuery + pageCount);

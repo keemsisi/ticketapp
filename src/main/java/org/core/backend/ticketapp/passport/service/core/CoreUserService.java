@@ -13,15 +13,13 @@ import org.core.backend.ticketapp.common.mailchimp.SendMessage;
 import org.core.backend.ticketapp.common.mailchimp.To;
 import org.core.backend.ticketapp.common.redis.TwoFADTO;
 import org.core.backend.ticketapp.common.request.MessagingServiceRequest;
-import org.core.backend.ticketapp.common.request.RenewPassword;
 import org.core.backend.ticketapp.common.request.TwoFaValidationDTO;
 import org.core.backend.ticketapp.common.util.Helpers;
 import org.core.backend.ticketapp.passport.dao.UserDao;
 import org.core.backend.ticketapp.passport.dtos.RoleDto;
-import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
-import org.core.backend.ticketapp.passport.dtos.core.UserActionDto;
-import org.core.backend.ticketapp.passport.dtos.core.UserDto;
-import org.core.backend.ticketapp.passport.dtos.core.UserRoleDto;
+import org.core.backend.ticketapp.passport.dtos.core.*;
+import org.core.backend.ticketapp.passport.entity.ChangePassword;
+import org.core.backend.ticketapp.passport.entity.EmailVerification;
 import org.core.backend.ticketapp.passport.entity.*;
 import org.core.backend.ticketapp.passport.repository.EmailVerificationRepository;
 import org.core.backend.ticketapp.passport.repository.RoleRepository;
@@ -69,11 +67,11 @@ import java.util.stream.Stream;
 public class CoreUserService extends BaseRepoService<User> implements UserDetailsService {
 
     private static final String AUTH_2FA = "_AUTH_2FA";
+    @Autowired
+    private final SharedEnvironment sharedEnvironment;
     protected Page<User> page = Page.empty();
     @Autowired
     private EmailVerificationRepository emailVerificationRepository;
-    @Autowired
-    private final SharedEnvironment sharedEnvironment;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
     @Autowired
@@ -96,6 +94,10 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     private Environment env;
     @Value("${ticketapp.password-reset-url}")
     private String resetPasswordUrl;
+    @Value("${user.failed.login.threshold}")
+    private Long failedLoginThreshold;
+    @Value("${user.password.expiration.in.days}")
+    private Long passwordExpirationInDays;
     @Value("${ticketapp.baseFrontEndUrl}")
     private String baseFrontEndUrl;
     @Value("${ticketapp.token-secret}")
@@ -225,7 +227,6 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
             user.setFirstTimeLogin(true);
             try {
                 user.setDob(dateFormat.parse(user.getDateOfBirth()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-                user.setUnitId(UUID.fromString(user.getUnitIdString()));
                 user.setDepartmentId(UUID.fromString(user.getDepartmentIdString()));
             } catch (ParseException e) {
                 throw new ApplicationException(400, "bad_date_of_birth", String.format("Date of birth format is bad at row %s, please use this format 'yyyy-MM-ddTHH:mm:ss'", rowCounter));
@@ -353,14 +354,12 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     public String previewUserCSV(Stream<User> userStream) {
         AtomicReference<String> text = new AtomicReference<>("FirstName, LastName, MiddleName, Email, DOB, Gender, Position Id, PricingSubscription Id, Unit id\n");
         userStream.forEach(user -> {
-            text.updateAndGet(v -> v + String.format("%s, %s, %s, %s, %s, %s, %d, %d, %d\n",
+            text.updateAndGet(v -> v + String.format("%s, %s, %s, %s, %s\n",
                     user.getFirstName().replaceAll(",", ""),
                     user.getLastName().replaceAll(",", ""),
                     user.getMiddleName() != null ? user.getMiddleName().replaceAll(",", "") : "",
                     user.getEmail().replaceAll(",", ""),
-                    user.getDob() != null ? user.getDob().toString().replaceAll(",", "") : "",
-                    user.getDepartmentId(),
-                    user.getUnitId()));
+                    user.getDob() != null ? user.getDob().toString().replaceAll(",", "") : ""));
         });
         return text.get();
     }
@@ -495,14 +494,14 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         } else if (user.isLocked()) {
             throw new ApplicationException(401, "unauthorized", "Your account is currently locked. Please reach out to support.");
         }
-        if (user.getLoginAttempt() >= user.getAccountLockoutThresholdCount()) {
+        if (user.getLoginAttempt() >= failedLoginThreshold) {
             user.setLocked(true);
             user.setLockDate(new Date());
             user.setLockedBy(user.getCreatedBy());
             userRepository.save(user);
             throw new ApplicationException(401, "unauthorized", "Your account is currently locked. Please reach out to support.");
         }
-        if (ChronoUnit.DAYS.between(user.getPasswordCreatedOn(), Instant.now()) >= user.getPasswordExpirationInDays()) {
+        if (ChronoUnit.DAYS.between(user.getPasswordCreatedOn(), Instant.now()) >= passwordExpirationInDays) {
             throw new ApplicationException(401, "password_expired", "Your password has expired, kindly change your password.");
         }
     }
