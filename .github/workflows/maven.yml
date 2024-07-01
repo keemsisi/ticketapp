@@ -10,9 +10,9 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "backend" ]
+    branches: ["backend"]
   pull_request:
-    branches: [ "backend", "adeshina/passport", "master"]
+    branches: ["backend","adeshina/passport","master"]
     types: [closed]
     
 jobs:
