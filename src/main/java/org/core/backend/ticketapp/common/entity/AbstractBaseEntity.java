@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.common.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 @MappedSuperclass
 public abstract class AbstractBaseEntity {
     @Id
@@ -27,7 +29,7 @@ public abstract class AbstractBaseEntity {
     @Column(columnDefinition = "timestamp with time zone DEFAULT CURRENT_DATE NOT NULL", updatable = false)
     protected LocalDateTime dateCreated;
     @Column(updatable = false)
-    protected UUID createdBy;
+    protected UUID userId;
     @UpdateTimestamp
     @Column(columnDefinition = "timestamp with time zone")
     protected LocalDateTime dateModified;
@@ -38,8 +40,6 @@ public abstract class AbstractBaseEntity {
     @NotNull
     @Column(columnDefinition = "bool default false")
     protected boolean deleted;
-    @Column(columnDefinition = "bool default false")
-    protected boolean active;
     @Column(columnDefinition = "bigint default(0)")
     private long version;
 
