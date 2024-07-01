@@ -5,6 +5,7 @@ on:
     branches:
       - backend
       - feature/*
+      - adeshina/*
   pull_request:
     branches:
       - backend
