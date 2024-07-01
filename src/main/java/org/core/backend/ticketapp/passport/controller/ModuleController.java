@@ -66,6 +66,7 @@ public class ModuleController {
         if (!module.isPresent()) {
             return new ResponseEntity<>(new GenericResponse<>("01", "No module with the specified id found", ""), HttpStatus.NOT_FOUND);
         }
+        activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Module.class.getTypeName(), null, null, "User performed get module resource by id");
         return new ResponseEntity<>(new GenericResponse<>("00", "", module.get()), HttpStatus.OK);
     }
 
@@ -84,7 +85,7 @@ public class ModuleController {
         module.setNormalizedName(StringUtil.normalizeString(moduleDto.getName()));
         newModuleCreated = moduleRepository.saveAndFlush(module);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Module.class.getTypeName(), null, objectMapper.writeValueAsString(newModuleCreated), "Initiated a request to create a module");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully added the new module", null), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully added the new module", newModuleCreated), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)

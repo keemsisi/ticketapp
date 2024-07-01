@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,6 +31,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/actions")
+@Validated
 public class ActionController {
 
     @Autowired
@@ -84,6 +86,8 @@ public class ActionController {
             @RequestParam(required = false) boolean paged,
             @RequestParam(required = false) String[] sortBy
     ) {
+        var user = jwtTokenUtil.getUser();
+        activityLogProcessorUtils.processActivityLog(user.getUserId(), Action.class.getTypeName(), null, null, "Initiated a request to get a list of assigned actions");
         return new ResponseEntity<>(
                 new GenericResponse<>(
                         "00",
