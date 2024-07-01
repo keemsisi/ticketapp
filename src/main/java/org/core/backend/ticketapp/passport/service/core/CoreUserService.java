@@ -94,6 +94,10 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     private Environment env;
     @Value("${ticketapp.password-reset-url}")
     private String resetPasswordUrl;
+    @Value("${user.failed.login.threshold}")
+    private Long failedLoginThreshold;
+    @Value("${user.password.expiration.in.days}")
+    private Long passwordExpirationInDays;
     @Value("${ticketapp.baseFrontEndUrl}")
     private String baseFrontEndUrl;
     @Value("${ticketapp.token-secret}")
@@ -490,14 +494,14 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         } else if (user.isLocked()) {
             throw new ApplicationException(401, "unauthorized", "Your account is currently locked. Please reach out to support.");
         }
-        if (user.getLoginAttempt() >= user.getAccountLockoutThresholdCount()) {
+        if (user.getLoginAttempt() >= failedLoginThreshold) {
             user.setLocked(true);
             user.setLockDate(new Date());
             user.setLockedBy(user.getCreatedBy());
             userRepository.save(user);
             throw new ApplicationException(401, "unauthorized", "Your account is currently locked. Please reach out to support.");
         }
-        if (ChronoUnit.DAYS.between(user.getPasswordCreatedOn(), Instant.now()) >= user.getPasswordExpirationInDays()) {
+        if (ChronoUnit.DAYS.between(user.getPasswordCreatedOn(), Instant.now()) >= passwordExpirationInDays) {
             throw new ApplicationException(401, "password_expired", "Your password has expired, kindly change your password.");
         }
     }

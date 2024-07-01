@@ -1,13 +1,18 @@
 package org.core.backend.ticketapp.passport.dtos.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-@Data
+
+@Getter
+@Setter
+@AllArgsConstructor
 public class RenewPassword {
     @NotNull
     @NotEmpty
@@ -18,6 +23,7 @@ public class RenewPassword {
     @NotBlank(message = "The new password value cannot be empty")
     @JsonProperty("new_password")
     private String newPassword;
+
     @JsonProperty("old_password")
     private String oldPassword;
 

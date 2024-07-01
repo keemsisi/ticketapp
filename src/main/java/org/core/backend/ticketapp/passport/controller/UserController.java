@@ -59,6 +59,8 @@ public class UserController {
     private SmsService smsService;
     @Autowired
     private UserAuthenticationService userAuthenticationService;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
