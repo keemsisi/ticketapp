@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.event.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
 @Entity
 @TypeDef(name = "UUID", typeClass = PostgresUUIDType.class)
 @Table(name = "event_seat_sections",
