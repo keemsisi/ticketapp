@@ -29,6 +29,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.boot.mainclass>org.core.backend.ticketapp.TicketApp</spring.boot.mainclass>
     </properties>
 
     <dependencies>
@@ -400,6 +401,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>${spring.boot.mainclass}</mainClass>
+                </configuration>
             </plugin>
 
             <plugin>
