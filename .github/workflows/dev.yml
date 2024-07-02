@@ -43,7 +43,7 @@ jobs:
 
       - name: Deploy to App Engine
         run: |
-          gcloud app deploy */src/target/ticketapp-*.jar --version=ticket-app-${{ github.sha }} --promote
+          gcloud app deploy src/target/ticketapp-*.jar --version=ticket-app-${{ github.sha }} --promote
 
       - name: Clean up
         run: gcloud auth revoke --all
