@@ -100,6 +100,6 @@ public class Event {
     @AllArgsConstructor
     public static class SeatSection {
         private String name;
-        private Integer capacity;
+        private Long capacity;
     }
 }

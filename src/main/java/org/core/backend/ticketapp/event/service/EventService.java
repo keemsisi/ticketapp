@@ -1,13 +1,19 @@
 package org.core.backend.ticketapp.event.service;
 
 import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.event.dto.EventRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
+import org.core.backend.ticketapp.event.entity.EventSeatSections;
 import org.core.backend.ticketapp.event.repository.EventRepository;
+import org.core.backend.ticketapp.event.repository.EventSeatSectionsRepository;
+import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -17,6 +23,8 @@ import java.util.stream.Collectors;
 public class EventService {
     private final EventRepository eventRepository;
     private final ModelMapper modelMapper;
+    private JwtTokenUtil jwtTokenUtil;
+    private EventSeatSectionsRepository eventSeatSectionsRepository;
 
     public List<EventRequestDTO> getAllEvents() {
         List<Event> events = eventRepository.findAll();
@@ -31,10 +39,19 @@ public class EventService {
         return convertToDTO(event);
     }
 
+    @Transactional
     public EventRequestDTO createEvent(EventRequestDTO eventDTO) {
         Event event = convertToEntity(eventDTO);
-        event = eventRepository.save(event);
-        return convertToDTO(event);
+        final var userId = jwtTokenUtil.getUser().getUserId();
+        final var savedEvent = eventRepository.save(event);
+        final var seatSections = new ArrayList<EventSeatSections>();
+        eventDTO.getSeatSections().forEach(seatSection -> {
+            final var seatSectionsVal = new EventSeatSections(savedEvent.getId(),
+                    userId, seatSection.getName(), seatSection.getCapacity(), 0L, ApprovalStatus.APPROVED);
+            seatSections.add(seatSectionsVal);
+        });
+        eventSeatSectionsRepository.saveAll(seatSections);
+        return convertToDTO(savedEvent);
     }
 
     private EventRequestDTO convertToDTO(Event event) {

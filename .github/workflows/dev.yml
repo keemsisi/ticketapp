@@ -1,0 +1,50 @@
+name: Build & Deploy to GCP AppEngine
+
+on:
+  push:
+    branches:
+      - backend
+      - feature/*
+      - adeshina/*
+  pull_request:
+    branches:
+      - backend
+      - feature/*
+      - adeshina/*
+    types: [closed]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Java JDK 17
+        uses: actions/checkout@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          # Leave other fields as placeholders
+
+      - name: Build with Maven
+        run: mvn clean package --file src/pom.xml  # Adjust path to your pom.xml
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.4.0
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}  # Replace with your Google Cloud project ID
+          service_account_key: ${{ secrets.GCP_SA_KEY }}  # Set GCP_SA_KEY as a secret in your GitHub repository
+
+      - name: Authenticate with Google Cloud
+        run: gcloud auth activate-service-account
+
+      - name: Deploy to App Engine
+        run: |
+          gcloud app deploy src/target/ticketapp-*.jar --version=ticket-app-${{ github.sha }} --promote
+
+      - name: Clean up
+        run: gcloud auth revoke --all
+        
