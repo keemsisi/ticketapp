@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - backend
+      - feature/*
+      - adeshina/*
   pull_request:
     branches:
       - backend
+      - feature/*
+      - adeshina/*
     types: [closed]
 
 jobs:
