@@ -39,11 +39,11 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}  # Set GCP_SA_KEY as a secret in your GitHub repository
 
       - name: Authenticate with Google Cloud
-        run: gcloud auth activate-service-account
+        run: gcloud auth activate-service-account --key-file=service_account_key.json
 
       - name: Deploy to App Engine
         run: |
-          gcloud app deploy src/target/ticketapp-*.jar --version=ticket-app-${{ github.sha }} --promote
+          gcloud app deploy */src/target/ticketapp-*.jar --version=ticket-app-${{ github.sha }} --promote
 
       - name: Clean up
         run: gcloud auth revoke --all
