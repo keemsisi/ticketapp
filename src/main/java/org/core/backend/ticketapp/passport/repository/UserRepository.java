@@ -22,8 +22,7 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID>, PagingAndSortingRepository<User, UUID> {
 
 
-    @Query(value = "SELECT users.* FROM users " +
-            " WHERE LOWER(users.email) = LOWER(?1)", nativeQuery = true)
+    @Query(value = "SELECT users.* FROM users WHERE LOWER(users.email) = LOWER(?1)", nativeQuery = true)
     @Transactional(readOnly = true)
     Optional<User> findByEmail(String email);
 

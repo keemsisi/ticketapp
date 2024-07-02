@@ -83,7 +83,7 @@ public class UserDao extends BaseDao {
     }
 
     public Optional<User> getUserById(UUID id) {
-        String sql = String.format("SELECT users.*  FROM users WHERE users.id = %s", id.toString());
+        String sql = String.format("SELECT users.*  FROM users WHERE users.id = '%s'", id.toString());
         var user = jdbcTemplate.queryForObject(sql, BeanPropertyRowMapper.newInstance(User.class));
         return Optional.of(user);
     }
