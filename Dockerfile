@@ -22,8 +22,8 @@ WORKDIR /opt/ticketapp
 COPY --from=MAVEN_BUILD /build/target/ticketapp-0.0.1.jar /opt/ticketapp/ticketapp.jar
 
 # Expose port 8092
-EXPOSE 8092
+EXPOSE 8080
 
 # Set the command to run the application
-CMD ["java", "-jar", "/opt/ticketapp/ticketapp.jar", "--server.port=8092"]
+CMD ["java", "-jar", "/opt/ticketapp/ticketapp.jar", "--server.port=8080"]
 
