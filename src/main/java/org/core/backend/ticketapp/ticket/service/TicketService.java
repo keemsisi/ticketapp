@@ -21,7 +21,7 @@ import java.util.UUID;
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final EventRepository eventRepository;
-    private final ModelMapper modelMapper;
+//    private final ModelMapper modelMapper;
 
     public List<Ticket> getAllTickets() {
         return ticketRepository.findAll();

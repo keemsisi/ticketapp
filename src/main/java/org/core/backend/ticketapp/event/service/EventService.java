@@ -22,15 +22,16 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
-    private final ModelMapper modelMapper;
+//    private final ModelMapper modelMapper;
     private JwtTokenUtil jwtTokenUtil;
     private EventSeatSectionsRepository eventSeatSectionsRepository;
 
     public List<EventRequestDTO> getAllEvents() {
-        List<Event> events = eventRepository.findAll();
-        return events.stream()
-                .map((event) -> modelMapper.map(event, EventRequestDTO.class))
-                .collect(Collectors.toList());
+//        List<Event> events = eventRepository.findAll();
+//        return events.stream()
+//                .map((event) -> modelMapper.map(event, EventRequestDTO.class))
+//                .collect(Collectors.toList());
+        return new ArrayList<>();
     }
 
     public EventRequestDTO getEventById(UUID id) {
@@ -55,10 +56,12 @@ public class EventService {
     }
 
     private EventRequestDTO convertToDTO(Event event) {
-        return modelMapper.map(event, EventRequestDTO.class);
+        return null;
+//        return modelMapper.map(event, EventRequestDTO.class);
     }
 
     private Event convertToEntity(EventRequestDTO eventDTO) {
-        return modelMapper.map(eventDTO, Event.class);
+        return null;
+//        return modelMapper.map(eventDTO, Event.class);
     }
 }

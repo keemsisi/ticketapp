@@ -23,11 +23,11 @@ public class TicketApp {
     }
 
     //prototype , singleton , request , session , custom, application, websocket
-    @Bean
-    public ModelMapper modelMapper() {
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setSkipNullEnabled(true).setPropertyCondition(Conditions.isNotNull())
-                .setMatchingStrategy(MatchingStrategies.STRICT);
-        return modelMapper;
-    }
+//    @Bean
+//    public ModelMapper modelMapper() {
+//        ModelMapper modelMapper = new ModelMapper();
+//        modelMapper.getConfiguration().setSkipNullEnabled(true).setPropertyCondition(Conditions.isNotNull())
+//                .setMatchingStrategy(MatchingStrategies.STRICT);
+//        return modelMapper;
+//    }
 }
