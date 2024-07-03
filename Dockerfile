@@ -1,22 +1,29 @@
+# Use a base image with Java and Maven pre-installed
+FROM maven:3.8.1-openjdk-11-slim AS build
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the pom.xml file
+COPY pom.xml .
+
+# Copy the entire source code
+COPY src ./src
+
+# Build the application
+RUN mvn clean package -DskipTests
+
+# Create a new stage for the final image
 FROM openjdk:11-jre-slim
 
-FROM maven:3.6.3-jdk-11 AS MAVEN_BUILD
+# Set the working directory
+WORKDIR /app
 
-# Install and setup
-COPY setup.sh /root/ticketapp/setup.sh
-RUN chmod +x /root/ticketapp/setup.sh
-RUN /root/ticketapp/setup.sh
+# Copy the compiled artifact from the build stage
+COPY --from=build "/app/target/ticketapp-0.0.1.jar" ./app.jar
 
-COPY pom.xml /build/
-COPY src /build/src/
-WORKDIR /build/
-RUN mvn package -U -Dmaven.test.skip=true
-RUN ls /build/target
-RUN cp /build/target/ticketapp-0.0.1.jar /opt/ticketapp
+# Expose the port your app runs on
+EXPOSE 8080
 
-
-WORKDIR /
-
-COPY install.sh /root/ticketapp/install.sh
-RUN chmod +x /root/ticketapp/install.sh
-CMD  /root/ticketapp/install.sh
+# Define the startup command
+CMD ["java", "-jar", "app.jar"]
