@@ -27,3 +27,5 @@ EXPOSE 8092
 
 # Define the startup command
 CMD ["java", "-jar", "app.jar"]
+
+
