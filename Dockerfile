@@ -10,7 +10,7 @@ COPY src /build/src/
 WORKDIR /build/
 
 # Build the application with Maven, skipping tests
-RUN mvn package -U -Dmaven.test.skip=true
+RUN mvn clean install -U -Dmaven.test.skip=true
 
 # Stage 2: Final stage with JDK 17 JRE
 FROM openjdk:17-jdk-slim

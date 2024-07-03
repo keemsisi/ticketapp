@@ -9,27 +9,28 @@ import org.core.backend.ticketapp.event.entity.EventSeatSections;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionsRepository;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
-    //    private final ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
     private JwtTokenUtil jwtTokenUtil;
     private EventSeatSectionsRepository eventSeatSectionsRepository;
 
     public List<EventRequestDTO> getAllEvents() {
-//        List<Event> events = eventRepository.findAll();
-//        return events.stream()
-//                .map((event) -> modelMapper.map(event, EventRequestDTO.class))
-//                .collect(Collectors.toList());
-        return new ArrayList<>();
+        List<Event> events = eventRepository.findAll();
+        return events.stream()
+                .map((event) -> modelMapper.map(event, EventRequestDTO.class))
+                .collect(Collectors.toList());
     }
 
     public EventRequestDTO getEventById(UUID id) {
@@ -54,12 +55,10 @@ public class EventService {
     }
 
     private EventRequestDTO convertToDTO(Event event) {
-        return null;
-//        return modelMapper.map(event, EventRequestDTO.class);
+        return modelMapper.map(event, EventRequestDTO.class);
     }
 
     private Event convertToEntity(EventRequestDTO eventDTO) {
-        return null;
-//        return modelMapper.map(eventDTO, Event.class);
+        return modelMapper.map(eventDTO, Event.class);
     }
 }

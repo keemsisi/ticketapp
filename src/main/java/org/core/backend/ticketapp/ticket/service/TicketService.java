@@ -2,11 +2,12 @@ package org.core.backend.ticketapp.ticket.service;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
-import org.core.backend.ticketapp.event.entity.Event;
-import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.ticket.dto.TicketRequestDTO;
+import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
+import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.ticket.repository.TicketRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ import java.util.UUID;
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final EventRepository eventRepository;
-//    private final ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     public List<Ticket> getAllTickets() {
         return ticketRepository.findAll();
