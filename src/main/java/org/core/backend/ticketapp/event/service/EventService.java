@@ -9,20 +9,18 @@ import org.core.backend.ticketapp.event.entity.EventSeatSections;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionsRepository;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
-//    private final ModelMapper modelMapper;
+    //    private final ModelMapper modelMapper;
     private JwtTokenUtil jwtTokenUtil;
     private EventSeatSectionsRepository eventSeatSectionsRepository;
 
