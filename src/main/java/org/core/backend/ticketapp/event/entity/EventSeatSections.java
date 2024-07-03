@@ -23,8 +23,6 @@ import java.util.UUID;
 public class EventSeatSections extends AbstractBaseEntity {
     @Column(name = "event_id")
     private UUID eventId;
-    @Column(name = "user_id", columnDefinition = "uuid not null")
-    private UUID userId;
     @Column(columnDefinition = "varchar(255) not null")
     private String name;
     @Column(columnDefinition = "numeric(19)")

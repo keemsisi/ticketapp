@@ -27,7 +27,7 @@ public abstract class AbstractBaseEntity {
     @CreationTimestamp
     @Column(columnDefinition = "timestamp with time zone DEFAULT CURRENT_DATE NOT NULL", updatable = false)
     protected LocalDateTime dateCreated;
-    @Column(updatable = false)
+    @Column(updatable = false, name = "user_id")
     protected UUID userId;
     @UpdateTimestamp
     @Column(columnDefinition = "timestamp with time zone")
