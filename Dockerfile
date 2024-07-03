@@ -23,7 +23,7 @@ WORKDIR /app
 COPY --from=build "/app/target/ticketapp-0.0.1.jar" ./app.jar
 
 # Expose the port your app runs on
-EXPOSE 8080
+EXPOSE 8092
 
 # Define the startup command
 CMD ["java", "-jar", "app.jar"]
