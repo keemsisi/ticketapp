@@ -1,22 +1,28 @@
-FROM openjdk:11-jre-slim
+# Use a multi-stage build for efficiency and to reduce image size
+# Stage 1: Build stage with Maven and JDK 17
+FROM maven:3.8.4-openjdk-17 AS MAVEN_BUILD
 
-FROM maven:3.6.3-jdk-11 AS MAVEN_BUILD
-
-# Install and setup
-COPY setup.sh /root/ticketapp/setup.sh
-RUN chmod +x /root/ticketapp/setup.sh
-RUN /root/ticketapp/setup.sh
-
+# Copy the pom.xml and source code
 COPY pom.xml /build/
 COPY src /build/src/
+
+# Set the working directory for Maven build
 WORKDIR /build/
+
+# Build the application with Maven, skipping tests
 RUN mvn package -U -Dmaven.test.skip=true
-RUN ls /build/target
-RUN cp /build/target/ticketapp-0.0.1.jar /opt/ticketapp
 
+# Stage 2: Final stage with JDK 17 JRE
+FROM openjdk:17-jdk-slim
 
-WORKDIR /
+# Set up the application directory
+WORKDIR /opt/ticketapp
 
-COPY install.sh /root/ticketapp/install.sh
-RUN chmod +x /root/ticketapp/install.sh
-CMD  /root/ticketapp/install.sh
+# Copy the JAR file from the Maven build stage to the final image
+COPY --from=MAVEN_BUILD /build/target/ticketapp-0.0.1.jar /opt/ticketapp/ticketapp.jar
+
+# Expose port 8092
+EXPOSE 8092
+
+# Set the command to run the application
+CMD ["java", "-jar", "/opt/ticketapp/ticketapp.jar", "--server.port=8092"]
