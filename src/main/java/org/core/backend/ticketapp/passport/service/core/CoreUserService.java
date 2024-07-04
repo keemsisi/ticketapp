@@ -27,6 +27,7 @@ import org.core.backend.ticketapp.passport.repository.UserRepository;
 import org.core.backend.ticketapp.passport.repository.UserRoleRepository;
 import org.core.backend.ticketapp.passport.service.MailChimpService;
 //import org.core.backend.ticketapp.passport.service.RedisService;
+import org.core.backend.ticketapp.passport.service.RedisService;
 import org.core.backend.ticketapp.passport.service.SmsService;
 import org.core.backend.ticketapp.passport.util.*;
 import org.springframework.beans.BeanUtils;
@@ -104,8 +105,8 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     private String secret;
     @Value("${send-2fa-sms}")
     private boolean send2faSms;
-//    @Autowired
-//    private RedisService redisService;
+    @Autowired
+    private RedisService redisService;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -507,17 +508,17 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     }
 
     public void validate2FAToken(TwoFaValidationDTO twoFaValidationDTO) throws JsonProcessingException {
-//        String key = twoFaValidationDTO.getUserId() + AUTH_2FA;
-//        String fetchedData = redisService.fetchDataAsString(key);
-//        if (org.apache.commons.lang3.ObjectUtils.isNotEmpty(fetchedData)) {
-//            TwoFADTO otpData = objectMapper.readValue(fetchedData, TwoFADTO.class);
-//            if (Objects.equals(twoFaValidationDTO.getOtp(), otpData.getOtp())) {
-//                CompletableFuture.runAsync(() -> redisService.deleteData(key));
-//                return;
-//            } else
-//                throw new ApplicationException(400, "expired_or_invalid_otp", "Token is invalid or has expired.");
-//        }
-//        throw new ApplicationException(400, "expired_or_invalid_otp", "Token is invalid or has expired.");
+        String key = twoFaValidationDTO.getUserId() + AUTH_2FA;
+        String fetchedData = redisService.fetchDataAsString(key);
+        if (org.apache.commons.lang3.ObjectUtils.isNotEmpty(fetchedData)) {
+            TwoFADTO otpData = objectMapper.readValue(fetchedData, TwoFADTO.class);
+            if (Objects.equals(twoFaValidationDTO.getOtp(), otpData.getOtp())) {
+                CompletableFuture.runAsync(() -> redisService.deleteData(key));
+                return;
+            } else
+                throw new ApplicationException(400, "expired_or_invalid_otp", "Token is invalid or has expired.");
+        }
+        throw new ApplicationException(400, "expired_or_invalid_otp", "Token is invalid or has expired.");
     }
 
     public void send2FAToken(String userId, String phone, User user) throws JsonProcessingException {
@@ -525,7 +526,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         twoFADTO.setDateCreated(new Date());
         twoFADTO.setOtp(RandomStringUtils.randomNumeric(6));
         twoFADTO.setPurpose("Authentication");
-//        redisService.storeDataAsString(userId + AUTH_2FA, objectMapper.writeValueAsString(twoFADTO), 1L);
+        redisService.storeDataAsString(userId + AUTH_2FA, objectMapper.writeValueAsString(twoFADTO), 1L);
 
         if (send2faSms) {
             smsService.sendSingleSms(

@@ -30,7 +30,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//@Component
+@Component
 @Slf4j
 @AllArgsConstructor
 public class SocketIOClientConnectionHandler implements ISocketIOClientEventHandler {
