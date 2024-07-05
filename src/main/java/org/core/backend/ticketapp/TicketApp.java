@@ -23,7 +23,6 @@ public class TicketApp {
     }
 
     //prototype , singleton , request , session , custom, application, websocket
-    @Scope(value = "singleton")
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();

@@ -6,6 +6,8 @@ handlers:
   - url: .*
     script: auto
 basic_scaling:
-  max_instances: 1
+  max_instances: 3
   idle_timeout: 10m
-service_account: project-alpha-427516@appspot.gserviceaccount.com
+service_account:  github-service-account@project-alpha-427516.iam.gserviceaccount.com
+runtime_config:
+  default_bucket_name: project-alpha-427516.appspot.com
