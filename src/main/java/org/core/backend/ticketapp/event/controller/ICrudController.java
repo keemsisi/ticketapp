@@ -27,7 +27,12 @@ public interface ICrudController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    default ResponseEntity<?> deleteById(@PathVariable UUID id) {
+    default ResponseEntity<?> delete(@PathVariable UUID id) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    default ResponseEntity<?> getAll() {
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

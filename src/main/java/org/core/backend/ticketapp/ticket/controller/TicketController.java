@@ -6,7 +6,7 @@ import org.core.backend.ticketapp.passport.dtos.core.UserDto;
 import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.core.backend.ticketapp.ticket.dto.TicketRequestDTO;
+import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.service.TicketService;
 import org.springframework.http.HttpStatus;
@@ -33,22 +33,22 @@ public class TicketController {
     private JwtTokenUtil jwtTokenUtil;
 
     @GetMapping
-    public ResponseEntity<List<TicketRequestDTO>> getAllTickets() {
-        List<TicketRequestDTO> tickets = ticketService.getAllTickets().stream()
+    public ResponseEntity<List<TicketCreateRequestDTO>> getAllTickets() {
+        List<TicketCreateRequestDTO> tickets = ticketService.getAllTickets().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(tickets);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TicketRequestDTO> getTicketById(@PathVariable UUID id) {
+    public ResponseEntity<TicketCreateRequestDTO> getTicketById(@PathVariable UUID id) {
         Ticket ticket = ticketService.getTicketById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", id.toString()));
         return ResponseEntity.ok(convertToDTO(ticket));
     }
 
     @PostMapping
-    public ResponseEntity<TicketRequestDTO> createTicket(@Valid @RequestBody TicketRequestDTO ticketDTO) {
+    public ResponseEntity<TicketCreateRequestDTO> createTicket(@Valid @RequestBody TicketCreateRequestDTO ticketDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             UserDto userDto = new UserDto();
@@ -64,26 +64,25 @@ public class TicketController {
             ticketDTO.setUserId(loggedInUserId);
         }
 
-        Ticket createdTicket = ticketService.createTicket(ticketDTO);
+        Ticket createdTicket = ticketService.create(ticketDTO);
         return new ResponseEntity<>(convertToDTO(createdTicket), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TicketRequestDTO> updateTicket(@PathVariable UUID id, @Valid @RequestBody TicketRequestDTO ticketDTO) {
-        Ticket updatedTicket = ticketService.updateTicket(id, ticketDTO);
+    public ResponseEntity<TicketCreateRequestDTO> updateTicket(@PathVariable UUID id, @Valid @RequestBody TicketCreateRequestDTO ticketDTO) {
+        Ticket updatedTicket = ticketService.update(id, ticketDTO);
         return ResponseEntity.ok(convertToDTO(updatedTicket));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTicket(@PathVariable UUID id) {
-        ticketService.deleteTicket(id);
+        ticketService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     // Helper method to convert Ticket entity to TicketDTO
-    private TicketRequestDTO convertToDTO(Ticket ticket) {
-        TicketRequestDTO ticketDTO = new TicketRequestDTO();
-        ticketDTO.setId(ticket.getId());
+    private TicketCreateRequestDTO convertToDTO(Ticket ticket) {
+        TicketCreateRequestDTO ticketDTO = new TicketCreateRequestDTO();
         ticketDTO.setPrice(ticket.getPrice());
         if (ticket.getEventId() != null) {
             ticketDTO.setEventId(ticket.getEventId());

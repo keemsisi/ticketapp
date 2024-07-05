@@ -28,7 +28,7 @@ public record EventSeatSectionsController(
     }
 
     @Override
-    public ResponseEntity<?> deleteById(UUID id) {
-        return ICrudController.super.deleteById(id);
+    public ResponseEntity<?> delete(UUID id) {
+        return ICrudController.super.delete(id);
     }
 }

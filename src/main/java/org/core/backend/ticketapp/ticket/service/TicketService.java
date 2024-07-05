@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.ticket.service;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
-import org.core.backend.ticketapp.ticket.dto.TicketRequestDTO;
+import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.event.repository.EventRepository;
@@ -31,9 +31,11 @@ public class TicketService {
         return ticketRepository.findById(id);
     }
 
-    public Ticket createTicket(TicketRequestDTO ticketRequestDTO) {
+    public Ticket create(TicketCreateRequestDTO ticketRequestDTO) {
         Event event = eventRepository.findById(ticketRequestDTO.getEventId())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id", ticketRequestDTO.getEventId().toString()));
+
+        if (event.getTicketsAvailable() < 0) throw new IllegalStateException("No available tickets for this event");
 
         Ticket ticket = new Ticket();
         ticket.setPrice(ticketRequestDTO.getPrice());
@@ -42,7 +44,7 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
 
-    public Ticket updateTicket(UUID id, TicketRequestDTO ticketDTO) {
+    public Ticket update(UUID id, TicketCreateRequestDTO ticketDTO) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", id.toString()));
 
@@ -55,7 +57,7 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
 
-    public void deleteTicket(UUID id) {
+    public void delete(UUID id) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", id.toString()));
         ticketRepository.delete(ticket);
