@@ -24,9 +24,6 @@ public abstract class AbstractFilterRequestDTO {
     private Date endDate;
     @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date startDateApproved;
-    @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endDateApproved;
     private UUID requestedById;
     private boolean userId;
