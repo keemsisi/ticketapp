@@ -66,8 +66,11 @@ public class NotificationController {
 
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/unread")
-    public ResponseEntity<GenericResponse<?>> getUserNotifications(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size, @RequestParam(required = false) Sort.Direction order, @RequestParam(required = false) boolean paged, @RequestParam(required = false) String[] sortBy) {
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Request processed successfully", iNotification.getUserNotificationsByUserIdTenantId(ResponsePageRequest.createPageRequest(page, size, order, sortBy, paged, "date_created"), order)));
+    public ResponseEntity<GenericResponse<?>> getUserNotifications(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size,
+                                                                   @RequestParam(required = false) Sort.Direction order, @RequestParam(required = false) boolean paged,
+                                                                   @RequestParam(required = false) String[] sortBy) {
+        return ResponseEntity.ok().body(new GenericResponse<>("00", "Request processed successfully",
+                iNotification.getUserNotificationsByUserIdTenantId(ResponsePageRequest.createPageRequest(page, size, order, sortBy, paged, "date_created"), order)));
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/unread/stats")
