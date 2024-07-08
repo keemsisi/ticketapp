@@ -15,10 +15,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -58,5 +56,5 @@ public class Event extends AbstractBaseEntity {
 
     @Column(name = "seat_sections", columnDefinition = "JSONB")
     @Type(type = "JSONB")
-    private List<EventSeatSections> seatSections;
+    private List<EventSeatSection> seatSections;
 }

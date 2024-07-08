@@ -20,7 +20,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "ticket")
 public class Ticket {
-
     @Id
     @Column(columnDefinition = "uuid not null default uuid_generate_v4()")
     private UUID id;

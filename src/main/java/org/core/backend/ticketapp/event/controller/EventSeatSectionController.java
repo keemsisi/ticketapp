@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.event.controller;
 
-import org.core.backend.ticketapp.event.service.EventSeatSectionsService;
+import org.core.backend.ticketapp.common.controller.ICrudController;
+import org.core.backend.ticketapp.event.service.EventSeatSectionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,8 +11,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/event-seat-sections")
-public record EventSeatSectionsController(
-        EventSeatSectionsService eventSeatSectionsService) implements ICrudController {
+public record EventSeatSectionController(
+        EventSeatSectionService eventSeatSectionsService) implements ICrudController {
     @Override
     public <T> ResponseEntity<?> create(T request) {
         return ICrudController.super.create(request);

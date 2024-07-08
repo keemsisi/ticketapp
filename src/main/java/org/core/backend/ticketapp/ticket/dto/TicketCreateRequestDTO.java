@@ -13,7 +13,7 @@ public class TicketCreateRequestDTO {
     private String seatSection;
     private UUID userId;
     private String firstName;
-    private String lstName;
+    private String lastName;
     private String email;
     private String phoneNumber;
 }

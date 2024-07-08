@@ -5,9 +5,9 @@ import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
-import org.core.backend.ticketapp.event.entity.EventSeatSections;
+import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.repository.EventRepository;
-import org.core.backend.ticketapp.event.repository.EventSeatSectionsRepository;
+import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
@@ -25,7 +25,7 @@ public class EventServiceImpl implements EventService {
     private EventRepository eventRepository;
     private ModelMapper modelMapper;
     private JwtTokenUtil jwtTokenUtil;
-    private EventSeatSectionsRepository eventSeatSectionsRepository;
+    private EventSeatSectionRepository eventSeatSectionsRepository;
 
     public List<EventCreateRequestDTO> getAll() {
         List<Event> events = eventRepository.findAll();
@@ -34,6 +34,10 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
+    public List<Event> getEventByCategory(String category, String searchParam) {
+//        return eventRepository.getEventByCategory(category, searchParam);
+        return null;
+    }
 
     @Override
     @Transactional
@@ -41,9 +45,9 @@ public class EventServiceImpl implements EventService {
         Event event = convertToEntity(eventDTO);
         final var userId = jwtTokenUtil.getUser().getUserId();
         final var savedEvent = eventRepository.save(event);
-        final var seatSections = new ArrayList<EventSeatSections>();
+        final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {
-            final var seatSectionsVal = new EventSeatSections(savedEvent.getId(),
+            final var seatSectionsVal = new EventSeatSection(savedEvent.getId(),
                     userId, seatSection.getName(), seatSection.getCapacity(), 0L, ApprovalStatus.APPROVED);
             seatSections.add(seatSectionsVal);
         });

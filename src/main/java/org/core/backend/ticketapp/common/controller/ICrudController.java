@@ -1,4 +1,4 @@
-package org.core.backend.ticketapp.event.controller;
+package org.core.backend.ticketapp.common.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 public interface ICrudController {
@@ -22,7 +23,7 @@ public interface ICrudController {
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    default <T> ResponseEntity<?> update(@RequestBody T request) {
+    default <T> ResponseEntity<?> update(@RequestBody @Valid T request) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 

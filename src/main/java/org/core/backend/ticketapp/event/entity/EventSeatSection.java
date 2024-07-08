@@ -20,7 +20,7 @@ import java.util.UUID;
 @TypeDef(name = "UUID", typeClass = PostgresUUIDType.class)
 @Table(name = "event_seat_sections", indexes = {@Index(name = "ix_tbl_event_seat_secs_name_event_id_user_id_uq", columnList = "name,event_id,user_id", unique = true)})
 @OptimisticLocking(type = OptimisticLockType.VERSION)
-public class EventSeatSections extends AbstractBaseEntity {
+public class EventSeatSection extends AbstractBaseEntity {
     @Column(name = "event_id")
     private UUID eventId;
     @Column(columnDefinition = "varchar(255) not null")
@@ -31,12 +31,12 @@ public class EventSeatSections extends AbstractBaseEntity {
     private Long acquired;
     private ApprovalStatus approvalStatus;//later to be updated to go through approval
 
-    public EventSeatSections(UUID id, LocalDateTime dateCreated, UUID createdBy, LocalDateTime dateModified, UUID modifiedBy,
-                             @NotNull long index, @NotNull boolean deleted, long version) {
+    public EventSeatSection(UUID id, LocalDateTime dateCreated, UUID createdBy, LocalDateTime dateModified, UUID modifiedBy,
+                            @NotNull long index, @NotNull boolean deleted, long version) {
         super(id, dateCreated, createdBy, dateModified, modifiedBy, index, deleted, version);
     }
 
-    public EventSeatSections(UUID eventId, UUID userId, String name, Long capacity, Long acquired, ApprovalStatus approvalStatus) {
+    public EventSeatSection(UUID eventId, UUID userId, String name, Long capacity, Long acquired, ApprovalStatus approvalStatus) {
         this.eventId = eventId;
         this.userId = userId;
         this.name = name;
