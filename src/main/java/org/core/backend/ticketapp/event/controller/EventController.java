@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.event.controller;
 
 import org.core.backend.ticketapp.common.controller.ICrudController;
+import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public record EventController(EventService eventService) implements ICrudControl
         return ICrudController.super.getById(id);
     }
 
-    public ResponseEntity<List<Event>> filterByCategory(@RequestParam String category, @RequestParam String value) {
+    public ResponseEntity<List<Event>> filterByCategory(EventFilterRequestDTO requestDTO) {
 //        List<Event> events = eventService.getEventByCategory(category, value);
 //        return new ResponseEntity<>(events, HttpStatus.OK);
         return null;

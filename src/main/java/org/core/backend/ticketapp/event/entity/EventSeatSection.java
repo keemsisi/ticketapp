@@ -30,6 +30,7 @@ public class EventSeatSection extends AbstractBaseEntity {
     @Column(columnDefinition = "numeric(19)")
     private Long acquired;
     private ApprovalStatus approvalStatus;//later to be updated to go through approval
+    private double price;
 
     public EventSeatSection(UUID id, LocalDateTime dateCreated, UUID createdBy, LocalDateTime dateModified, UUID modifiedBy,
                             @NotNull long index, @NotNull boolean deleted, long version) {

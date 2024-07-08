@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.event.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
-import org.core.backend.ticketapp.common.enums.EventApprovalStatus;
+import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
 import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
 import lombok.*;
@@ -50,7 +50,7 @@ public class Event extends AbstractBaseEntity {
     @NotNull private LocalDate eventDate;
     @NotNull private LocalTime eventTime;
     @Column(name = "user_id", nullable = false) private UUID userId;
-    @Enumerated(EnumType.STRING) private EventApprovalStatus approvalStatus;
+    @Enumerated(EnumType.STRING) private ApprovalStatus approvalStatus;
 
     private boolean approvalRequired;
 
