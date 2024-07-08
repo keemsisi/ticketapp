@@ -24,7 +24,7 @@ public class EventSeatSections extends AbstractBaseEntity {
     @Column(name = "event_id")
     private UUID eventId;
     @Column(columnDefinition = "varchar(255) not null")
-    private String name;
+    private String type;
     @Column(columnDefinition = "numeric(19)")
     private Long capacity;
     @Column(columnDefinition = "numeric(19)")
@@ -36,10 +36,10 @@ public class EventSeatSections extends AbstractBaseEntity {
         super(id, dateCreated, createdBy, dateModified, modifiedBy, index, deleted, version);
     }
 
-    public EventSeatSections(UUID eventId, UUID userId, String name, Long capacity, Long acquired, ApprovalStatus approvalStatus) {
+    public EventSeatSections(UUID eventId, UUID userId, String type, Long capacity, Long acquired, ApprovalStatus approvalStatus) {
         this.eventId = eventId;
         this.userId = userId;
-        this.name = name;
+        this.type = type;
         this.capacity = capacity;
         this.acquired = acquired;
         this.approvalStatus = approvalStatus;

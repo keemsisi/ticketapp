@@ -26,6 +26,7 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     private ApprovalStatus approvalStatus;
     private EventCategoryEnum eventCategoryEnum;
     private UUID seatSection;
+    private String seatSectionType; // eventTicketType each seat has section name
     private double startPrice;
     private double endPrice;
     private String address;
@@ -37,4 +38,4 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     private Boolean isPhysicalEvent;
     private String title;
     private String description;
-}
+}g
