@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record EventSeatSectionsCreateRequestDTO(
-        @NotNull String name,
+        @NotNull String type,
         @NotNull Long capacity,
         @NotNull UUID eventId
 ) {

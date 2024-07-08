@@ -18,7 +18,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @TypeDef(name = "UUID", typeClass = PostgresUUIDType.class)
-@Table(name = "event_seat_sections", indexes = {@Index(name = "ix_tbl_event_seat_secs_name_event_id_user_id_uq", columnList = "name,event_id,user_id", unique = true)})
+@Table(name = "event_seat_sections", indexes = {@Index(name = "ix_tbl_event_seat_secs_type_event_id_user_id_uq", columnList = "type,event_id,user_id", unique = true)})
 @OptimisticLocking(type = OptimisticLockType.VERSION)
 public class EventSeatSections extends AbstractBaseEntity {
     @Column(name = "event_id")
