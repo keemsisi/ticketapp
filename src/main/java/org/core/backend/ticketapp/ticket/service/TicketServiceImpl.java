@@ -39,7 +39,7 @@ public class TicketServiceImpl implements TicketService {
 
             Ticket ticket = new Ticket();
             ticket.setPrice(ticketRequestDTO.getPrice());
-            ticket.setSeatSection(ticketRequestDTO.getSeatSection());
+            ticket.setSeatSection(ticketRequestDTO.getSeatSection().toString());
             ticket.setEventId(ticketRequestDTO.getEventId());
 
             // Check if user exists

@@ -48,7 +48,7 @@ public class EventServiceImpl implements EventService {
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {
             final var seatSectionsVal = new EventSeatSection(savedEvent.getId(),
-                    userId, seatSection.getName(), seatSection.getCapacity(), 0L, ApprovalStatus.APPROVED);
+                    userId, seatSection.getType(), seatSection.getCapacity(), 0L, ApprovalStatus.APPROVED);
             seatSections.add(seatSectionsVal);
         });
         eventSeatSectionsRepository.saveAll(seatSections);
