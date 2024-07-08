@@ -38,4 +38,4 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     private Boolean isPhysicalEvent;
     private String title;
     private String description;
-}g
+}
