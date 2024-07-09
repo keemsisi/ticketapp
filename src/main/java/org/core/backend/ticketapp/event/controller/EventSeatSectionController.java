@@ -24,8 +24,8 @@ public record EventSeatSectionController(
     }
 
     @Override
-    public <T> ResponseEntity<?> update(T request) {
-        return ICrudController.super.update(request);
+    public <T> ResponseEntity<?> update(UUID id, T request) {
+        return ICrudController.super.update(id, request);
     }
 
     @Override

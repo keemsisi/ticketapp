@@ -7,6 +7,7 @@ import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 public record EventSeatSectionUpdateRequestDTO(
         String name,
         Long capacity,
+        double price,
         ApprovalStatus approvalStatus
 ) {
 }

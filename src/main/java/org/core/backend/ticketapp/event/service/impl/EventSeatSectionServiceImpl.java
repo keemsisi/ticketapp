@@ -41,6 +41,7 @@ public class EventSeatSectionServiceImpl implements EventSeatSectionService {
         if (optionalSeatSection.isPresent()) {
             EventSeatSection seatSection = optionalSeatSection.get();
             seatSection.setType(seatSectionDTO.name());
+            seatSection.setPrice(seatSectionDTO.price());
             seatSection.setCapacity(seatSectionDTO.capacity());
             seatSection.setAcquired(seatSectionDTO.capacity());
             seatSection.setApprovalStatus(seatSectionDTO.approvalStatus());

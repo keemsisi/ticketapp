@@ -8,10 +8,8 @@ import java.util.UUID;
 @Getter
 @Setter
 public class TicketCreateRequestDTO {
-    private double price;
     private UUID eventId;
-    private UUID seatSection;
-    private int seatNumber;
+    private UUID seatSectionId;
     private UUID userId;
     private String firstName;
     private String lastName;

@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface EventService {
     EventCreateRequestDTO create(final EventCreateRequestDTO requestDTO);
 
+    List<Event> getAll();
+
 //    List<Event> getEventByCategory(final String category, final String searchParam);
 
     EventCreateRequestDTO getById(final UUID id);

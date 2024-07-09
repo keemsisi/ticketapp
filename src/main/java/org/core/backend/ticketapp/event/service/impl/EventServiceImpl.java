@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.event.service.impl;
 
+import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
@@ -11,6 +12,7 @@ import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class EventServiceImpl implements EventService {
 
     private EventRepository eventRepository;
@@ -27,11 +30,16 @@ public class EventServiceImpl implements EventService {
     private JwtTokenUtil jwtTokenUtil;
     private EventSeatSectionRepository eventSeatSectionsRepository;
 
-    public List<EventCreateRequestDTO> getAll() {
+    public List<Event> getAll() {
         List<Event> events = eventRepository.findAll();
-        return events.stream()
-                .map((event) -> modelMapper.map(event, EventCreateRequestDTO.class))
+        List<Event> eventDTOs = events.stream()
+                .map((event) -> {
+                    Event eventDTO = modelMapper.map(event, Event.class);
+                    eventDTO.setSeatSections(event.getSeatSections());
+                    return eventDTO;
+                })
                 .collect(Collectors.toList());
+        return eventDTOs;
     }
 
     public List<Event> getEventByCategory(String category, String searchParam) {
@@ -48,7 +56,7 @@ public class EventServiceImpl implements EventService {
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {
             final var seatSectionsVal = new EventSeatSection(savedEvent.getId(),
-                    userId, seatSection.getType(), seatSection.getCapacity(), 0L, ApprovalStatus.APPROVED);
+                    userId, seatSection.getType(), seatSection.getCapacity(), seatSection.getPrice(), 0L, ApprovalStatus.APPROVED);
             seatSections.add(seatSectionsVal);
         });
         eventSeatSectionsRepository.saveAll(seatSections);
@@ -62,7 +70,9 @@ public class EventServiceImpl implements EventService {
     }
 
     public Event update(UUID id, EventUpdateRequestDTO eventRequestDTO) {
-        Event event = eventRepository.getById(id);
+        Event event = eventRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
+
         event.setTitle(eventRequestDTO.title());
         event.setDescription(eventRequestDTO.description());
         event.setEventBanner(eventRequestDTO.eventBanner());
@@ -73,7 +83,20 @@ public class EventServiceImpl implements EventService {
         event.setLocation(eventRequestDTO.location());
         event.setLocationNumber(eventRequestDTO.locationNumber());
         event.setStreetAddress(eventRequestDTO.streetAddress());
-        return eventRepository.save(event);
+
+        final var seatSections = new ArrayList<EventSeatSection>();
+        eventRequestDTO.seatSections().forEach(seatSection -> {
+            final var seatSectionsVal = new EventSeatSection(
+                    seatSection.getId(), seatSection.getDateCreated(), seatSection.getUserId(), seatSection.getDateModified(), seatSection.getUserId(),
+                    seatSection.getIndex(), seatSection.isDeleted(), seatSection.getVersion()
+            );
+            seatSections.add(seatSectionsVal);
+        });
+
+        event.setSeatSections(seatSections);
+        eventRepository.save(event);
+        eventSeatSectionsRepository.saveAll(seatSections);
+        return event;
     }
 
     public void delete(UUID id) {

@@ -7,8 +7,7 @@ import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record TicketUpdateRequestDTO(
-        @NotNull double price,
-        @NotNull String seatSection,
+        @NotNull UUID seatSectionId,
         @NotNull UUID eventId,
         @NotNull UUID userId
         ) {

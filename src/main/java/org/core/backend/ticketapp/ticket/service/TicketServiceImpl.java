@@ -3,7 +3,9 @@ package org.core.backend.ticketapp.ticket.service;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.event.entity.Event;
+import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.repository.EventRepository;
+import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.passport.dtos.core.UserDto;
 import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
@@ -28,6 +30,7 @@ public class TicketServiceImpl implements TicketService {
     private final EventRepository eventRepository;
     private final CoreUserService userService;
     private final JwtTokenUtil jwtTokenUtil;
+    private final EventSeatSectionRepository eventSeatSectionRepository;
 
     @Override
     public Ticket create(TicketCreateRequestDTO ticketRequestDTO) {
@@ -37,28 +40,47 @@ public class TicketServiceImpl implements TicketService {
         if (event.getTicketsAvailable() > 0) {
             event.setTicketsAvailable(event.getTicketsAvailable() - 1);
 
-            Ticket ticket = new Ticket();
-            ticket.setPrice(ticketRequestDTO.getPrice());
-            ticket.setSeatSection(ticketRequestDTO.getSeatSection().toString());
-            ticket.setEventId(ticketRequestDTO.getEventId());
+            EventSeatSection seatSection = null;
 
-            // Check if user exists
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                UserDto userDto = new UserDto();
-                userDto.setEmail(ticketRequestDTO.getEmail());
-                userDto.setFirstName(ticketRequestDTO.getFirstName());
-                userDto.setLastName(ticketRequestDTO.getLastName());
-                userDto.setPhone(ticketRequestDTO.getPhoneNumber());
+            if (!ticketRequestDTO.getSeatSectionId().toString().isEmpty()) {
+                seatSection = eventSeatSectionRepository.findById(ticketRequestDTO.getSeatSectionId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Event seat section does not exist", ticketRequestDTO.getSeatSectionId().toString()));
+                if (seatSection.getCapacity() == 0) throw new IllegalStateException("No available ticket for seat section");
 
-                User user = userService.createUser(userDto, null);
-                ticket.setUserId(user.getId());
-            } else {
-                UUID loggedInUserId = jwtTokenUtil.getUser().getUserId();
-                ticket.setUserId(loggedInUserId);
             }
 
-            return ticketRepository.save(ticket);
+            try {
+
+                Ticket ticket = new Ticket();
+                ticket.setSeatSectionId(ticketRequestDTO.getSeatSectionId());
+                ticket.setEventId(ticketRequestDTO.getEventId());
+                assert seatSection != null;
+                ticket.setPrice(seatSection.getPrice());
+                seatSection.setCapacity(seatSection.getCapacity() + 1);
+
+                // Check if user exists
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                if (authentication == null || !authentication.isAuthenticated()) {
+                    UserDto userDto = new UserDto();
+                    userDto.setEmail(ticketRequestDTO.getEmail());
+                    userDto.setFirstName(ticketRequestDTO.getFirstName());
+                    userDto.setLastName(ticketRequestDTO.getLastName());
+                    userDto.setPhone(ticketRequestDTO.getPhoneNumber());
+
+                    User user = userService.createUser(userDto, null);
+                    ticket.setUserId(user.getId());
+                } else {
+                    UUID loggedInUserId = jwtTokenUtil.getUser().getUserId();
+                    ticket.setUserId(loggedInUserId);
+                }
+
+                // eventRepository.save(event);
+
+                return ticketRepository.save(ticket);
+            } catch (Exception e) {
+                event.setTicketsAvailable(event.getTicketsAvailable() + 1);
+                throw new IllegalStateException(e);
+            }
         }
 
         throw new IllegalStateException("Ticket not available for event");
@@ -80,8 +102,8 @@ public class TicketServiceImpl implements TicketService {
         Event event = eventRepository.findById(ticketDTO.eventId())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id", ticketDTO.eventId().toString()));
 
-        ticket.setPrice(ticketDTO.price());
         ticket.setEventId(ticketDTO.eventId());
+        ticket.setSeatSectionId(ticketDTO.seatSectionId());
 
         return ticketRepository.save(ticket);
     }

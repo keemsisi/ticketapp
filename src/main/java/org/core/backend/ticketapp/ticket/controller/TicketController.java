@@ -3,9 +3,13 @@ package org.core.backend.ticketapp.ticket.controller;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.ticket.service.TicketService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+@RestController
+@RequestMapping("/api/v1/tickets")
 public record TicketController (TicketService ticketService) implements ICrudController {
     @Override
     public <T> ResponseEntity<?> create(T request) {
@@ -18,8 +22,8 @@ public record TicketController (TicketService ticketService) implements ICrudCon
     }
 
     @Override
-    public <T> ResponseEntity<?> update(T request) {
-        return ICrudController.super.update(request);
+    public <T> ResponseEntity<?> update(UUID id, T request) {
+        return ICrudController.super.update(id, request);
     }
 
     @Override
