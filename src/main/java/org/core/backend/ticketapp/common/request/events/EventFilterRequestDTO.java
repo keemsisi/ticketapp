@@ -25,8 +25,8 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     private Date startDateApproved;
     private ApprovalStatus approvalStatus;
     private EventCategoryEnum eventCategoryEnum;
-    private UUID seatSection;
-    private String seatSectionType; // eventTicketType each seat has section name
+    private UUID seatSectionId;
+    private String seatSectionType; // eventTicketType each seat has section type
     private double startPrice;
     private double endPrice;
     private String address;
