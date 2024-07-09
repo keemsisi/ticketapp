@@ -40,7 +40,7 @@ public class EventSeatSectionServiceImpl implements EventSeatSectionService {
         Optional<EventSeatSection> optionalSeatSection = seatSectionRepository.findById(id);
         if (optionalSeatSection.isPresent()) {
             EventSeatSection seatSection = optionalSeatSection.get();
-            seatSection.setName(seatSectionDTO.name());
+            seatSection.setType(seatSectionDTO.name());
             seatSection.setCapacity(seatSectionDTO.capacity());
             seatSection.setAcquired(seatSectionDTO.capacity());
             seatSection.setApprovalStatus(seatSectionDTO.approvalStatus());
