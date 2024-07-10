@@ -7,9 +7,10 @@ import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record EventSeatSectionsCreateRequestDTO(
-        @NotNull String type,
+public record EventSeatSectionCreateRequestDTO(
+        @NotNull String name,
         @NotNull Long capacity,
-        @NotNull UUID eventId
+        @NotNull UUID eventId,
+        @NotNull double price
 ) {
 }

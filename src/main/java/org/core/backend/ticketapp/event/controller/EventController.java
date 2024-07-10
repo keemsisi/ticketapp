@@ -1,41 +1,56 @@
 package org.core.backend.ticketapp.event.controller;
 
-import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.event.dto.EventRequestDTO;
+import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.controller.ICrudController;
+import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
+import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
+import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/events")
-@AllArgsConstructor
-@Validated
-public class EventController {
-
-    private final EventService eventService;
-
-    @GetMapping
-    public ResponseEntity<List<EventRequestDTO>> getAllEvents() {
-        List<EventRequestDTO> events = eventService.getAllEvents();
-        return ResponseEntity.ok(events);
+public record EventController(EventService eventService) implements ICrudController {
+    public ResponseEntity<?> create(EventCreateRequestDTO request) {
+        EventCreateRequestDTO event = eventService.create(request);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Event created successfully", event),
+                HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<EventRequestDTO> getEventById(@PathVariable("id") UUID id) {
-        EventRequestDTO event = eventService.getEventById(id);
-        return ResponseEntity.ok(event);
+    @Override
+    public ResponseEntity<?> getById(UUID id) {
+        return ICrudController.super.getById(id);
     }
 
-    @PostMapping
-    public ResponseEntity<EventRequestDTO> createEvent(@Valid @RequestBody EventRequestDTO eventDTO) {
-        EventRequestDTO newEvent = eventService.createEvent(eventDTO);
-        return new ResponseEntity<>(newEvent, HttpStatus.CREATED);
+    public ResponseEntity<List<Event>> filterByCategory(EventFilterRequestDTO requestDTO) {
+//        List<Event> events = eventService.getEventByCategory(category, value);
+//        return new ResponseEntity<>(events, HttpStatus.OK);
+        return null;
     }
 
+    @Override
+    public <T> ResponseEntity<?> update(UUID id, T request) {
+        return ICrudController.super.update(id, request);
+    }
+
+    @Override
+    public ResponseEntity<?> getAll() {
+        List<Event> events = eventService.getAll();
+        return new ResponseEntity<>(new GenericResponse<>("00", "All events", events),
+                HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> delete(UUID id) {
+        return ICrudController.super.delete(id);
+    }
 }

@@ -20,13 +20,16 @@ import java.util.UUID;
 @Entity
 @Table(name = "ticket")
 public class Ticket {
-
     @Id
     @Column(columnDefinition = "uuid not null default uuid_generate_v4()")
     private UUID id;
 
-    @Column(name = "seat_section", nullable = false)
-    private String seatSection;
+    @Column(name = "seat_section", nullable = false )
+    private UUID seatSectionId;
+
+    @Column(name = "seat_number", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long seatNumber;
 
     @Enumerated(EnumType.STRING)
     private TicketStatus status = TicketStatus.PENDING;
@@ -39,9 +42,9 @@ public class Ticket {
     @Column(name = "event_id", nullable = false)
     private UUID eventId;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime dateCreated;
 
-    private LocalDateTime updatedAt;
+    private LocalDateTime dateModified;
 
     @PrePersist
     public void onCreate() {

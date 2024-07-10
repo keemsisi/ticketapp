@@ -1,64 +1,22 @@
 package org.core.backend.ticketapp.event.service;
 
-import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.enums.ApprovalStatus;
-import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
-import org.core.backend.ticketapp.event.dto.EventRequestDTO;
+import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
+import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
-import org.core.backend.ticketapp.event.entity.EventSeatSections;
-import org.core.backend.ticketapp.event.repository.EventRepository;
-import org.core.backend.ticketapp.event.repository.EventSeatSectionsRepository;
-import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-@Service
-@AllArgsConstructor
-public class EventService {
-    private final EventRepository eventRepository;
-    private final ModelMapper modelMapper;
-    private JwtTokenUtil jwtTokenUtil;
-    private EventSeatSectionsRepository eventSeatSectionsRepository;
+public interface EventService {
+    EventCreateRequestDTO create(final EventCreateRequestDTO requestDTO);
 
-    public List<EventRequestDTO> getAllEvents() {
-        List<Event> events = eventRepository.findAll();
-        return events.stream()
-                .map((event) -> modelMapper.map(event, EventRequestDTO.class))
-                .collect(Collectors.toList());
-    }
+    List<Event> getAll();
 
-    public EventRequestDTO getEventById(UUID id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
-        return convertToDTO(event);
-    }
+//    List<Event> getEventByCategory(final String category, final String searchParam);
 
-    @Transactional
-    public EventRequestDTO createEvent(EventRequestDTO eventDTO) {
-        Event event = convertToEntity(eventDTO);
-        final var userId = jwtTokenUtil.getUser().getUserId();
-        final var savedEvent = eventRepository.save(event);
-        final var seatSections = new ArrayList<EventSeatSections>();
-        eventDTO.getSeatSections().forEach(seatSection -> {
-            final var seatSectionsVal = new EventSeatSections(savedEvent.getId(),
-                    userId, seatSection.getName(), seatSection.getCapacity(), 0L, ApprovalStatus.APPROVED);
-            seatSections.add(seatSectionsVal);
-        });
-        eventSeatSectionsRepository.saveAll(seatSections);
-        return convertToDTO(savedEvent);
-    }
+    EventCreateRequestDTO getById(final UUID id);
 
-    private EventRequestDTO convertToDTO(Event event) {
-        return modelMapper.map(event, EventRequestDTO.class);
-    }
+    void delete(final UUID id);
 
-    private Event convertToEntity(EventRequestDTO eventDTO) {
-        return modelMapper.map(eventDTO, Event.class);
-    }
+    Event update(final UUID id, final EventUpdateRequestDTO requestDTO);
 }

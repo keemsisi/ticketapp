@@ -2,20 +2,17 @@ package org.core.backend.ticketapp.ticket.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.core.backend.ticketapp.common.enums.TicketStatus;
 
 import java.util.UUID;
 
 @Getter
 @Setter
-public class TicketRequestDTO {
-    private UUID id;
-    private double price;
+public class TicketCreateRequestDTO {
     private UUID eventId;
-    private String seatSection;
+    private UUID seatSectionId;
     private UUID userId;
     private String firstName;
-    private String lstName;
+    private String lastName;
     private String email;
     private String phoneNumber;
 }
