@@ -41,7 +41,7 @@ import java.util.Collections;
 import java.util.Map;
 
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings("unchecked")
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
