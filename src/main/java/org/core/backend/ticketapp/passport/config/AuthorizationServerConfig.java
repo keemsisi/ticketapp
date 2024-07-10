@@ -46,10 +46,10 @@ import java.util.Map;
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
-    private static final String KEY_STORE_FILE = "greenpole-oauth-jwt.jks";
-    private static final String KEY_STORE_PASSWORD = "greenpole-oauth-jwt";
-    private static final String KEY_ALIAS = "greenpole-oauth-jwt";
-    private static final String JWK_KID = "greenpole-oauth-jwt";
+    private static final String KEY_STORE_FILE = "passport-oauth-jwt.jks";
+    private static final String KEY_STORE_PASSWORD = "passport-oauth-jwt";
+    private static final String KEY_ALIAS = "passport-oauth-jwt";
+    private static final String JWK_KID = "passport-oauth-jwt";
 
     @Autowired
     private ClientService clientService;
