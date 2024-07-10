@@ -52,7 +52,7 @@ public class ReminderNotificationService implements IReminderNotification {
     private MailChimpService mailChimpService;
     @Autowired
     private NotificationService notificationService;
-    @Value("${ticketapp.baseFrontEndUrl}")
+    @Value("${baseFrontEndUrl}")
     private String baseFrontEndUrl;
 
     @Override
