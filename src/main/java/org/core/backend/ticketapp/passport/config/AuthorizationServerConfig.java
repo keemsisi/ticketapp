@@ -68,6 +68,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Value("${spring.security.oauth2.client.registration.general.client-secret}")
     private String clientSecret;
 
+
     @Autowired
     private TokenEnhancerService tokenEnhancerService;
 
