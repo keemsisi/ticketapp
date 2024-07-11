@@ -99,7 +99,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     private Long failedLoginThreshold;
     @Value("${user.password.expiration.in.days}")
     private Long passwordExpirationInDays;
-    @Value("${ticketapp.baseFrontEndUrl}")
+    @Value("${baseFrontEndUrl}")
     private String baseFrontEndUrl;
     @Value("${ticketapp.token-secret}")
     private String secret;
