@@ -2,17 +2,15 @@ package org.core.backend.ticketapp.event.controller;
 
 import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
+import org.core.backend.ticketapp.common.enums.ApprovalStatus;
+import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,10 +29,33 @@ public record EventController(EventService eventService) implements ICrudControl
         return ICrudController.super.getById(id);
     }
 
-    public ResponseEntity<List<Event>> filterByCategory(EventFilterRequestDTO requestDTO) {
-//        List<Event> events = eventService.getEventByCategory(category, value);
-//        return new ResponseEntity<>(events, HttpStatus.OK);
-        return null;
+    @GetMapping("/filterSearch")
+    public ResponseEntity<List<Event>> filterSearch(
+            @RequestParam(required = false) ApprovalStatus approvalStatus,
+            @RequestParam(required = false) EventCategoryEnum eventCategory,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String artistName,
+            @RequestParam(required = false) boolean paidEvent,
+            @RequestParam(required = false) boolean physicalEvent
+    ) {
+        EventFilterRequestDTO filter = new EventFilterRequestDTO();
+        filter.setApprovalStatus(approvalStatus);
+        filter.setEventCategory(eventCategory);
+        filter.setTitle(title);
+        filter.setDescription(description);
+        filter.setAddress(address);
+        filter.setState(state);
+        filter.setCountry(country);
+        filter.setArtistName(artistName);
+        filter.setIsPaidEvent(paidEvent);
+        filter.setIsPhysicalEvent(physicalEvent);
+
+        List<Event> filteredEvents = eventService.searchEvents(filter);
+        return new ResponseEntity<>(filteredEvents, HttpStatus.OK);
     }
 
     @Override

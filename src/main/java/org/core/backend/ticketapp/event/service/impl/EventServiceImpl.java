@@ -3,6 +3,7 @@ package org.core.backend.ticketapp.event.service.impl;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
+import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
@@ -32,19 +33,31 @@ public class EventServiceImpl implements EventService {
 
     public List<Event> getAll() {
         List<Event> events = eventRepository.findAll();
-        List<Event> eventDTOs = events.stream()
+        return events.stream()
                 .map((event) -> {
                     Event eventDTO = modelMapper.map(event, Event.class);
                     eventDTO.setSeatSections(event.getSeatSections());
                     return eventDTO;
                 })
                 .collect(Collectors.toList());
-        return eventDTOs;
     }
 
-    public List<Event> getEventByCategory(String category, String searchParam) {
-//        return eventRepository.getEventByCategory(category, searchParam);
-        return null;
+    public List<Event> searchEvents(EventFilterRequestDTO eventDTO) {
+        List<Event> events = eventRepository.findByFilter(
+                eventDTO.getApprovalStatus(),
+                eventDTO.getEventCategory(),
+                eventDTO.getTitle(),
+                eventDTO.getAddress(),
+                eventDTO.getState(),
+                eventDTO.getCountry(),
+                eventDTO.getIsPaidEvent(),
+                eventDTO.getIsPhysicalEvent(),
+                eventDTO.getArtistName(),
+                eventDTO.getDescription()
+        );
+        return events.stream()
+                .map((event) -> modelMapper.map(event, Event.class))
+                .collect(Collectors.toList());
     }
 
     @Override
