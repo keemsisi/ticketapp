@@ -25,5 +25,7 @@ COPY --from=MAVEN_BUILD /build/target/ticketapp-0.0.1.jar /opt/ticketapp/ticketa
 EXPOSE 8080
 
 # Set the command to run the application
-CMD ["java", "-jar", "/opt/ticketapp/ticketapp.jar", "--server.port=8080","--spring.redis.url=redis://default:wb8We7NTTQkRMghSWQfvqH91hDPFlZvA@redis-17966.c8.us-east-1-4.ec2.redns.redis-cloud.com:1796"]
+CMD ["java", "-jar", "/opt/ticketapp/ticketapp.jar",
+"--server.port=8080",
+"--spring.redis.url=redis://default:wb8We7NTTQkRMghSWQfvqH91hDPFlZvA@redis-17966.c8.us-east-1-4.ec2.redns.redis-cloud.com:1796"]
 
