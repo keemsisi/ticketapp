@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EventService {
-    EventCreateRequestDTO create(final EventCreateRequestDTO requestDTO);
+    Event create(final EventCreateRequestDTO requestDTO);
 
     List<Event> getAll();
 
     Page<Event> searchEvents(final EventFilterRequestDTO filterRequest);
 
-    EventCreateRequestDTO getById(final UUID id);
+    Event getById(final UUID id);
 
     void delete(final UUID id);
 

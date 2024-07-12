@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
@@ -37,7 +38,7 @@ public class EventDao extends BaseDao {
         assert getJdbcTemplate() != null;
         final var baseSQL = " SELECT %s FROM event e " +
                 " INNER JOIN event_seat_sections ss ON ss.event_id = e.id " +
-                " WHERE 1=1 %s ";
+                " WHERE e.deleted=false %s ";
         final var order = ObjectUtils.defaultIfNull(filterRequest.getOrder(), Sort.Direction.DESC);
         final var subQuery = new StringBuilder();
         if (Objects.nonNull(filterRequest.getIsPaidEvent())) {

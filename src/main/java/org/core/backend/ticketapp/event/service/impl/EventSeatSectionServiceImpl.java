@@ -9,9 +9,11 @@ import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventSeatSectionService;
+import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,12 +22,16 @@ import java.util.UUID;
 public class EventSeatSectionServiceImpl implements EventSeatSectionService {
     private EventRepository eventRepository;
     private EventSeatSectionRepository seatSectionRepository;
+    private JwtTokenUtil jwtTokenUtil;
 
     @Override
     @Transactional
     public EventSeatSection create(EventSeatSectionCreateRequestDTO seatSectionDTO) {
         final var seatSection = new EventSeatSection();
         seatSection.setType(seatSectionDTO.name());
+        seatSection.setUserId(jwtTokenUtil.getUser().getUserId());
+        seatSection.setDateCreated(LocalDateTime.now());
+        seatSection.setId(UUID.randomUUID());
         seatSection.setPrice(seatSectionDTO.price());
         seatSection.setCapacity(seatSectionDTO.capacity());
         seatSection.setAcquired(seatSectionDTO.capacity());
