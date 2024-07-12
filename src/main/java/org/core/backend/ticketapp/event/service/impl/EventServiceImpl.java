@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
+import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
@@ -13,7 +14,7 @@ import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 public class EventServiceImpl implements EventService {
 
     private EventRepository eventRepository;
+    private EventDao eventDao;
     private ModelMapper modelMapper;
     private JwtTokenUtil jwtTokenUtil;
     private EventSeatSectionRepository eventSeatSectionsRepository;
@@ -42,22 +44,9 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
-    public List<Event> searchEvents(EventFilterRequestDTO eventDTO) {
-        List<Event> events = eventRepository.findByFilter(
-                eventDTO.getApprovalStatus(),
-                eventDTO.getEventCategory(),
-                eventDTO.getTitle(),
-                eventDTO.getAddress(),
-                eventDTO.getState(),
-                eventDTO.getCountry(),
-                eventDTO.getIsPaidEvent(),
-                eventDTO.getIsPhysicalEvent(),
-                eventDTO.getArtistName(),
-                eventDTO.getDescription()
-        );
-        return events.stream()
-                .map((event) -> modelMapper.map(event, Event.class))
-                .collect(Collectors.toList());
+    @Override
+    public Page<Event> searchEvents(final EventFilterRequestDTO filterRequest) {
+        return eventDao.filterSearch(filterRequest);
     }
 
     @Override
@@ -84,7 +73,7 @@ public class EventServiceImpl implements EventService {
 
     public Event update(UUID id, EventUpdateRequestDTO eventRequestDTO) {
         Event event = eventRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
 
         event.setTitle(eventRequestDTO.title());
         event.setDescription(eventRequestDTO.description());
@@ -117,6 +106,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
         eventRepository.delete(event);
     }
+
     private EventCreateRequestDTO convertToDTO(Event event) {
         return modelMapper.map(event, EventCreateRequestDTO.class);
     }

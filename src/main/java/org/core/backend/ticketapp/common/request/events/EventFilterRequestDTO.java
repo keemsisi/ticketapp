@@ -8,6 +8,7 @@ import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
 import org.core.backend.ticketapp.common.request.AbstractFilterRequestDTO;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -29,14 +30,15 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     private EventCategoryEnum eventCategory;
     private UUID seatSectionId;
     private String seatSectionType; // eventTicketType each seat has section type
-    private double startPrice;
-    private double endPrice;
+    private Double startPrice;
+    private Double endPrice;
     private String address;
     private String state;
-    private String country;
+    private String location;
     private String artistName;
     private Boolean isPaidEvent;
     private Boolean isPhysicalEvent;
     private String title;
     private String description;
+
 }

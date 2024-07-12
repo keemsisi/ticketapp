@@ -9,6 +9,7 @@ import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,31 +30,8 @@ public record EventController(EventService eventService) implements ICrudControl
         return ICrudController.super.getById(id);
     }
 
-    @GetMapping("/filterSearch")
-    public ResponseEntity<List<Event>> filterSearch(
-            @RequestParam(required = false) ApprovalStatus approvalStatus,
-            @RequestParam(required = false) EventCategoryEnum eventCategory,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String description,
-            @RequestParam(required = false) String address,
-            @RequestParam(required = false) String state,
-            @RequestParam(required = false) String country,
-            @RequestParam(required = false) String artistName,
-            @RequestParam(required = false) boolean paidEvent,
-            @RequestParam(required = false) boolean physicalEvent
-    ) {
-        EventFilterRequestDTO filter = new EventFilterRequestDTO();
-        filter.setApprovalStatus(approvalStatus);
-        filter.setEventCategory(eventCategory);
-        filter.setTitle(title);
-        filter.setDescription(description);
-        filter.setAddress(address);
-        filter.setState(state);
-        filter.setCountry(country);
-        filter.setArtistName(artistName);
-        filter.setIsPaidEvent(paidEvent);
-        filter.setIsPhysicalEvent(physicalEvent);
-
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/filter-search")
+    public ResponseEntity<List<Event>> filterSearch(@RequestParam EventFilterRequestDTO filter) {
         List<Event> filteredEvents = eventService.searchEvents(filter);
         return new ResponseEntity<>(filteredEvents, HttpStatus.OK);
     }
