@@ -85,9 +85,9 @@ public class EventDao extends BaseDao {
                 filterRequest.getSize(), order, new String[]{"dateCreated"}, true, "dateCreated");
         final var eventsQuery = String.format(baseSQL, "e.*", subQuery);
         final var countQuery = String.format(baseSQL, "count(*) as count", subQuery);
-        final var finalQuery = ":eventsQuery ; :countQuery ; "
-                .replaceAll("eventsQuery", eventsQuery)
-                .replaceAll("countQuery", countQuery);
+        final var finalQuery = ":eventsQuery;:countQuery;"
+                .replaceAll(":eventsQuery", eventsQuery)
+                .replaceAll(":countQuery", countQuery);
         var cscFactory = new CallableStatementCreatorFactory(finalQuery);
         var returnedParams = Arrays.<SqlParameter>asList(
                 new SqlReturnResultSet("events", BeanPropertyRowMapper.newInstance(Event.class)),
