@@ -1,11 +1,11 @@
-package org.core.backend.ticketapp.payment.dto;
+package org.core.backend.ticketapp.transaction.dto;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import javax.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record PaymentVerifyRequestDTO(
+public record TransactionVerifyRequestDTO(
         @NotNull String reference,
         @NotNull String status,
         @NotNull String orderId
