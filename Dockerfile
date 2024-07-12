@@ -26,4 +26,3 @@ EXPOSE 8080
 
 # Set the command to run the application
 CMD ["java", "-jar", "/opt/ticketapp/ticketapp.jar","--server.port=8080"]
-
