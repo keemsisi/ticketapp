@@ -7,9 +7,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
+import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,4 +38,5 @@ public class EventCreateRequestDTO {
     private boolean recurring = false;
     private TimeZoneEnum timeZone;
     private List<EventSeatSection> seatSections;
+    private EventTicketType ticketType;
 }

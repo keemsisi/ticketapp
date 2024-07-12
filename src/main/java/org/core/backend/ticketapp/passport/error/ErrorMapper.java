@@ -274,6 +274,8 @@ public class ErrorMapper {
         var _message = String.format("%s with the given id does not exist", resource);
         if (message.contains("update or delete on table")) {
             _message = String.format("This operation is not allowed on %s with the given id.", resource);
+        } else if (message.contains("duplicate key value violates unique constraint")) {
+            _message = "Oops! Contains duplicate resource!";
         }
         return new ErrorResponse(400, "400", _message);
     }
