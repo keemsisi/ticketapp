@@ -56,7 +56,7 @@ public class EventDao extends BaseDao {
             subQuery.append(" AND e.description iLIKE '%").append(filterRequest.getArtistName()).append("%'");
         }
         if (Objects.nonNull(filterRequest.getApprovalStatus())) {
-            subQuery.append(" AND e.description iLIKE '%").append(filterRequest.getArtistName()).append("%'");
+            subQuery.append(" AND e.approval_status = '%s' ").append(filterRequest.getArtistName());
         }
         if (Objects.nonNull(filterRequest.getDescription())) {
             subQuery.append(" AND e.description iLIKE '%").append(filterRequest.getDescription()).append("%'");
