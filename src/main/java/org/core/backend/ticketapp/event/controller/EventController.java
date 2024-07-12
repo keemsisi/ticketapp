@@ -1,12 +1,13 @@
 package org.core.backend.ticketapp.event.controller;
 
 import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.PagedMapperUtil;
+import org.core.backend.ticketapp.common.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.EventService;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,8 @@ public record EventController(EventService eventService) implements ICrudControl
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/filter-search")
-    public ResponseEntity<Page<Event>> filterSearch(final EventFilterRequestDTO filter) {
-        return new ResponseEntity<>(eventService.searchEvents(filter), HttpStatus.OK);
+    public ResponseEntity<PagedResponse<?>> filterSearch(final EventFilterRequestDTO filter) {
+        return new ResponseEntity<>(PagedMapperUtil.map(eventService.searchEvents(filter)), HttpStatus.OK);
     }
 
     @Override
