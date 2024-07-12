@@ -33,8 +33,9 @@ public record EventController(EventService eventService) implements ICrudControl
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/filter-search")
-    public ResponseEntity<PagedResponse<?>> filterSearch(final EventFilterRequestDTO filter) {
-        return new ResponseEntity<>(PagedMapperUtil.map(eventService.searchEvents(filter)), HttpStatus.OK);
+    public ResponseEntity<GenericResponse<PagedResponse<?>>> filterSearch(final EventFilterRequestDTO filter) {
+        return new ResponseEntity<>(new GenericResponse<>("00", "All events",
+                PagedMapperUtil.map(eventService.searchEvents(filter))), HttpStatus.OK);
     }
 
     @Override
