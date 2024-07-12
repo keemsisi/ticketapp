@@ -16,8 +16,8 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -60,13 +60,13 @@ public class Event extends AbstractBaseEntity {
     @NotNull
     private TimeZoneEnum timeZone = TimeZoneEnum.WAT;
     @NotNull
-    private LocalDate eventDate;
-    @NotNull
-    private LocalTime eventTime;
+    private LocalDateTime eventDate;
     @Column(name = "user_id", nullable = false)
     private UUID userId;
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
 
     private boolean approvalRequired;
+    @Transient
+    private List<EventSeatSection> seatSections;
 }

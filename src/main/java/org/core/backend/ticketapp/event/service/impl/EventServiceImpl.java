@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.event.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
-import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
+import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -43,29 +44,36 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventCreateRequestDTO create(EventCreateRequestDTO eventDTO) {
+    public Event create(EventCreateRequestDTO eventDTO) {
         Event event = convertToEntity(eventDTO);
+        event.setId(UUID.randomUUID());
         final var userId = jwtTokenUtil.getUser().getUserId();
+        event.setUserId(userId);
+        event.setApprovalStatus(ApprovalStatus.APPROVED);
+        event.setDateCreated(LocalDateTime.now());
         final var savedEvent = eventRepository.save(event);
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {
             final var seatSectionsVal = new EventSeatSection(savedEvent.getId(),
                     userId, seatSection.getType(), seatSection.getCapacity(), seatSection.getPrice(), 0L, ApprovalStatus.APPROVED);
+            seatSectionsVal.setId(UUID.randomUUID());
+            seatSectionsVal.setDateCreated(LocalDateTime.now());
+            seatSectionsVal.setUserId(userId);
             seatSections.add(seatSectionsVal);
         });
         eventSeatSectionsRepository.saveAll(seatSections);
-        return convertToDTO(savedEvent);
+        event.setSeatSections(seatSections);
+        return savedEvent;
     }
 
-    public EventCreateRequestDTO getById(UUID id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
-        return convertToDTO(event);
+    public Event getById(UUID id) {
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
     }
 
     public Event update(UUID id, EventUpdateRequestDTO eventRequestDTO) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
+                .orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
         event.setTitle(eventRequestDTO.title());
         event.setDescription(eventRequestDTO.description());
         event.setEventBanner(eventRequestDTO.eventBanner());
@@ -81,9 +89,10 @@ public class EventServiceImpl implements EventService {
     }
 
     public void delete(UUID id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
-        eventRepository.delete(event);
+        final var event = eventRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
+        event.setDeleted(true);
+        eventRepository.save(event);
     }
 
     private EventCreateRequestDTO convertToDTO(Event event) {

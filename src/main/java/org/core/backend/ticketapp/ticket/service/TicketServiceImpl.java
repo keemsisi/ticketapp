@@ -45,12 +45,15 @@ public class TicketServiceImpl implements TicketService {
             if (!ticketRequestDTO.getSeatSectionId().toString().isEmpty()) {
                 seatSection = eventSeatSectionRepository.findById(ticketRequestDTO.getSeatSectionId())
                         .orElseThrow(() -> new ResourceNotFoundException("Event seat section does not exist", ticketRequestDTO.getSeatSectionId().toString()));
-                if (seatSection.getCapacity() == 0) throw new IllegalStateException("No available ticket for seat section");
+                if (seatSection.getCapacity() == 0)
+                    throw new IllegalStateException("No available ticket for seat section");
 
             }
 
             try {
 
+                //TODO: Update this code to check if the user exists by email
+                // if the user does not exists by email, then create a new user account
                 Ticket ticket = new Ticket();
                 ticket.setSeatSectionId(ticketRequestDTO.getSeatSectionId());
                 ticket.setEventId(ticketRequestDTO.getEventId());
@@ -74,8 +77,6 @@ public class TicketServiceImpl implements TicketService {
                     ticket.setUserId(loggedInUserId);
                 }
 
-                // eventRepository.save(event);
-
                 return ticketRepository.save(ticket);
             } catch (Exception e) {
                 event.setTicketsAvailable(event.getTicketsAvailable() + 1);
@@ -98,13 +99,10 @@ public class TicketServiceImpl implements TicketService {
     public Ticket update(UUID id, TicketUpdateRequestDTO ticketDTO) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", id.toString()));
-
-        Event event = eventRepository.findById(ticketDTO.eventId())
+        eventRepository.findById(ticketDTO.eventId())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id", ticketDTO.eventId().toString()));
-
         ticket.setEventId(ticketDTO.eventId());
         ticket.setSeatSectionId(ticketDTO.seatSectionId());
-
         return ticketRepository.save(ticket);
     }
 
