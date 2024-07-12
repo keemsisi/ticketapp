@@ -1,9 +1,10 @@
 package org.core.backend.ticketapp.event.service.impl;
 
+import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.event.dto.EventSeatSectionCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventSeatSectionUpdateRequestDTO;
-import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
+@AllArgsConstructor
 @Service
 public class EventSeatSectionServiceImpl implements EventSeatSectionService {
     private EventRepository eventRepository;
@@ -22,9 +24,13 @@ public class EventSeatSectionServiceImpl implements EventSeatSectionService {
     @Override
     @Transactional
     public EventSeatSection create(EventSeatSectionCreateRequestDTO seatSectionDTO) {
-        Optional<Event> event = eventRepository.findById(seatSectionDTO.eventId());
-        if (event.isEmpty()) throw new IllegalStateException("Event does not exist");
-        return null;
+        final var seatSection = new EventSeatSection();
+        seatSection.setType(seatSectionDTO.name());
+        seatSection.setPrice(seatSectionDTO.price());
+        seatSection.setCapacity(seatSectionDTO.capacity());
+        seatSection.setAcquired(seatSectionDTO.capacity());
+        seatSection.setApprovalStatus(ApprovalStatus.PENDING);
+        return seatSectionRepository.save(seatSection);
     }
 
     @Override

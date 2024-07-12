@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.common.controller;
 
+import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +13,6 @@ import javax.validation.Valid;
 import java.util.UUID;
 
 public interface ICrudController {
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    default <T> ResponseEntity<?> create(@RequestBody T request) {
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     default ResponseEntity<?> getById(@PathVariable UUID id) {
