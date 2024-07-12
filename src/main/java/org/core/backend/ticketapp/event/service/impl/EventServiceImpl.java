@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -34,14 +33,7 @@ public class EventServiceImpl implements EventService {
     private EventSeatSectionRepository eventSeatSectionsRepository;
 
     public List<Event> getAll() {
-        List<Event> events = eventRepository.findAll();
-        return events.stream()
-                .map((event) -> {
-                    Event eventDTO = modelMapper.map(event, Event.class);
-                    eventDTO.setSeatSections(event.getSeatSections());
-                    return eventDTO;
-                })
-                .collect(Collectors.toList());
+        return eventRepository.findAll();
     }
 
     @Override
@@ -74,7 +66,6 @@ public class EventServiceImpl implements EventService {
     public Event update(UUID id, EventUpdateRequestDTO eventRequestDTO) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
-
         event.setTitle(eventRequestDTO.title());
         event.setDescription(eventRequestDTO.description());
         event.setEventBanner(eventRequestDTO.eventBanner());
@@ -85,19 +76,7 @@ public class EventServiceImpl implements EventService {
         event.setLocation(eventRequestDTO.location());
         event.setLocationNumber(eventRequestDTO.locationNumber());
         event.setStreetAddress(eventRequestDTO.streetAddress());
-
-        final var seatSections = new ArrayList<EventSeatSection>();
-        eventRequestDTO.seatSections().forEach(seatSection -> {
-            final var seatSectionsVal = new EventSeatSection(
-                    seatSection.getId(), seatSection.getDateCreated(), seatSection.getUserId(), seatSection.getDateModified(), seatSection.getUserId(),
-                    seatSection.getIndex(), seatSection.isDeleted(), seatSection.getVersion()
-            );
-            seatSections.add(seatSectionsVal);
-        });
-
-        event.setSeatSections(seatSections);
         eventRepository.save(event);
-        eventSeatSectionsRepository.saveAll(seatSections);
         return event;
     }
 
