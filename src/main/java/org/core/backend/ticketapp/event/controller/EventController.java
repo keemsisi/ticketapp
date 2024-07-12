@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -33,7 +32,7 @@ public record EventController(EventService eventService) implements ICrudControl
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/filter-search")
-    public ResponseEntity<Page<Event>> filterSearch(@RequestParam EventFilterRequestDTO filter) {
+    public ResponseEntity<Page<Event>> filterSearch(final EventFilterRequestDTO filter) {
         return new ResponseEntity<>(eventService.searchEvents(filter), HttpStatus.OK);
     }
 
