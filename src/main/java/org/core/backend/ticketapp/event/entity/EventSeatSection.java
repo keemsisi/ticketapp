@@ -40,7 +40,7 @@ public class EventSeatSection extends AbstractBaseEntity {
     private ApprovalStatus approvalStatus; //later to be updated to go through approval
 
     public EventSeatSection(UUID id, LocalDateTime dateCreated, UUID createdBy, LocalDateTime dateModified, UUID modifiedBy,
-                             @NotNull long index, @NotNull boolean deleted, long version) {
+                            @NotNull long index, @NotNull boolean deleted, long version) {
         super(id, dateCreated, createdBy, dateModified, modifiedBy, index, deleted, version);
     }
 

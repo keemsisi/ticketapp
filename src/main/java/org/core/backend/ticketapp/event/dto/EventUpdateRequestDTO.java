@@ -10,9 +10,11 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record EventUpdateRequestDTO(
+        @NotNull UUID id,
         @NotNull String title,
         @NotNull String description,
         @NotNull int ticketsAvailable,

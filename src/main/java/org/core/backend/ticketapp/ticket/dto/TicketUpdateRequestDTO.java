@@ -10,5 +10,5 @@ public record TicketUpdateRequestDTO(
         @NotNull UUID seatSectionId,
         @NotNull UUID eventId,
         @NotNull UUID userId
-        ) {
+) {
 }

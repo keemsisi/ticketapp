@@ -12,11 +12,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.*;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.*;
 
+@Component
 public class EventDao extends BaseDao {
 
     @Autowired
@@ -35,11 +38,11 @@ public class EventDao extends BaseDao {
         assert getJdbcTemplate() != null;
         final var baseSQL = " SELECT %s FROM event e " +
                 " INNER JOIN event_seat_sections ss ON ss.event_id = e.id " +
-                " WHERE 1=1 %s ";
+                " WHERE e.deleted=false %s ";
         final var order = ObjectUtils.defaultIfNull(filterRequest.getOrder(), Sort.Direction.DESC);
         final var subQuery = new StringBuilder();
         if (Objects.nonNull(filterRequest.getIsPaidEvent())) {
-            subQuery.append(" AND e.free_event = '%s' ").append(filterRequest.getIsPaidEvent());
+            subQuery.append(String.format(" AND e.free_event = '%s' ", filterRequest.getIsPaidEvent()));
         }
         if (Objects.nonNull(filterRequest.getLocation())) {
             subQuery.append(" AND e.location iLIKE '%").append(filterRequest.getLocation()).append("%'");
@@ -48,46 +51,47 @@ public class EventDao extends BaseDao {
             subQuery.append(" AND e.street_address iLIKE '%").append(filterRequest.getAddress()).append("%'");
         }
         if (Objects.nonNull(filterRequest.getEventCategory())) {
-            subQuery.append(" AND e.category = '%s' ").append(filterRequest.getEventCategory());
+            subQuery.append(String.format(" AND e.category = '%s' ", filterRequest.getEventCategory()));
         }
         if (StringUtils.isNotBlank(filterRequest.getArtistName())) {
             subQuery.append(" AND e.description iLIKE '%").append(filterRequest.getArtistName()).append("%'");
         }
+
         if (Objects.nonNull(filterRequest.getApprovalStatus())) {
-            subQuery.append(" AND e.description iLIKE '%").append(filterRequest.getArtistName()).append("%'");
+            subQuery.append(String.format(" AND e.approval_status = '%s' ", filterRequest.getApprovalStatus()));
         }
         if (Objects.nonNull(filterRequest.getDescription())) {
             subQuery.append(" AND e.description iLIKE '%").append(filterRequest.getDescription()).append("%'");
         }
         if (Objects.nonNull(filterRequest.getIsPhysicalEvent())) {
-            subQuery.append(" AND e.description = '%s' ").append(filterRequest.getIsPhysicalEvent());
+            subQuery.append(String.format(" AND e.description = '%s' ", filterRequest.getIsPhysicalEvent()));
         }
         if (Objects.nonNull(filterRequest.getStartDate()) && Objects.nonNull(filterRequest.getEndDate())) {
-            subQuery.append(" AND e.event_date BETWEEN '%s' AND '%s' ").append(filterRequest.getStartDate()).append(filterRequest.getEndDate());
+            subQuery.append(String.format(" AND e.event_date BETWEEN '%s' AND '%s' ", filterRequest.getStartDate(), filterRequest.getEndDate()));
         } else if (Objects.nonNull(filterRequest.getStartDate())) {
-            subQuery.append(" AND e.event_date BETWEEN '%s' AND now() ").append(filterRequest.getStartDate());
+            subQuery.append(String.format(" AND e.event_date BETWEEN '%s' AND now() ", filterRequest.getStartDate()));
         }
         if (Objects.nonNull(filterRequest.getStartPrice()) && Objects.nonNull(filterRequest.getEndPrice())) {
-            subQuery.append(" AND ss.price BETWEEN '%s' AND '%s' ").append(filterRequest.getStartPrice()).append(filterRequest.getEndPrice());
+            subQuery.append(String.format(" AND ss.price BETWEEN '%s' AND '%s' ", filterRequest.getStartPrice(), filterRequest.getEndPrice()));
         } else if (Objects.nonNull(filterRequest.getStartPrice())) {
-            subQuery.append(" AND ss.price >= '%s' ").append(filterRequest.getStartPrice());
+            subQuery.append(String.format(" AND ss.price >= '%s' ", filterRequest.getStartPrice()));
         }
         if (StringUtils.isNotBlank(filterRequest.getTitle())) {
-            subQuery.append(" AND e.title = '%s' ").append(filterRequest.getTitle());
+            subQuery.append(String.format(" AND e.title = '%s' ", filterRequest.getTitle()));
         }
         if (Objects.nonNull(filterRequest.getSeatSectionId())) {
-            subQuery.append(" AND ss.id = '%s' ").append(filterRequest.getSeatSectionId());
+            subQuery.append(String.format(" AND ss.id = '%s' ", filterRequest.getSeatSectionId()));
         }
         if (Objects.nonNull(filterRequest.getSeatSectionType())) {
-            subQuery.append(" AND ss.type = '%s' ").append(filterRequest.getSeatSectionType());
+            subQuery.append(String.format(" AND ss.type = '%s' ", filterRequest.getSeatSectionType()));
         }
         final var pageable = ResponsePageRequest.createPageRequest(filterRequest.getPage(),
                 filterRequest.getSize(), order, new String[]{"dateCreated"}, true, "dateCreated");
         final var eventsQuery = String.format(baseSQL, "e.*", subQuery);
         final var countQuery = String.format(baseSQL, "count(*) as count", subQuery);
-        final var finalQuery = ":eventsQuery ; :countQuery ; "
-                .replaceAll("eventsQuery", eventsQuery)
-                .replaceAll("countQuery", countQuery);
+        final var finalQuery = ":eventsQuery;:countQuery;"
+                .replaceAll(":eventsQuery", eventsQuery)
+                .replaceAll(":countQuery", countQuery);
         var cscFactory = new CallableStatementCreatorFactory(finalQuery);
         var returnedParams = Arrays.<SqlParameter>asList(
                 new SqlReturnResultSet("events", BeanPropertyRowMapper.newInstance(Event.class)),
