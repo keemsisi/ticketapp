@@ -44,7 +44,7 @@ public record EventController(EventService eventService, JwtTokenUtil jwtTokenUt
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<Event>> update(@RequestBody EventUpdateRequestDTO request) {
-        final var event = eventService.update(request.id(), request);
+        final var event = eventService.update(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Updated successfully", event), HttpStatus.OK);
     }
 

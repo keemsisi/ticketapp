@@ -6,7 +6,6 @@ import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -25,5 +24,5 @@ public interface EventService {
 
     void delete(final UUID id);
 
-    Event update(final UUID id, final EventUpdateRequestDTO requestDTO);
+    Event update(final EventUpdateRequestDTO requestDTO);
 }

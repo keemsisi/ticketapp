@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 @Service
 @AllArgsConstructor
 public class EventServiceImpl implements EventService {
@@ -78,24 +80,23 @@ public class EventServiceImpl implements EventService {
         return event;
     }
 
-    public Event update(final UUID id, final EventUpdateRequestDTO eventRequestDTO) {
-        Event event = eventRepository.findById(id)
+    public Event update(final EventUpdateRequestDTO request) {
+        Event event = eventRepository.findById(request.id())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
         UserUtils.isResourceOwner(event.getUserId());
-        event.setTitle(eventRequestDTO.title());
-        event.setDescription(eventRequestDTO.description());
-        event.setEventBanner(eventRequestDTO.eventBanner());
-        event.setTicketsAvailable(eventRequestDTO.ticketsAvailable());
-        event.setFreeEvent(eventRequestDTO.freeEvent());
-        event.setPhysicalEvent(eventRequestDTO.physicalEvent());
-        event.setMaxPerUser(eventRequestDTO.maxPerUser());
-        event.setLocation(eventRequestDTO.location());
-        event.setLocationNumber(eventRequestDTO.locationNumber());
-        event.setStreetAddress(eventRequestDTO.streetAddress());
-        event.setEventCategory(eventRequestDTO.eventCategory());
+        event.setTitle(request.title());
+        event.setDescription(request.description());
+        event.setEventBanner(request.eventBanner());
+        event.setTicketsAvailable(request.ticketsAvailable());
+        event.setFreeEvent(request.freeEvent());
+        event.setPhysicalEvent(request.physicalEvent());
+        event.setMaxPerUser(request.maxPerUser());
+        event.setLocation(request.location());
+        event.setLocationNumber(request.locationNumber());
+        event.setStreetAddress(request.streetAddress());
+        event.setEventCategory(request.eventCategory());
         //TODO: update event section too here
-        eventRepository.save(event);
-        return event;
+        return eventRepository.save(event);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class EventServiceImpl implements EventService {
 
     public void delete(UUID id) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
+                .orElseThrow(() -> new ApplicationException(404, "not_found", "Resource not found!"));
         UserUtils.isResourceOwner(event.getUserId());
         event.setDeleted(true);
         eventRepository.save(event);
