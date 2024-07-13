@@ -23,7 +23,6 @@ enum EventType {
 @Getter
 @Setter
 public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date startDateApproved;
     private ApprovalStatus approvalStatus;
