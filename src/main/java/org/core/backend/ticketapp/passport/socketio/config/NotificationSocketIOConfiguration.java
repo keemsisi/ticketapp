@@ -15,8 +15,8 @@ public class NotificationSocketIOConfiguration {
     private Integer port;
     @Value(value = "${server.netty-socket-origin}")
     private String origin;
-    @Autowired
-    private RedissonClient redissonClient;
+//    @Autowired
+//    private RedissonClient redissonClient;
 
     @Bean
     public SocketIOServer socketIOServer() {
@@ -27,10 +27,10 @@ public class NotificationSocketIOConfiguration {
         config.setOrigin(origin);
         return new SocketIOServer(config);
     }
-
-    @Bean
-    public SpringAnnotationScanner springAnnotationScanner() {
-        return new SpringAnnotationScanner(socketIOServer());
-    }
+//
+//    @Bean
+//    public SpringAnnotationScanner springAnnotationScanner() {
+//        return new SpringAnnotationScanner(socketIOServer());
+//    }
 }
 
