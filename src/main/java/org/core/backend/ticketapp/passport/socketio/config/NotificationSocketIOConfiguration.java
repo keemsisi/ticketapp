@@ -20,9 +20,9 @@ public class NotificationSocketIOConfiguration {
 
     @Bean
     public SocketIOServer socketIOServer() {
-        RedissonStoreFactory redisStoreFactory = new RedissonStoreFactory(redissonClient);
+//        RedissonStoreFactory redisStoreFactory = new RedissonStoreFactory(redissonClient);
         com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
-        config.setStoreFactory(redisStoreFactory);
+//        config.setStoreFactory(redisStoreFactory);
         config.setPort(port);
         config.setOrigin(origin);
         return new SocketIOServer(config);

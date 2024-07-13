@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class NotificationSocketIO implements CommandLineRunner {
 
-    @Autowired
-    private SocketIOServer socketIOServer;
+//    @Autowired
+//    private SocketIOServer socketIOServer;
 
     @Override
     public void run(String... strings) {
-        socketIOServer.start();
-        log.info("---------------|||| [ NOTIFICATION NETTY.SOCKET.IO SERVER STARTED ]|||---------------");
+//        socketIOServer.start();
+//        log.info("---------------|||| [ NOTIFICATION NETTY.SOCKET.IO SERVER STARTED ]|||---------------");
     }
 }
