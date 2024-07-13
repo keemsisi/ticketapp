@@ -1,10 +1,13 @@
 package org.core.backend.ticketapp.event.service;
 
+import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +20,8 @@ public interface EventService {
     Page<Event> searchEvents(final EventFilterRequestDTO filterRequest);
 
     Event getById(final UUID id);
+
+    Page<Event> getByEventTicketType(EventTicketType eventTicketType, Pageable pageable);
 
     void delete(final UUID id);
 

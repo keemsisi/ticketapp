@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -39,13 +40,7 @@ public abstract class AbstractBaseEntity {
     @NotNull
     @Column(columnDefinition = "bool default false")
     protected boolean deleted;
+    @JsonIgnore
     @Column(columnDefinition = "bigint default(0)")
     private long version;
-
-    @PrePersist
-    protected void onCreate() {
-        if (id == null) id = UUID.randomUUID();
-        if (dateCreated == null) LocalDateTime.now();
-
-    }
 }

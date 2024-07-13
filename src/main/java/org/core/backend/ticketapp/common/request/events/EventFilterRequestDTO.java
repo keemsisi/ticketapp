@@ -6,11 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
+import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.request.AbstractFilterRequestDTO;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.UUID;
 
@@ -39,5 +38,7 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     private Boolean isPhysicalEvent;
     private String title;
     private String description;
+    private EventTicketType eventTicketType;
+    private UUID userId;
 
 }

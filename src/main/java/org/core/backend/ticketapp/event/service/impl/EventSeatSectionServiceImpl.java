@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.event.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
+import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.event.dto.EventSeatSectionCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventSeatSectionUpdateRequestDTO;
@@ -65,7 +66,8 @@ public class EventSeatSectionServiceImpl implements EventSeatSectionService {
 
     public void delete(UUID id) {
         EventSeatSection eventSeatSection = seatSectionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event seat section not found", id.toString()));
-        seatSectionRepository.delete(eventSeatSection);
+                .orElseThrow(() -> new ApplicationException(400, "not_found", "Event seat section not found!"));
+        eventSeatSection.setDeleted(true);
+        seatSectionRepository.save(eventSeatSection);
     }
 }

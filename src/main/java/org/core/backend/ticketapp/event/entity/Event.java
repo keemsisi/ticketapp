@@ -67,9 +67,23 @@ public class Event extends AbstractBaseEntity {
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
     @Enumerated(EnumType.STRING)
+    @Column(name = "ticket_type")
     private EventTicketType ticketType;
 
     private boolean approvalRequired;
     @Transient
     private List<EventSeatSection> seatSections;
+
+    @PrePersist
+    public void onCreate() {
+        if (approvalStatus == null) approvalStatus = ApprovalStatus.APPROVED;
+        if (id == null) id = UUID.randomUUID();
+        if (dateCreated == null) LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        if (getDateModified() == null) setDateModified(LocalDateTime.now());
+        if (getModifiedBy() == null) setModifiedBy(userId);
+    }
 }
