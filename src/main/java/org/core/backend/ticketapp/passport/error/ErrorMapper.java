@@ -146,6 +146,9 @@ public class ErrorMapper {
             String message = BAD_REQUEST_MESSAGE;
             if (e.getMessage().contains("ix_tbl_users_col_email_uq"))
                 message = "Oops! One or more users have an existing account email address(es)";
+            if (e.getMessage().contains("ix_tbl_event_seat_secs_type_event_id_user_id_uq")) {
+                message = "Oops! Duplicate seat section in request!";
+            }
             return new ErrorResponse(400, "request_failed",
                     message);
         }
