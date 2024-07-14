@@ -4,20 +4,20 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 
 @AllArgsConstructor
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @MappedSuperclass
 public abstract class AbstractBaseEntity {
@@ -29,7 +29,6 @@ public abstract class AbstractBaseEntity {
     protected LocalDateTime dateCreated;
     @Column(updatable = false, name = "user_id")
     protected UUID userId;
-    @UpdateTimestamp
     @Column(columnDefinition = "timestamp with time zone")
     protected LocalDateTime dateModified;
     protected UUID modifiedBy;
@@ -39,13 +38,7 @@ public abstract class AbstractBaseEntity {
     @NotNull
     @Column(columnDefinition = "bool default false")
     protected boolean deleted;
+    @JsonIgnore
     @Column(columnDefinition = "bigint default(0)")
     private long version;
-
-    @PrePersist
-    protected void onCreate() {
-        if (id == null) id = UUID.randomUUID();
-        if (dateCreated == null) LocalDateTime.now();
-
-    }
 }

@@ -2,7 +2,9 @@ package org.core.backend.ticketapp.event.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
+import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
@@ -13,8 +15,10 @@ import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +26,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 @AllArgsConstructor
@@ -34,7 +41,14 @@ public class EventServiceImpl implements EventService {
     private EventSeatSectionRepository eventSeatSectionsRepository;
 
     public List<Event> getAll() {
-        return eventRepository.findAll();
+        List<Event> events = eventRepository.findAll();
+        return events.stream()
+                .map((event) -> {
+                    Event eventDTO = modelMapper.map(event, Event.class);
+                    eventDTO.setSeatSections(event.getSeatSections());
+                    return eventDTO;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -45,20 +59,14 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public Event create(EventCreateRequestDTO eventDTO) {
-        Event event = convertToEntity(eventDTO);
-        event.setId(UUID.randomUUID());
+        final var event = convertToEntity(eventDTO);
         final var userId = jwtTokenUtil.getUser().getUserId();
         event.setUserId(userId);
-        event.setApprovalStatus(ApprovalStatus.APPROVED);
-        event.setDateCreated(LocalDateTime.now());
         final var savedEvent = eventRepository.save(event);
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {
             final var seatSectionsVal = new EventSeatSection(savedEvent.getId(),
                     userId, seatSection.getType(), seatSection.getCapacity(), seatSection.getPrice(), 0L, ApprovalStatus.APPROVED);
-            seatSectionsVal.setId(UUID.randomUUID());
-            seatSectionsVal.setDateCreated(LocalDateTime.now());
-            seatSectionsVal.setUserId(userId);
             seatSections.add(seatSectionsVal);
         });
         eventSeatSectionsRepository.saveAll(seatSections);
@@ -67,30 +75,41 @@ public class EventServiceImpl implements EventService {
     }
 
     public Event getById(UUID id) {
-        return eventRepository.findById(id)
+        final var event = eventRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
-    }
-
-    public Event update(UUID id, EventUpdateRequestDTO eventRequestDTO) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
-        event.setTitle(eventRequestDTO.title());
-        event.setDescription(eventRequestDTO.description());
-        event.setEventBanner(eventRequestDTO.eventBanner());
-        event.setTicketsAvailable(eventRequestDTO.ticketsAvailable());
-        event.setFreeEvent(eventRequestDTO.freeEvent());
-        event.setPhysicalEvent(eventRequestDTO.physicalEvent());
-        event.setMaxPerUser(eventRequestDTO.maxPerUser());
-        event.setLocation(eventRequestDTO.location());
-        event.setLocationNumber(eventRequestDTO.locationNumber());
-        event.setStreetAddress(eventRequestDTO.streetAddress());
-        eventRepository.save(event);
+        UserUtils.isResourceOwner(event.getUserId());
         return event;
     }
 
+    public Event update(final EventUpdateRequestDTO request) {
+        Event event = eventRepository.findById(request.id())
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
+        UserUtils.isResourceOwner(event.getUserId());
+        event.setTitle(request.title());
+        event.setDescription(request.description());
+        event.setEventBanner(request.eventBanner());
+        event.setTicketsAvailable(request.ticketsAvailable());
+        event.setFreeEvent(request.freeEvent());
+        event.setPhysicalEvent(request.physicalEvent());
+        event.setMaxPerUser(request.maxPerUser());
+        event.setLocation(request.location());
+        event.setLocationNumber(request.locationNumber());
+        event.setStreetAddress(request.streetAddress());
+        event.setEventCategory(request.eventCategory());
+        event.setDateModified(LocalDateTime.now());
+        //TODO: update event section too here
+        return eventRepository.save(event);
+    }
+
+    @Override
+    public Page<Event> getByEventTicketType(final EventTicketType eventTicketType, final Pageable pageable) {
+        return eventRepository.getByEventTicketType(eventTicketType.name(), pageable);
+    }
+
     public void delete(UUID id) {
-        final var event = eventRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(404, "not_found", "Resource not found!"));
+        UserUtils.isResourceOwner(event.getUserId());
         event.setDeleted(true);
         eventRepository.save(event);
     }

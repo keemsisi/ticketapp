@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.passport.dtos.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.thecarisma.ExcelColumn;
@@ -11,6 +12,7 @@ import java.util.*;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LoggedInUserDto {
 
     @JsonProperty("user_id")

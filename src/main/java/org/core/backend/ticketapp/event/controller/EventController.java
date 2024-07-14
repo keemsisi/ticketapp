@@ -9,6 +9,8 @@ import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.EventService;
+import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,46 +22,41 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/events")
-public record EventController(EventService eventService) implements ICrudController {
+public record EventController(EventService eventService, JwtTokenUtil jwtTokenUtil) implements ICrudController {
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<Event>> create(@Valid @RequestBody EventCreateRequestDTO request) {
         final var event = eventService.create(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Created successfully", event),
-                HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Created successfully", event), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/{id}")
     public ResponseEntity<GenericResponse<Event>> getById(UUID id) {
         final var event = eventService.getById(id);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Created successfully", event),
-                HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Created successfully", event), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/filter-search")
     public ResponseEntity<GenericResponse<PagedResponse<?>>> filterSearch(final EventFilterRequestDTO filter) {
-        return new ResponseEntity<>(new GenericResponse<>("00", "All events",
-                PagedMapperUtil.map(eventService.searchEvents(filter))), HttpStatus.OK);
+        UserUtils.isResourceOwner(filter.getUserId());
+        return new ResponseEntity<>(new GenericResponse<>("00", "All events", PagedMapperUtil.map(eventService.searchEvents(filter))), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<Event>> update(@RequestBody EventUpdateRequestDTO request) {
-        final var event = eventService.update(request.id(), request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Updated successfully", event),
-                HttpStatus.CREATED);
+        final var event = eventService.update(request);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Updated successfully", event), HttpStatus.OK);
     }
 
-    @Override
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
         List<Event> events = eventService.getAll();
-        return new ResponseEntity<>(new GenericResponse<>("00", "All events", events),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new GenericResponse<>("00", "All events", events), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<Event>> delete(@PathVariable UUID id) {
         eventService.delete(id);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Deleted successfully", null),
-                HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Deleted successfully", null), HttpStatus.OK);
     }
 }
