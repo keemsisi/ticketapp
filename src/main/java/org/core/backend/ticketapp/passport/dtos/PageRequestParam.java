@@ -50,4 +50,16 @@ public class PageRequestParam {
     private String search;
     private UUID notificationForUserId; //only super admin should be allowed
     private UUID notificationByUserId;
+
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class PagedParam {
+        private Long index;
+        private Integer size = 20;
+        private Sort.Direction order = Sort.Direction.DESC;
+        private String[] sortBy;
+        private Integer page;
+    }
 }

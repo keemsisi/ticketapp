@@ -6,6 +6,7 @@ import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.passport.dao.BaseDao;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
+import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.ResponsePageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
@@ -24,6 +24,8 @@ public class EventDao extends BaseDao {
 
     @Autowired
     DataSource dataSource;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -36,9 +38,8 @@ public class EventDao extends BaseDao {
     @SuppressWarnings("unchecked")
     public Page<Event> filterSearch(EventFilterRequestDTO filterRequest) {
         assert getJdbcTemplate() != null;
-        final var baseSQL = " SELECT %s FROM event e " +
-                " INNER JOIN event_seat_sections ss ON ss.event_id = e.id " +
-                " WHERE e.deleted=false %s ";
+        final var baseSQL = " SELECT %s FROM event e :innerQuery WHERE e.deleted=false %s ";
+        final var seatSectionInnerQuery = " INNER JOIN event_seat_sections ss ON ss.event_id = e.id ";
         final var order = ObjectUtils.defaultIfNull(filterRequest.getOrder(), Sort.Direction.DESC);
         final var subQuery = new StringBuilder();
         if (Objects.nonNull(filterRequest.getIsPaidEvent())) {
@@ -85,10 +86,17 @@ public class EventDao extends BaseDao {
         if (Objects.nonNull(filterRequest.getSeatSectionType())) {
             subQuery.append(String.format(" AND ss.type = '%s' ", filterRequest.getSeatSectionType()));
         }
+        if (Objects.nonNull(filterRequest.getEventTicketType())) {
+            subQuery.append(String.format(" AND e.ticket_type = '%s' ", filterRequest.getEventTicketType()));
+        }
+        final var userId = ObjectUtils.defaultIfNull(filterRequest.getUserId(), getUserIdIfNotAdmin());
+        subQuery.append(String.format(" AND e.user_id = '%s' ", userId));
+        var finalBaseQuery = subQuery.toString().contains("ss.") ? baseSQL.replace(":innerQuery", seatSectionInnerQuery) :
+                baseSQL.replace(":innerQuery", "");
         final var pageable = ResponsePageRequest.createPageRequest(filterRequest.getPage(),
                 filterRequest.getSize(), order, new String[]{"dateCreated"}, true, "dateCreated");
-        final var eventsQuery = String.format(baseSQL, "e.*", subQuery);
-        final var countQuery = String.format(baseSQL, "count(*) as count", subQuery);
+        final var eventsQuery = String.format(finalBaseQuery, "e.*", subQuery);
+        final var countQuery = String.format(finalBaseQuery, "count(*) as count", subQuery);
         final var finalQuery = ":eventsQuery;:countQuery;"
                 .replaceAll(":eventsQuery", eventsQuery)
                 .replaceAll(":countQuery", countQuery);
@@ -100,5 +108,10 @@ public class EventDao extends BaseDao {
         Map<String, Object> results = getJdbcTemplate().call(csc, returnedParams);
         return PageableExecutionUtils.getPage((List<Event>) results.get("events"), pageable,
                 () -> ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount());
+    }
+
+    private UUID getUserIdIfNotAdmin() {
+        final var user = jwtTokenUtil.getUser();
+        return user.getRoles().contains("system_admin") ? null : user.getUserId();
     }
 }

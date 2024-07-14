@@ -69,6 +69,8 @@ public class EventSeatSection extends AbstractBaseEntity {
 
     @PrePersist
     public void onCreate() {
+        if (id == null) id = UUID.randomUUID();
+        if (dateCreated == null) LocalDateTime.now();
         this.approvalStatus = ApprovalStatus.APPROVED;
     }
 }

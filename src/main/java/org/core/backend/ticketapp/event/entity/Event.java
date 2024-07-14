@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
+import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -74,9 +75,20 @@ public class Event extends AbstractBaseEntity {
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ticket_type")
+    private EventTicketType ticketType;
+
     @Column(name = "approval_required")
     private boolean approvalRequired;
 
     @Transient
     private List<EventSeatSection> seatSections;
+
+    @PrePersist
+    public void onCreate() {
+        if (approvalStatus == null) approvalStatus = ApprovalStatus.APPROVED;
+        if (id == null) id = UUID.randomUUID();
+        if (dateCreated == null) LocalDateTime.now();
+    }
 }

@@ -5,10 +5,14 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.springframework.stereotype.Component;
 
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
+@Component
 public class UserUtils {
     private static final String EMAIL_PATTERN = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
     private static final String MOBILE_NO_PATTERN = "^((\\+|00)?[1-9]|0)\\d{1,14}$";
@@ -131,6 +135,13 @@ public class UserUtils {
             }
         } catch (NumberParseException e) {
             throw new InvalidParameterException("Invalid mobile number");
+        }
+    }
+
+    public static void isResourceOwner(final UUID userId) {
+        final var user = JwtTokenUtil.getAuthUser();
+        if (Objects.nonNull(userId) && !userId.equals(JwtTokenUtil.getAuthUser().getUserId())) {
+            UserUtils.assertUserHasRole(user.getRoles(), "system_admin");
         }
     }
 }
