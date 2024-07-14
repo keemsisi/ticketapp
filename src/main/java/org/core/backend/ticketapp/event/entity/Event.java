@@ -80,10 +80,4 @@ public class Event extends AbstractBaseEntity {
         if (id == null) id = UUID.randomUUID();
         if (dateCreated == null) LocalDateTime.now();
     }
-
-    @PreUpdate
-    public void onUpdate() {
-        if (getDateModified() == null) setDateModified(LocalDateTime.now());
-        if (getModifiedBy() == null) setModifiedBy(userId);
-    }
 }

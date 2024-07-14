@@ -58,6 +58,7 @@ public class EventSeatSectionServiceImpl implements EventSeatSectionService {
             seatSection.setCapacity(seatSectionDTO.capacity());
             seatSection.setAcquired(seatSectionDTO.capacity());
             seatSection.setApprovalStatus(seatSectionDTO.approvalStatus());
+            seatSection.setDateModified(LocalDateTime.now());
             return seatSectionRepository.save(seatSection);
         } else {
             throw new IllegalArgumentException("Seat section not found with id: " + id);

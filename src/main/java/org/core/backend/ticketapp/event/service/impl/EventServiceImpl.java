@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -95,6 +96,7 @@ public class EventServiceImpl implements EventService {
         event.setLocationNumber(request.locationNumber());
         event.setStreetAddress(request.streetAddress());
         event.setEventCategory(request.eventCategory());
+        event.setDateModified(LocalDateTime.now());
         //TODO: update event section too here
         return eventRepository.save(event);
     }

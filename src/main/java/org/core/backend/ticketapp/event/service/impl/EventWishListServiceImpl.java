@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -36,6 +37,7 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
         UserUtils.isResourceOwner(userId);
         final var eventWishList = repository.getById(id, userId).orElseThrow(() -> new ApplicationException(404, "not_found", "Event wishlist not found!"));
         eventWishList.setDeleted(true);
+        eventWishList.setDateModified(LocalDateTime.now());
         repository.save(eventWishList);
     }
 
