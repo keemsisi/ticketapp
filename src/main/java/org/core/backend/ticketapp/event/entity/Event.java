@@ -33,40 +33,50 @@ public class Event extends AbstractBaseEntity {
     @Id
     @Column(columnDefinition = "uuid not null default uuid_generate_v4()")
     private UUID id;
-    @NotBlank
-    private String title;
-    @NotBlank
-    private String description;
-    @NotNull
+    @NotBlank private String title;
+    @NotBlank private String description;
+
+    @Column(name = "physical_event", nullable = false)
     private boolean physicalEvent;
-    @NotNull
+
+    @Column(name = "free_event", nullable = false)
     private boolean freeEvent;
-    @NotNull
+
+    @Column(name = "tickets_available")
     private int ticketsAvailable;
-    @NotNull
+
+    @Column(name = "max_per_user")
     private int maxPerUser;
-    @NotNull
-    private String location;
-    @NotNull
+
+    @NotNull private String location;
+    @Column(name = "location_number", nullable = false)
     private String locationNumber;
-    @NotNull
+
+    @Column(name = "street_address", nullable = false)
     private String streetAddress;
-    @NotNull
+
+    @Column(name = "event_category", nullable = false)
     private EventCategoryEnum eventCategory;
 
     private String eventBanner = "event-banner.jpg";
     private boolean recurring = false;
 
-    @NotNull
+    @Column(name = "time_zone", nullable = false)
     private TimeZoneEnum timeZone = TimeZoneEnum.WAT;
-    @NotNull
+
+    @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
+
     @Column(name = "user_id", nullable = false)
     private UUID userId;
+
+    @Column(name = "approval_status")
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
 
+    @Column(name = "approval_required")
     private boolean approvalRequired;
+
     @Transient
     private List<EventSeatSection> seatSections;
 }

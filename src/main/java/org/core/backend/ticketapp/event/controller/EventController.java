@@ -46,7 +46,7 @@ public record EventController(EventService eventService) implements ICrudControl
     public ResponseEntity<GenericResponse<Event>> update(@RequestBody EventUpdateRequestDTO request) {
         final var event = eventService.update(request.id(), request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Updated successfully", event),
-                HttpStatus.CREATED);
+                HttpStatus.OK);
     }
 
     @Override
@@ -60,6 +60,6 @@ public record EventController(EventService eventService) implements ICrudControl
     public ResponseEntity<GenericResponse<Event>> delete(@PathVariable UUID id) {
         eventService.delete(id);
         return new ResponseEntity<>(new GenericResponse<>("00", "Deleted successfully", null),
-                HttpStatus.CREATED);
+                HttpStatus.OK);
     }
 }
