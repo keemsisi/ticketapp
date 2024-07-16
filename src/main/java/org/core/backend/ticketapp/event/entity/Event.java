@@ -34,8 +34,10 @@ public class Event extends AbstractBaseEntity {
     @Id
     @Column(columnDefinition = "uuid not null default uuid_generate_v4()")
     private UUID id;
-    @NotBlank private String title;
-    @NotBlank private String description;
+    @NotBlank
+    private String title;
+    @NotBlank
+    private String description;
 
     @Column(name = "physical_event", nullable = false)
     private boolean physicalEvent;
@@ -49,13 +51,15 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "max_per_user")
     private int maxPerUser;
 
-    @NotNull private String location;
+    @NotNull
+    private String location;
     @Column(name = "location_number", nullable = false)
     private String locationNumber;
 
     @Column(name = "street_address", nullable = false)
     private String streetAddress;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "event_category", nullable = false)
     private EventCategoryEnum eventCategory;
 
