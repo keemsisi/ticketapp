@@ -11,6 +11,7 @@ import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
@@ -58,6 +59,10 @@ public class Event extends AbstractBaseEntity {
 
     @Column(name = "event_category", nullable = false)
     private EventCategoryEnum eventCategory;
+
+    @Column(name = "sub_category", columnDefinition = "JSONB", nullable = false)
+    @Type(type = "JSONB")
+    private List<String> subCategory;
 
     private String eventBanner = "event-banner.jpg";
     private boolean recurring = false;
