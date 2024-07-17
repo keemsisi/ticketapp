@@ -60,9 +60,9 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "event_category", nullable = false)
     private EventCategoryEnum eventCategory;
 
-    @Column(name = "sub_category", columnDefinition = "JSONB", nullable = false)
+    @Column(name = "sub_categories", columnDefinition = "JSONB", nullable = false)
     @Type(type = "JSONB")
-    private List<String> subCategory;
+    private List<String> subCategories;
 
     private String eventBanner = "event-banner.jpg";
     private boolean recurring = false;

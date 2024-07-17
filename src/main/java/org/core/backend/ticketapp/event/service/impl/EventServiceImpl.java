@@ -62,6 +62,10 @@ public class EventServiceImpl implements EventService {
         final var event = convertToEntity(eventDTO);
         final var userId = jwtTokenUtil.getUser().getUserId();
         event.setUserId(userId);
+
+        final var eventCategories = eventDTO.getSubCategories().stream().toList();
+        event.setSubCategories(eventCategories);
+
         final var savedEvent = eventRepository.save(event);
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {

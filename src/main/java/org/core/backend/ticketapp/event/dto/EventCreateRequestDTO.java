@@ -38,5 +38,6 @@ public class EventCreateRequestDTO {
     private boolean recurring = false;
     private TimeZoneEnum timeZone;
     private List<EventSeatSection> seatSections;
+    private List<String> subCategories;
     private EventTicketType ticketType;
 }
