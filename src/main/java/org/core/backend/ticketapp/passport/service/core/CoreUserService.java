@@ -269,6 +269,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         user.setCreatedOn(new Date());
         user.setCreatedBy(loggedInUser.getUserId());
         user.setFirstTimeLogin(true);
+        user.setTenantId(loggedInUser.getTenantId());
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         final var password = PasswordUtil.generatePassword();
         user.setPassword(passwordEncoder.encode(password));
@@ -318,11 +319,11 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
                 e.printStackTrace();
             }
         }).start();
-        return assignNewTenantAsOwner(user, loggedInUser);
+        return user;
     }
 
     @Transactional
-    public User assignNewTenantAsOwner(@NotNull final User user, @NotNull LoggedInUserDto loggedInUserDto) throws JsonProcessingException {
+    public void assignNewTenantAsOwner(@NotNull final User user, @NotNull LoggedInUserDto loggedInUserDto) throws JsonProcessingException {
         if (user.getType().equals(UserType.MERCHANT_OWNER) && Objects.isNull(user.getTenantId())) {
             final var tenantDto = modelMapper.map(user, TenantDto.class);
             tenantDto.setAccountLockoutDurationInMinutes(5);
@@ -340,7 +341,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         } else if (user.getType().equals(UserType.INDIVIDUAL)) {
             user.setTenantId(loggedInUserDto.getTenantId());
         }
-        return save(user);
+        save(user);
     }
 
     public Object sendRegistrationEmail(User user) {
