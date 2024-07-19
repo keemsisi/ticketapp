@@ -1,20 +1,11 @@
 package org.core.backend.ticketapp.event.controller;
 
 import org.core.backend.ticketapp.common.GenericResponse;
-import org.core.backend.ticketapp.common.PagedMapperUtil;
-import org.core.backend.ticketapp.common.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
-import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCategoryCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCategoryUpdateRequestDTO;
-import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
-import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
-import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.entity.EventCategory;
 import org.core.backend.ticketapp.event.service.EventCategoryService;
-import org.core.backend.ticketapp.event.service.EventService;
-import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
