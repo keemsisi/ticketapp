@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.event.controller;
 
+import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.event.dto.EventCategoryCreateRequestDTO;
@@ -9,6 +10,7 @@ import org.core.backend.ticketapp.event.service.EventCategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -17,7 +19,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/event-categories")
-public record EventCategoryController(EventCategoryService categoryService) implements ICrudController {
+@AllArgsConstructor
+public class EventCategoryController implements ICrudController {
+    private final EventCategoryService categoryService;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<EventCategory>> create(@Valid @RequestBody EventCategoryCreateRequestDTO request) {

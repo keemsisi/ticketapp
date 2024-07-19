@@ -8,7 +8,10 @@ import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,4 +24,11 @@ public class EventCategory extends AbstractBaseEntity {
     private String name;
     @Column
     private String description;
+
+    @PrePersist
+    public void onCreate() {
+        if (this.id == null) this.id = UUID.randomUUID();
+        if (this.dateCreated == null) this.dateCreated = LocalDateTime.now();
+    }
+
 }

@@ -10,7 +10,9 @@ import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
+import org.core.backend.ticketapp.event.entity.EventCategory;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
+import org.core.backend.ticketapp.event.repository.EventCategoryRepository;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
@@ -39,16 +41,15 @@ public class EventServiceImpl implements EventService {
     private ModelMapper modelMapper;
     private JwtTokenUtil jwtTokenUtil;
     private EventSeatSectionRepository eventSeatSectionsRepository;
+    private EventCategoryRepository eventCategoryRepository;
 
     public List<Event> getAll() {
         List<Event> events = eventRepository.findAll();
-        return events.stream()
-                .map((event) -> {
-                    Event eventDTO = modelMapper.map(event, Event.class);
-                    eventDTO.setSeatSections(event.getSeatSections());
-                    return eventDTO;
-                })
-                .collect(Collectors.toList());
+        return events.stream().map((event) -> {
+            Event eventDTO = modelMapper.map(event, Event.class);
+            eventDTO.setSeatSections(event.getSeatSections());
+            return eventDTO;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -61,33 +62,39 @@ public class EventServiceImpl implements EventService {
     public Event create(EventCreateRequestDTO eventDTO) {
         final var event = convertToEntity(eventDTO);
         final var userId = jwtTokenUtil.getUser().getUserId();
+
+        eventDTO.getSubCategories().add(event.getEventCategory());
+        final var eventCategories = eventDTO.getSubCategories().stream().map(String::toUpperCase).toList();
+        final var existingCategories = eventCategoryRepository.findAllByName(eventDTO.getSubCategories().stream().toList());
+        if (existingCategories.size() != eventCategories.size()) {
+            throw new ApplicationException(400, "missing_categories", "Some categories does not exist!");
+        }
+        final var categoriesNames = existingCategories.stream().map(EventCategory::getName).toList();
+        event.setSubCategories(categoriesNames);
+        event.setEventCategory(eventDTO.getEventCategory());
+        event.setId(UUID.randomUUID());
         event.setUserId(userId);
 
-        final var eventCategories = eventDTO.getSubCategories().stream().toList();
-        event.setSubCategories(eventCategories);
-
-        final var savedEvent = eventRepository.save(event);
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {
-            final var seatSectionsVal = new EventSeatSection(savedEvent.getId(),
-                    userId, seatSection.getType(), seatSection.getCapacity(), seatSection.getPrice(), 0L, ApprovalStatus.APPROVED);
+            final var seatSectionsVal = new EventSeatSection(event.getId(), userId,
+                    seatSection.getType(), seatSection.getCapacity(), seatSection.getPrice(),
+                    0L, ApprovalStatus.APPROVED);
             seatSections.add(seatSectionsVal);
         });
         eventSeatSectionsRepository.saveAll(seatSections);
         event.setSeatSections(seatSections);
-        return savedEvent;
+        return eventRepository.save(event);
     }
 
     public Event getById(UUID id) {
-        final var event = eventRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
+        final var event = eventRepository.findById(id).orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
         UserUtils.isResourceOwner(event.getUserId());
         return event;
     }
 
     public Event update(final EventUpdateRequestDTO request) {
-        Event event = eventRepository.findById(request.id())
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
+        Event event = eventRepository.findById(request.id()).orElseThrow(() -> new ResourceNotFoundException("Event not found", id.toString()));
         UserUtils.isResourceOwner(event.getUserId());
         event.setTitle(request.title());
         event.setDescription(request.description());
@@ -111,8 +118,7 @@ public class EventServiceImpl implements EventService {
     }
 
     public void delete(UUID id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(404, "not_found", "Resource not found!"));
+        Event event = eventRepository.findById(id).orElseThrow(() -> new ApplicationException(404, "not_found", "Resource not found!"));
         UserUtils.isResourceOwner(event.getUserId());
         event.setDeleted(true);
         eventRepository.save(event);

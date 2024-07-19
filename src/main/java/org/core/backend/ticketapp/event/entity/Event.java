@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
-import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
 import org.hibernate.annotations.Type;
@@ -60,9 +59,12 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "street_address", nullable = false)
     private String streetAddress;
 
-    @Column(name = "sub_categories", columnDefinition = "JSONB", nullable = false)
+    @Column(name = "sub_categories", columnDefinition = "JSONB")
     @Type(type = "JSONB")
     private List<String> subCategories;
+
+    @Column(nullable = false, name = "event_category")
+    private String eventCategory;
 
     private String eventBanner = "event-banner.jpg";
 
