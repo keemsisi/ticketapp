@@ -65,13 +65,13 @@ public class EventServiceImpl implements EventService {
 
         eventDTO.getSubCategories().add(event.getEventCategory());
         final var eventCategories = eventDTO.getSubCategories().stream().map(String::toUpperCase).toList();
-        final var existingCategories = eventCategoryRepository.findAllByName(eventDTO.getSubCategories().stream().toList());
+        final var existingCategories = eventCategoryRepository.findAllByName(eventCategories);
         if (existingCategories.size() != eventCategories.size()) {
             throw new ApplicationException(400, "missing_categories", "Some categories does not exist!");
         }
-        final var categoriesNames = existingCategories.stream().map(EventCategory::getName).toList();
-        event.setSubCategories(categoriesNames);
-        event.setEventCategory(eventDTO.getEventCategory());
+        final var subCategoriesNames = existingCategories.stream().map(EventCategory::getName).toList();
+        event.setSubCategories(subCategoriesNames.contains(eventDTO.getEventCategory()) ? eventCategories : null);
+        event.setEventCategory(eventDTO.getEventCategory().toUpperCase());
         event.setId(UUID.randomUUID());
         event.setUserId(userId);
 
@@ -82,9 +82,10 @@ public class EventServiceImpl implements EventService {
                     0L, ApprovalStatus.APPROVED);
             seatSections.add(seatSectionsVal);
         });
+        eventRepository.saveAndFlush(event);
         eventSeatSectionsRepository.saveAll(seatSections);
         event.setSeatSections(seatSections);
-        return eventRepository.save(event);
+        return event;
     }
 
     public Event getById(UUID id) {
