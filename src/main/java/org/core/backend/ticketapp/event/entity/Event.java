@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
-import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
@@ -39,10 +39,10 @@ public class Event extends AbstractBaseEntity {
     @NotBlank
     private String description;
 
-    @Column(name = "physical_event", nullable = false)
+    @Column(name = "physical_event", columnDefinition = "bool", nullable = false)
     private boolean physicalEvent;
 
-    @Column(name = "free_event", nullable = false)
+    @Column(name = "free_event", columnDefinition = "bool", nullable = false)
     private boolean freeEvent;
 
     @Column(name = "tickets_available")
@@ -59,11 +59,16 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "street_address", nullable = false)
     private String streetAddress;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "event_category", nullable = false)
-    private EventCategoryEnum eventCategory;
+    @Column(name = "sub_categories", columnDefinition = "JSONB")
+    @Type(type = "JSONB")
+    private List<String> subCategories;
+
+    @Column(nullable = false, name = "event_category")
+    private String eventCategory;
 
     private String eventBanner = "event-banner.jpg";
+
+    @Column(columnDefinition = "bool default false")
     private boolean recurring = false;
 
     @Column(name = "time_zone", nullable = false)
@@ -83,7 +88,7 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "ticket_type")
     private EventTicketType ticketType;
 
-    @Column(name = "approval_required")
+    @Column(name = "approval_required", columnDefinition = "bool default false")
     private boolean approvalRequired;
 
     @Transient
