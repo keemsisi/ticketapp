@@ -289,7 +289,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
             assignRolesToUser(userRolesDtos, loggedInUser);
         }
 
-        if (!userDto.getActionIds().isEmpty()) {
+        if (!userDto.getActionIds().isEmpty()) {c
             var userActions = userDto.getActionIds().stream().map(x -> {
                 var userAction = new UserActionDto();
                 userAction.setActionId(x);

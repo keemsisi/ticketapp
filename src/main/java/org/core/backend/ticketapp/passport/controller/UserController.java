@@ -4,14 +4,12 @@ package org.core.backend.ticketapp.passport.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.thecarisma.FatalObjCopierException;
+import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dao.UserDao;
-import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
-import org.core.backend.ticketapp.passport.dtos.core.RenewPassword;
-import org.core.backend.ticketapp.passport.dtos.core.ResetPassword;
-import org.core.backend.ticketapp.passport.dtos.core.UserDto;
+import org.core.backend.ticketapp.passport.dtos.core.*;
 import org.core.backend.ticketapp.passport.entity.ChangePassword;
 import org.core.backend.ticketapp.passport.entity.EmailVerification;
 import org.core.backend.ticketapp.passport.entity.User;
@@ -19,7 +17,7 @@ import org.core.backend.ticketapp.passport.service.SmsService;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.service.core.EmailVerificationService;
 import org.core.backend.ticketapp.passport.util.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -40,33 +38,24 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@AllArgsConstructor
 public class UserController {
-
-    @Autowired
     private CoreUserService userService;
-
-    @Autowired
     private EmailVerificationService emailVerificationService;
-
-    @Autowired
     private JwtTokenUtil jwtTokenUtil;
-    @Autowired
     private UserDao userDao;
-    @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
     private ActivityLogProcessorUtils activityLogProcessorUtils;
-    @Autowired
     private SmsService smsService;
-    @Autowired
     private UserAuthenticationService userAuthenticationService;
-    @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private ModelMapper modelMapper;
 
 
     @RequestMapping(value = "/onboard", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> onboardUser(@Validated @RequestBody UserDto userDto) throws JsonProcessingException {
-        final var newRegisteredUser = userService.createUser(userDto, new LoggedInUserDto());
+    public ResponseEntity<?> userOnboarding(@Validated @RequestBody UserLiteDto userDto) throws JsonProcessingException {
+        final var request = modelMapper.map(userDto, UserDto.class);
+        final var newRegisteredUser = userService.createUser(request, new LoggedInUserDto());
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null,
                 objectMapper.writeValueAsString(newRegisteredUser), "Initiated a request to register a user under a tenant");
         return new ResponseEntity<>(
@@ -161,7 +150,7 @@ public class UserController {
     public ResponseEntity<?> registerUser(@Validated @RequestBody UserDto userDto) throws JsonProcessingException {
         User newRegisteredUser = null;
         var loggedInUser = jwtTokenUtil.getUser();
-        UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.SUPER_ADMIN);
+        UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.ONBOARD_USER);
         newRegisteredUser = userService.createUser(userDto, loggedInUser);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null, objectMapper.writeValueAsString(newRegisteredUser), "Initiated a request to register a user under a tenant");
         return new ResponseEntity<>(
