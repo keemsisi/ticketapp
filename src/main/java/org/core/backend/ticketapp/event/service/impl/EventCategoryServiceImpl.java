@@ -41,7 +41,7 @@ public class EventCategoryServiceImpl implements EventCategoryService {
     @Transactional
     public EventCategory create(final EventCategoryCreateRequestDTO categoryDTO) {
         final var category = convertToEntity(categoryDTO);
-        category.setName(categoryDTO.getName().toUpperCase());
+        category.setName(categoryDTO.getName().toUpperCase().replace(" ", "_"));
         category.setUserId(jwtTokenUtil.getUser().getUserId());
         categoryRepository.save(category);
         return category;
