@@ -20,6 +20,9 @@ public class LoggedInUserDto {
     @JsonProperty("client_id")
     private UUID clientId;
 
+    @JsonProperty("tenant_id")
+    private UUID tenantId;
+
     @Email
     @ExcelColumn(columnName = "Email")
     @NotBlank

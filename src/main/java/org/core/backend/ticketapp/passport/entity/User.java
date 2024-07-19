@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.thecarisma.CopyProperty;
 import io.github.thecarisma.ExcelColumn;
 import lombok.Data;
+import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
 import org.hibernate.annotations.TypeDef;
@@ -25,7 +26,7 @@ import java.util.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @TypeDef(name = "UUID", typeClass = PostgresUUIDType.class)
 @OptimisticLocking(type = OptimisticLockType.VERSION)
-public class User implements UserDetails {
+public class User extends AbstractBaseEntity implements UserDetails {
 
     @Id
     @Column(name = "id", columnDefinition = "UUID")

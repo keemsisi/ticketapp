@@ -41,4 +41,6 @@ public abstract class AbstractBaseEntity {
     @JsonIgnore
     @Column(columnDefinition = "bigint default(0)")
     private long version;
+    @Column(name = "tenant_id", columnDefinition = "uuid default null")
+    private UUID tenantId;
 }
