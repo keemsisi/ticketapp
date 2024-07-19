@@ -59,12 +59,9 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "street_address", nullable = false)
     private String streetAddress;
 
-    @Column(name = "sub_categories", columnDefinition = "JSONB")
+    @Column(name = "categories", columnDefinition = "JSONB")
     @Type(type = "JSONB")
-    private List<String> subCategories;
-
-    @Column(nullable = false, name = "event_category")
-    private String eventCategory;
+    private List<String> categories;
 
     private String eventBanner = "event-banner.jpg";
 

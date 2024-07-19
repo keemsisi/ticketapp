@@ -2,24 +2,21 @@ package org.core.backend.ticketapp.passport.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Entity
-@Data
+@Entity @Getter @Setter
 @Table(name = "tenant", indexes = {@Index(name = "ix_tbl_tenant_col_name_uq", columnList = "normalized_name", unique = true)})
-public class Tenant {
-
-    @Id
-    @Column(name = "id")
-    private UUID id;
-
+public class Tenant extends AbstractBaseEntity {
     @Column(name = "name")
     private String name;
 
@@ -78,6 +75,13 @@ public class Tenant {
 
     @Column(name = "system_alert_id")
     private UUID systemAlertId;
+
     @Column(name = "two_fa_enabled", columnDefinition = "bool default(false)")
     private boolean twoFaEnabled;
+
+    @PrePersist
+    public void onCreate() {
+        if (Objects.isNull(id)) this.id = UUID.randomUUID();
+        if (Objects.isNull(dateCreated)) this.dateCreated = LocalDateTime.now();
+    }
 }

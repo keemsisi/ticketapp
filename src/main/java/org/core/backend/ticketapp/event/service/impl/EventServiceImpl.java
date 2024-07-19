@@ -7,6 +7,7 @@ import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.dao.EventDao;
+import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,27 +61,27 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public Event create(EventCreateRequestDTO eventDTO) {
+    public Event create(@NotNull final EventCreateRequestDTO eventDTO) {
         final var event = convertToEntity(eventDTO);
         final var userId = jwtTokenUtil.getUser().getUserId();
 
-        eventDTO.getSubCategories().add(event.getEventCategory());
-        final var eventCategories = eventDTO.getSubCategories().stream().map(String::toUpperCase).toList();
-        final var existingCategories = eventCategoryRepository.findAllByName(eventCategories);
-        if (existingCategories.size() != eventCategories.size()) {
-            throw new ApplicationException(400, "missing_categories", "Some categories does not exist!");
+        List<EventCategory> existingCategories = new ArrayList<>();
+        if (!eventDTO.getCategories().isEmpty()) {
+            final var eventCategories = eventDTO.getCategories().stream().map(String::toUpperCase).toList();
+            existingCategories = eventCategoryRepository.findAllByName(eventCategories);
+            if (existingCategories.size() != eventCategories.size()) {
+                throw new ApplicationException(400, "missing_categories", "Some categories does not exist!");
+            }
         }
-        final var subCategoriesNames = existingCategories.stream().map(EventCategory::getName).toList();
-        event.setSubCategories(subCategoriesNames.contains(eventDTO.getEventCategory()) ? eventCategories : null);
-        event.setEventCategory(eventDTO.getEventCategory().toUpperCase());
+        final var subCategoriesNames = existingCategories.stream().map(EventCategory::getName).map(String::toUpperCase).toList();
+        event.setCategories(subCategoriesNames);
         event.setId(UUID.randomUUID());
         event.setUserId(userId);
 
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {
-            final var seatSectionsVal = new EventSeatSection(event.getId(), userId,
-                    seatSection.getType(), seatSection.getCapacity(), seatSection.getPrice(),
-                    0L, ApprovalStatus.APPROVED);
+            final var seatSectionsVal = new EventSeatSection(event.getId(), userId, seatSection.getType(),
+                    seatSection.getCapacity(), seatSection.getPrice(), 0L, ApprovalStatus.APPROVED);
             seatSections.add(seatSectionsVal);
         });
         eventRepository.saveAndFlush(event);
@@ -107,9 +109,17 @@ public class EventServiceImpl implements EventService {
         event.setLocation(request.location());
         event.setLocationNumber(request.locationNumber());
         event.setStreetAddress(request.streetAddress());
-//        event.setEventCategory(request.eventCategory()); TODO: update event category
         event.setDateModified(LocalDateTime.now());
         //TODO: update event section too here
+        return eventRepository.save(event);
+    }
+
+    @Override
+    public Event assignCategory(@NotNull final AssignCategoryToEventRequestDTO request) {
+        final var eventCategory = eventCategoryRepository.getAllByIds(request.categoryId());
+        if (eventCategory.isEmpty()) throw notFoundException();
+        final var event = eventRepository.findById(request.eventId()).orElseThrow(this::notFoundException);
+        event.getCategories().addAll(eventCategory.stream().map(EventCategory::getName).toList());
         return eventRepository.save(event);
     }
 
@@ -131,5 +141,9 @@ public class EventServiceImpl implements EventService {
 
     private Event convertToEntity(EventCreateRequestDTO eventDTO) {
         return modelMapper.map(eventDTO, Event.class);
+    }
+
+    private ApplicationException notFoundException() {
+        return new ApplicationException(404, "not_found", "Resource not found!");
     }
 }
