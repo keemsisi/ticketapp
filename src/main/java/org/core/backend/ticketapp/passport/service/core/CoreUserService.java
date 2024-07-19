@@ -108,6 +108,8 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     private String secret;
     @Value("${send-2fa-sms}")
     private boolean send2faSms;
+    @Value("${system.default.role.onboard_user_role}")
+    private UUID onboardUserRoleId;
     @Autowired
     private RedisService redisService;
     @Autowired
@@ -280,6 +282,12 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         user.setPassword(password); //set the password so it can be sent to the user via email
 
         if (!userDto.getRoleIds().isEmpty()) {
+            final UserRoleDto defaultUserRoleDto = new UserRoleDto();
+            if (user.getType().equals(UserType.MERCHANT_USER)) {
+                defaultUserRoleDto.setRoleId(onboardUserRoleId);
+                defaultUserRoleDto.setUserId(user.getId());
+                assignNewTenantAsOwner(user, loggedInUser);
+            }
             var userRolesDtos = userDto.getRoleIds().stream().map(x -> {
                 var userRole = new UserRoleDto();
                 userRole.setRoleId(x);
@@ -310,11 +318,11 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
                 e.printStackTrace();
             }
         }).start();
-        return attachUserToTenantAccount(user, loggedInUser);
+        return assignNewTenantAsOwner(user, loggedInUser);
     }
 
     @Transactional
-    public User attachUserToTenantAccount(@NotNull final User user, @NotNull LoggedInUserDto loggedInUserDto) throws JsonProcessingException {
+    public User assignNewTenantAsOwner(@NotNull final User user, @NotNull LoggedInUserDto loggedInUserDto) throws JsonProcessingException {
         if (user.getType().equals(UserType.MERCHANT_OWNER) && Objects.isNull(user.getTenantId())) {
             final var tenantDto = modelMapper.map(user, TenantDto.class);
             tenantDto.setAccountLockoutDurationInMinutes(5);
