@@ -30,7 +30,6 @@ public class EventCreateRequestDTO {
     private boolean freeEvent;
     private int locationNumber;
     private String streetAddress;
-    private EventCategoryEnum eventCategory;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime eventDate;
     private String approvalStatus;

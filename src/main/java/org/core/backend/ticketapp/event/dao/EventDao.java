@@ -51,9 +51,9 @@ public class EventDao extends BaseDao {
         if (StringUtils.isNotBlank(filterRequest.getAddress())) {
             subQuery.append(" AND e.street_address iLIKE '%").append(filterRequest.getAddress()).append("%'");
         }
-        if (Objects.nonNull(filterRequest.getEventCategory())) {
-            subQuery.append(String.format(" AND e.category = '%s' ", filterRequest.getEventCategory()));
-        }
+//        if (Objects.nonNull(filterRequest.getEventCategory())) {
+//            subQuery.append(String.format(" AND e.category = '%s' ", filterRequest.getEventCategory()));
+//        }
         if (StringUtils.isNotBlank(filterRequest.getArtistName())) {
             subQuery.append(" AND e.description iLIKE '%").append(filterRequest.getArtistName()).append("%'");
         }

@@ -99,7 +99,7 @@ public class EventServiceImpl implements EventService {
         event.setLocation(request.location());
         event.setLocationNumber(request.locationNumber());
         event.setStreetAddress(request.streetAddress());
-        event.setEventCategory(request.eventCategory());
+//        event.setEventCategory(request.eventCategory()); TODO: update event category
         event.setDateModified(LocalDateTime.now());
         //TODO: update event section too here
         return eventRepository.save(event);
