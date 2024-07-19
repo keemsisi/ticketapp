@@ -8,6 +8,7 @@ import io.github.thecarisma.FatalObjCopierException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.core.backend.ticketapp.common.enums.Gender;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.mailchimp.SendMessage;
 import org.core.backend.ticketapp.common.mailchimp.To;
@@ -28,7 +29,9 @@ import org.core.backend.ticketapp.passport.repository.UserRoleRepository;
 import org.core.backend.ticketapp.passport.service.MailChimpService;
 import org.core.backend.ticketapp.passport.service.RedisService;
 import org.core.backend.ticketapp.passport.service.SmsService;
+import org.core.backend.ticketapp.passport.service.TenantService;
 import org.core.backend.ticketapp.passport.util.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +50,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -110,6 +114,10 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     private ObjectMapper objectMapper;
     @Autowired
     private SmsService smsService;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     public CoreUserService(UserRepository userRepository) {
@@ -252,20 +260,22 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     }
 
     @Transactional
-    public User createUser(UserDto userDto, LoggedInUserDto loggedInUser) {
-        User user = new User();
+    public User createUser(final UserDto userDto, final LoggedInUserDto loggedInUser) throws JsonProcessingException {
+        final var user = new User();
         BeanUtils.copyProperties(userDto, user);
         user.setId(UUID.randomUUID());
         user.setCreatedOn(new Date());
         user.setCreatedBy(loggedInUser.getUserId());
         user.setFirstTimeLogin(true);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        var password = PasswordUtil.generatePassword();
+        final var password = PasswordUtil.generatePassword();
         user.setPassword(passwordEncoder.encode(password));
         user.setPasswordCreatedOn(Instant.now());
         user.setCreatedOn(new Date());
-        Gender gender = Gender.valueOf(userDto.getGender().toUpperCase());
+        final var gender = Gender.valueOf(userDto.getGender().toUpperCase());
         user.setGender(org.apache.commons.lang3.ObjectUtils.isEmpty(gender) ? "OTHERS" : gender.name());
+        user.setType(userDto.getType());
+
         userRepository.saveAndFlush(user);
         user.setPassword(password); //set the password so it can be sent to the user via email
 
@@ -300,8 +310,29 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
                 e.printStackTrace();
             }
         }).start();
+        return attachUserToTenantAccount(user, loggedInUser);
+    }
 
-        return user;
+    @Transactional
+    public User attachUserToTenantAccount(@NotNull final User user, @NotNull LoggedInUserDto loggedInUserDto) throws JsonProcessingException {
+        if (user.getType().equals(UserType.MERCHANT_OWNER) && Objects.isNull(user.getTenantId())) {
+            final var tenantDto = modelMapper.map(user, TenantDto.class);
+            tenantDto.setAccountLockoutDurationInMinutes(5);
+            tenantDto.setAccountLockoutThresholdCount(5);
+            tenantDto.setState(user.getStateOfOrigin());
+            tenantDto.setPasswordExpirationInDays(365);
+            tenantDto.setInactivePeriodInMinutes(10);
+            tenantDto.setCurrency("NGN");
+            tenantDto.setEmailAlert(true);
+            tenantDto.setId(UUID.randomUUID());
+            final var tenant = tenantService.create(tenantDto, user.getId());
+            user.setTenantId(tenant.getId());
+            user.setModifiedOn(new Date());
+            user.setModifiedBy(user.getId());
+        } else if (user.getType().equals(UserType.INDIVIDUAL)) {
+            user.setTenantId(loggedInUserDto.getTenantId());
+        }
+        return save(user);
     }
 
     public Object sendRegistrationEmail(User user) {

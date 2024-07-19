@@ -10,7 +10,6 @@ import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dtos.core.TenantAccountSettingsDto;
 import org.core.backend.ticketapp.passport.dtos.core.TenantDto;
-import org.core.backend.ticketapp.passport.entity.SystemAlert;
 import org.core.backend.ticketapp.passport.entity.Tenant;
 import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.repository.SystemAlertRepository;
@@ -18,7 +17,6 @@ import org.core.backend.ticketapp.passport.service.TenantService;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.core.backend.ticketapp.passport.util.StringUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
@@ -33,8 +31,6 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,25 +46,15 @@ public class TenantController {
     private final ObjectMapper objectMapper;
     private final ActivityLogProcessorUtils activityLogProcessorUtils;
     private final SystemAlertRepository systemAlertRepository;
+    private final TenantService tenantService;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createTenant(@Validated @RequestBody TenantDto tenantDto) throws JsonProcessingException {
-        Tenant newTenant;
-        var user = jwtTokenUtil.getUser();
+        final var user = jwtTokenUtil.getUser();
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.UNAUTHORIZED);
         }
-        var tenant = new Tenant();
-        BeanUtils.copyProperties(tenantDto, tenant);
-        tenant.setId(UUID.randomUUID());
-        tenant.setNormalizedName(StringUtil.normalizeString(tenantDto.getName()));
-        tenant.setCreatedBy(user.getUserId());
-        tenant.setCreatedOn(new Date());
-        SystemAlert systemAlert = SystemAlert.builder().emailAlert(tenantDto.isEmailAlert()).smsAlert(tenantDto.isSmsAlert()).id(UUID.randomUUID()).dateCreated(LocalDateTime.now()).createdBy(jwtTokenUtil.getUser().getUserId()).tenantId(tenant.getId()).build();
-        systemAlertRepository.save(systemAlert);
-        tenant.setSystemAlertId(systemAlert.getId());
-        newTenant = service.save(tenant);
-        activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), null, objectMapper.writeValueAsString(newTenant), "Initiated a request to create a new tenant");
+        final var tenant = tenantService.create(tenantDto, user.getUserId());
         return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
     }
 

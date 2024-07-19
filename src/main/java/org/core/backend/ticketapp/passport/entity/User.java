@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.thecarisma.CopyProperty;
 import io.github.thecarisma.ExcelColumn;
 import lombok.Data;
-import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
 import org.hibernate.annotations.TypeDef;
@@ -26,7 +26,7 @@ import java.util.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @TypeDef(name = "UUID", typeClass = PostgresUUIDType.class)
 @OptimisticLocking(type = OptimisticLockType.VERSION)
-public class User extends AbstractBaseEntity implements UserDetails {
+public class User implements UserDetails {
 
     @Id
     @Column(name = "id", columnDefinition = "UUID")
@@ -180,6 +180,9 @@ public class User extends AbstractBaseEntity implements UserDetails {
     @Column(name = "deleted", columnDefinition = "bool default(false)")
     private boolean deleted;
 
+    @Column(name = "tenant_id", columnDefinition = "UUID")
+    private UUID tenantId;
+
     @Column(name = "password_expiry_date")
     private LocalDateTime passwordExpiryDate;
     /* SECONDARY TABLES COLUMNS */
@@ -198,6 +201,10 @@ public class User extends AbstractBaseEntity implements UserDetails {
     @Version
     @Column(name = "version", columnDefinition = "numeric(19,2) default 0")
     private Long version;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private UserType type;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

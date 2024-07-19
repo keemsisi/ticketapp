@@ -1,25 +1,30 @@
 package org.core.backend.ticketapp.passport.dtos.core;
 
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.thecarisma.CopyProperty;
 import io.github.thecarisma.ExcelColumn;
 import lombok.Data;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.passport.entity.UserRole;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.UUID;
 
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDto{
+public class UserDto {
 
     @CopyProperty(ignore = true)
     private UUID id;
@@ -49,7 +54,8 @@ public class UserDto{
     @ExcelColumn(columnName = "PHONE", failIfAbsent = false)
     private String phone;
 
-    @NotBlank @NotNull
+    @NotBlank
+    @NotNull
     @ExcelColumn(columnName = "GENDER", failIfAbsent = false)
     private String gender;
 
@@ -93,7 +99,7 @@ public class UserDto{
 
     @Convert(disableConversion = true)
     @CopyProperty(ignore = true)
-    @Type(type="numeric_boolean")
+    @Type(type = "numeric_boolean")
     private boolean locked;
 
     @Convert(disableConversion = true)
@@ -122,4 +128,7 @@ public class UserDto{
     private DateTime lockDate;
 
     private int loginAttempt;
+
+    @NotNull
+    private UserType type = UserType.INDIVIDUAL;
 }

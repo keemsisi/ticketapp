@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.passport.dtos.core;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
 import lombok.Data;
 import org.core.backend.ticketapp.passport.validation.annotation.CountryCode;
 
@@ -9,6 +10,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.UUID;
 
 
+@Builder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TenantDto {

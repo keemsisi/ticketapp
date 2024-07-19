@@ -8,6 +8,7 @@ import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dao.UserDao;
+import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.core.backend.ticketapp.passport.dtos.core.RenewPassword;
 import org.core.backend.ticketapp.passport.dtos.core.ResetPassword;
 import org.core.backend.ticketapp.passport.dtos.core.UserDto;
@@ -61,6 +62,17 @@ public class UserController {
     private UserAuthenticationService userAuthenticationService;
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+
+    @RequestMapping(value = "/onboard", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> onboardUser(@Validated @RequestBody UserDto userDto) throws JsonProcessingException {
+        final var newRegisteredUser = userService.createUser(userDto, new LoggedInUserDto());
+        activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null,
+                objectMapper.writeValueAsString(newRegisteredUser), "Initiated a request to register a user under a tenant");
+        return new ResponseEntity<>(
+                new GenericResponse<>("00", "The user has been successfully registered", ""),
+                HttpStatus.OK);
+    }
 
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
