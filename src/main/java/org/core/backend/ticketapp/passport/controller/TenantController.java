@@ -50,11 +50,14 @@ public class TenantController {
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createTenant(@Validated @RequestBody TenantDto tenantDto) throws JsonProcessingException {
-        final var user = jwtTokenUtil.getUser();
-        if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
+        final var loggedInUserDto = jwtTokenUtil.getUser();
+        if (!loggedInUserDto.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.UNAUTHORIZED);
         }
-        final var tenant = tenantService.create(tenantDto, user.getUserId());
+        final var user = new User();
+        BeanUtils.copyProperties(loggedInUserDto, user);
+        user.setId(loggedInUserDto.getUserId());
+        final var tenant = tenantService.create(tenantDto, user, tenantDto.getOwnerId());
         return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
     }
 

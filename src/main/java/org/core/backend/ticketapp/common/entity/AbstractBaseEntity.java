@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,6 +40,7 @@ public abstract class AbstractBaseEntity {
     @JsonIgnore
     @Column(columnDefinition = "bigint default(0)")
     private long version;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Column(name = "tenant_id", columnDefinition = "uuid default null")
     private UUID tenantId;
 }

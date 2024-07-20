@@ -14,7 +14,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 
-@Entity @Getter @Setter
+@Entity
+@Getter
+@Setter
 @Table(name = "tenant", indexes = {@Index(name = "ix_tbl_tenant_col_name_uq", columnList = "normalized_name", unique = true)})
 public class Tenant extends AbstractBaseEntity {
     @Column(name = "name")

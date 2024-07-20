@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.passport.dtos.core.TenantDto;
 import org.core.backend.ticketapp.passport.entity.SystemAlert;
 import org.core.backend.ticketapp.passport.entity.Tenant;
+import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.repository.SystemAlertRepository;
 import org.core.backend.ticketapp.passport.repository.TenantRepository;
 import org.core.backend.ticketapp.passport.service.core.BaseRepoService;
@@ -29,12 +30,12 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class TenantService extends BaseRepoService<Tenant> {
-    private TenantRepository repository;
-    private SystemAlertRepository systemAlertRepository;
-    private ActivityLogProcessorUtils activityLogProcessorUtils;
-    private BlobStorageService blobStorageService;
-    private ObjectMapper objectMapper;
-    private JwtTokenUtil jwtTokenUtil;
+    private final TenantRepository repository;
+    private final SystemAlertRepository systemAlertRepository;
+    private final ActivityLogProcessorUtils activityLogProcessorUtils;
+    private final BlobStorageService blobStorageService;
+    private final ObjectMapper objectMapper;
+    private final JwtTokenUtil jwtTokenUtil;
 
     public Optional<Tenant> getByTenantId(UUID tenantId) {
         return repository.findRegistrar(tenantId);
@@ -45,22 +46,23 @@ public class TenantService extends BaseRepoService<Tenant> {
         return repository.saveAndFlush(existing);
     }
 
-    public Tenant create(final TenantDto tenantDto, UUID userId) throws JsonProcessingException {
+    public Tenant create(final TenantDto tenantDto, final User user, final UUID ownerId) throws JsonProcessingException {
         final var tenant = new Tenant();
         BeanUtils.copyProperties(tenantDto, tenant);
         tenant.setId(UUID.randomUUID());
-        tenant.setNormalizedName(StringUtil.normalizeString(tenantDto.getName()));
-        tenant.setCreatedBy(userId);
+        tenant.setNormalizedName(StringUtil.normalizeString(user.getFullName()));
+        tenant.setCreatedBy(user.getId());
         tenant.setCreatedOn(new Date());
+        tenant.setUserId(ownerId);
         final var systemAlert = SystemAlert.builder().emailAlert(tenantDto.isEmailAlert())
                 .smsAlert(tenantDto.isSmsAlert()).id(UUID.randomUUID())
                 .dateCreated(LocalDateTime.now()).createdBy(jwtTokenUtil.getUser().getUserId())
-                .tenantId(tenant.getId()).build();
+                .tenantId(tenant.getId()).tenantId(tenant.getId()).createdBy(user.getId()).build();
         systemAlertRepository.save(systemAlert);
         tenant.setSystemAlertId(systemAlert.getId());
-        final var newTenant = save(tenant);
-        activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), null,
-                objectMapper.writeValueAsString(newTenant), "Initiated a request to create a new tenant");
+        final var newTenant = repository.save(tenant);
+        activityLogProcessorUtils.processActivityLog(tenant.getId(), user.getId(), Tenant.class.getTypeName(), null,
+                objectMapper.writeValueAsString(newTenant), "Created a new tenant account!");
         return newTenant;
     }
 }

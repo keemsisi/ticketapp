@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.thecarisma.CopyProperty;
 import io.github.thecarisma.ExcelColumn;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
@@ -26,6 +28,8 @@ import java.util.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @TypeDef(name = "UUID", typeClass = PostgresUUIDType.class)
 @OptimisticLocking(type = OptimisticLockType.VERSION)
+@AllArgsConstructor
+@NoArgsConstructor
 public class User implements UserDetails {
 
     @Id
@@ -234,5 +238,9 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return deactivated;
+    }
+
+    public String getFullName() {
+        return String.format("%s %s %s", lastName, middleName, firstName);
     }
 }

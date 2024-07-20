@@ -312,7 +312,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
                         userRole.setUserId(user.getId());
                         defaultUserRoleDto.add(userRole);
                     });
-            assignNewTenantAsOwner(user, loggedInUser);
+            assignNewTenantAsOwner(user);
         } else if (user.getType().equals(UserType.INDIVIDUAL)) {
             List.of(individualUserRoleId).forEach(roleId -> {
                 var userRole = new UserRoleDto();
@@ -359,7 +359,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     }
 
     @Transactional
-    public void assignNewTenantAsOwner(@NotNull final User user, @NotNull LoggedInUserDto loggedInUserDto) throws JsonProcessingException {
+    public void assignNewTenantAsOwner(@NotNull final User user) throws JsonProcessingException {
         if (user.getType().equals(UserType.MERCHANT_OWNER) && Objects.isNull(user.getTenantId())) {
             final var tenantDto = modelMapper.map(user, TenantDto.class);
             tenantDto.setAccountLockoutDurationInMinutes(5);
@@ -370,12 +370,12 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
             tenantDto.setCurrency("NGN");
             tenantDto.setEmailAlert(true);
             tenantDto.setId(UUID.randomUUID());
-            final var tenant = tenantService.create(tenantDto, user.getId());
+            final var tenant = tenantService.create(tenantDto, user, user.getId());
             user.setTenantId(tenant.getId());
             user.setModifiedOn(new Date());
             user.setModifiedBy(user.getId());
         } else if (user.getType().equals(UserType.INDIVIDUAL)) {
-            user.setTenantId(loggedInUserDto.getTenantId());
+            user.setTenantId(defaultTenantId);
         }
         save(user);
     }

@@ -1,18 +1,23 @@
 package org.core.backend.ticketapp.passport.dtos.core;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.core.backend.ticketapp.passport.validation.annotation.CountryCode;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 
 @Builder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@AllArgsConstructor
+@NoArgsConstructor
 public class TenantDto {
     private UUID id;
     @NotBlank
@@ -35,4 +40,6 @@ public class TenantDto {
     private Integer accountLockoutThresholdCount;
     private boolean emailAlert;
     private boolean smsAlert;
+    @NotNull(message = "Tenant owner id must be valid!")
+    private UUID ownerId;
 }

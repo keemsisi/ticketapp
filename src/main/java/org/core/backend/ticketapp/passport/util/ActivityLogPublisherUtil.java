@@ -48,6 +48,31 @@ public class ActivityLogPublisherUtil {
         }
     }
 
+    public void publishActivityLog(HttpServletRequestProperty httpServletRequest, String oldDataJSON, Object newData, UUID userId, String typeName, String actionDescription, UUID tenantId) {
+        log.info("----||||PROCESSING USER ACTIVITY LOG INSIDE ANOTHER THREAD||||---- {}", Thread.currentThread().getName());
+        try {
+            final var message = ActivityLog.builder()
+                    .activityDescription(actionDescription)
+                    .dateCreated(LocalDateTime.now())
+                    .oldDataModified(oldDataJSON)
+                    .httpMethod(httpServletRequest.getMethod())
+                    .httpURI(httpServletRequest.getRequestURI())
+                    .id(UUID.randomUUID())
+                    .remoteAddress(httpServletRequest.getRemoteAddr())
+                    .remoteHost(httpServletRequest.getRemoteHost())
+                    .remotePort(httpServletRequest.getRemotePort())
+                    .newDataCreated(objectMapper.writeValueAsString(newData))
+                    .userId(userId)
+                    .tenantId(tenantId)
+                    .entityTypeName(typeName)
+                    .build();
+            iActivityLog.save(message);
+            log.info("----||||USER[{}] ACTIVITY TRACKED||||----", userId);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
     public HttpServletRequestProperty getHttpServletRequestProperty(HttpServletRequest httpServletRequest) {
         return HttpServletRequestProperty.builder().requestURI(httpServletRequest.getRequestURI())
                 .method(httpServletRequest.getMethod())
