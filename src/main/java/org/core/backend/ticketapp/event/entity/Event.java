@@ -2,15 +2,11 @@ package org.core.backend.ticketapp.event.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
@@ -28,6 +24,7 @@ import java.util.UUID;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "event")
+@Builder
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class Event extends AbstractBaseEntity {
 
@@ -59,9 +56,8 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "street_address", nullable = false)
     private String streetAddress;
 
-    @Column(name = "categories", columnDefinition = "JSONB")
-    @Type(type = "JSONB")
-    private List<String> categories;
+    @Column(name = "categories", columnDefinition = "text[]")
+    private String[] categories;
 
     private String eventBanner = "event-banner.jpg";
 

@@ -1,7 +1,9 @@
 package org.core.backend.ticketapp.passport.config;
 
 import io.github.thecarisma.Konfiger;
+import org.core.backend.ticketapp.common.converters.PGobjectToListConverter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -31,5 +33,10 @@ public class TicketAppConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new TicketAppMethodInterceptor());
+    }
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(new PGobjectToListConverter());
     }
 }

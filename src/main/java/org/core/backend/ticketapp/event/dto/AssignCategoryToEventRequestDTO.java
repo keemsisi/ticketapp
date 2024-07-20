@@ -9,5 +9,5 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record AssignCategoryToEventRequestDTO(
         @NotNull UUID eventId,
-        @NotNull List<UUID> categoryId) {
+        @NotNull List<UUID> categoryIds) {
 }

@@ -11,7 +11,6 @@ import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +38,6 @@ public record EventController(EventService eventService, JwtTokenUtil jwtTokenUt
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/filter-search")
     public ResponseEntity<GenericResponse<PagedResponse<?>>> filterSearch(final EventFilterRequestDTO filter) {
-        UserUtils.isResourceOwner(filter.getUserId());
         return new ResponseEntity<>(new GenericResponse<>("00", "All events", PagedMapperUtil.map(eventService.searchEvents(filter))), HttpStatus.OK);
     }
 

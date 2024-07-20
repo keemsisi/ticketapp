@@ -71,6 +71,16 @@ public class UserUtils {
         }
     }
 
+    public static void assertUserHasAnyRole(final List<String> userRoles, List<String> roles) {
+        if (userRoles.stream().noneMatch(roles::contains)) {
+            throw new ApplicationException(403, "403", "You don't have the right permission to complete this action.");
+        }
+    }
+
+    public static boolean userHasAnyRole(final List<String> userRoles, List<String> roles) {
+        return userRoles.stream().anyMatch(roles::contains);
+    }
+
     public static String generateOTP() {
         int randomPin = (int) (Math.random() * 900000) + 100000;
         String otp = String.valueOf(randomPin);
@@ -138,10 +148,19 @@ public class UserUtils {
         }
     }
 
-    public static void isResourceOwner(final UUID userId) {
+    public static void canAccessResource(final UUID userId) {
         final var user = JwtTokenUtil.getAuthUser();
         if (Objects.nonNull(userId) && !userId.equals(JwtTokenUtil.getAuthUser().getUserId())) {
             UserUtils.assertUserHasRole(user.getRoles(), "system_admin");
         }
     }
+
+//    public static void canAccessResource(final UUID userId) {
+//        final var user = JwtTokenUtil.getAuthUser();
+//        final var authUser = JwtTokenUtil.getAuthUser();
+//        if ((Objects.nonNull(tenantId) && !user.getTenantId().equals(tenantId))
+//                || (Objects.nonNull(userId) && !userId.equals(authUser.getUserId()))) {
+//            UserUtils.assertUserHasRole(user.getRoles(), "system_admin");
+//        }
+//    }
 }

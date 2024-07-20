@@ -110,6 +110,11 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     private boolean send2faSms;
     @Value("${system.default.role.onboard_user_role}")
     private UUID onboardUserRoleId;
+    @Value("${system.default.role.tenant_admin_role}")
+    private UUID tenantAdminRoleId;
+    @Value("${system.default.role.tenant_user_role}")
+    private UUID tenantUserRoleId;
+
     @Autowired
     private RedisService redisService;
     @Autowired
@@ -283,10 +288,14 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         user.setPassword(password); //set the password so it can be sent to the user via email
 
         if (!userDto.getRoleIds().isEmpty()) {
-            final UserRoleDto defaultUserRoleDto = new UserRoleDto();
-            if (user.getType().equals(UserType.MERCHANT_USER)) {
-                defaultUserRoleDto.setRoleId(onboardUserRoleId);
-                defaultUserRoleDto.setUserId(user.getId());
+            final List<UserRoleDto> defaultUserRoleDto = new ArrayList<>();
+            if (user.getType().equals(UserType.TENANT_USER)) {
+                List.of(onboardUserRoleId, tenantUserRoleId, tenantAdminRoleId).forEach(roleId -> {
+                    var userRole = new UserRoleDto();
+                    userRole.setRoleId(roleId);
+                    userRole.setUserId(user.getId());
+                    defaultUserRoleDto.add(userRole);
+                });
                 assignNewTenantAsOwner(user, loggedInUser);
             }
             var userRolesDtos = userDto.getRoleIds().stream().map(x -> {
@@ -295,6 +304,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
                 userRole.setUserId(user.getId());
                 return userRole;
             }).collect(Collectors.toList());
+            userRolesDtos.addAll(defaultUserRoleDto);
             assignRolesToUser(userRolesDtos, loggedInUser);
         }
 
@@ -324,7 +334,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
 
     @Transactional
     public void assignNewTenantAsOwner(@NotNull final User user, @NotNull LoggedInUserDto loggedInUserDto) throws JsonProcessingException {
-        if (user.getType().equals(UserType.MERCHANT_OWNER) && Objects.isNull(user.getTenantId())) {
+        if (user.getType().equals(UserType.TENANT_ADMIN) && Objects.isNull(user.getTenantId())) {
             final var tenantDto = modelMapper.map(user, TenantDto.class);
             tenantDto.setAccountLockoutDurationInMinutes(5);
             tenantDto.setAccountLockoutThresholdCount(5);

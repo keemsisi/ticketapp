@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -17,8 +18,8 @@ public interface EventCategoryRepository extends JpaRepository<EventCategory, UU
     Optional<EventCategory> getByName(final @NotNull String name);
 
     @Query(value = "SELECT e.* FROM event_category e WHERE e.name IN ?1 AND e.deleted=false", nativeQuery = true)
-    List<EventCategory> findAllByName(final List<String> eventCategories);
+    Set<EventCategory> findAllByName(final List<String> eventCategories);
 
     @Query(value = "SELECT e.* FROM event_category e WHERE e.id IN ?1 AND e.deleted=false", nativeQuery = true)
-    List<EventCategory> getAllByIds(List<UUID> uuids);
+    List<EventCategory> getAllByIds(final List<UUID> ids);
 }
