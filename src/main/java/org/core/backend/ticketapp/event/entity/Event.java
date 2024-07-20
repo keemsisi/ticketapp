@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.event.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
@@ -67,7 +68,8 @@ public class Event extends AbstractBaseEntity {
     @Column(columnDefinition = "bool default false")
     private boolean recurring = false;
 
-    @Column(name = "time_zone", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "time_zone")
     private TimeZoneEnum timeZone = TimeZoneEnum.WAT;
 
     @Column(name = "event_date", nullable = false)
@@ -88,6 +90,7 @@ public class Event extends AbstractBaseEntity {
     private boolean approvalRequired;
 
     @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<EventSeatSection> seatSections;
 
     @PrePersist

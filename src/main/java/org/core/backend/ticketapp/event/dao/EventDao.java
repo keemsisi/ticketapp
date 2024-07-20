@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.event.dao;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.UserType;
@@ -30,6 +31,8 @@ public class EventDao extends BaseDao {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @PostConstruct
     private void initialize() {
@@ -104,7 +107,7 @@ public class EventDao extends BaseDao {
                 .replaceAll(":countQuery", countQuery);
         var cscFactory = new CallableStatementCreatorFactory(finalQuery);
         var returnedParams = Arrays.<SqlParameter>asList(
-                new SqlReturnResultSet("events", BeanPropertyRowMapper.newInstance(EventResponseDTO.class)),
+                new SqlReturnResultSet("events", new EventResponseRowMapper(objectMapper)),
                 new SqlReturnResultSet("count", BeanPropertyRowMapper.newInstance(LongWrapper.class)));
         CallableStatementCreator csc = cscFactory.newCallableStatementCreator(new HashMap<>());
         Map<String, Object> results = getJdbcTemplate().call(csc, returnedParams);

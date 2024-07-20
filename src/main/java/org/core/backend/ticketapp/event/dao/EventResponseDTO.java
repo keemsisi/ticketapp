@@ -9,7 +9,9 @@ import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -40,7 +42,7 @@ public class EventResponseDTO {
     private String location;
     private String locationNumber;
     private String streetAddress;
-    private String categories;
+    private HashSet<String> categories;
     private String eventBanner;
     private boolean recurring;
     private TimeZoneEnum timeZone;
