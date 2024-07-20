@@ -148,7 +148,7 @@ public class EventDao extends BaseDao {
         } else if (Objects.isNull(user.getUserId()) && Objects.isNull(reqTenantId)) {
 //            tenantQuery.append(" AND e.tenant_id IS NOT NULL AND u.type NOT IN ('SUPER_ADMIN','SUPER_ADMIN_USER') ");
             tenantQuery.append(" AND e.tenant_id IS NOT NULL ");
-        } else if (UserUtils.userHasAnyRole(userRoles, List.of(UserType.TENANT_ADMIN.name(), UserType.TENANT_USER.name()))) {
+        } else if (UserUtils.userHasAnyRole(userRoles, List.of(UserType.MERCHANT_USER.name(), UserType.MERCHANT_OWNER.name()))) {
             tenantQuery.append(String.format(" AND e.tenant_id = '%s' ", tenantId));
         } else if (Objects.nonNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(UserType.SUPER_ADMIN.name(), UserType.SYSTEM_ADMIN_USER.name()))) {
             tenantQuery.append(" AND e.tenant_id = '%s' ").append(reqTenantId);
