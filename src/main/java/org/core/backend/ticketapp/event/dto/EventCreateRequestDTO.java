@@ -49,11 +49,7 @@ public class EventCreateRequestDTO {
     private TimeZoneEnum timeZone;
     @NotNull
     private List<EventSeatSection> seatSections;
-    @NotNull
-    private Set<String> subCategories;
+    private Set<String> categories;
     @NotNull
     private EventTicketType ticketType;
-    @NotBlank
-    @NotNull
-    private String eventCategory;
 }
