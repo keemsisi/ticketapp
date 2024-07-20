@@ -19,7 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class UserLiteDto {
     @NotNull
-    private final UserType type = UserType.INDIVIDUAL;
+    private UserType type;
 
     @CopyProperty(ignore = true)
     private UUID id;

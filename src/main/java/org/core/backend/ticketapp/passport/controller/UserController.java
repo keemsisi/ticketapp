@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.thecarisma.FatalObjCopierException;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dao.UserDao;
@@ -55,6 +56,9 @@ public class UserController {
     @RequestMapping(value = "/onboard", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> userOnboarding(@Validated @RequestBody UserLiteDto userDto) throws JsonProcessingException {
         final var request = modelMapper.map(userDto, UserDto.class);
+        if (userDto.getType().equals(UserType.SUPER_ADMIN) || userDto.getType().equals(UserType.SYSTEM_ADMIN_USER)) {
+            UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), "super_admin");
+        }
         final var newRegisteredUser = userService.createUser(request, new LoggedInUserDto());
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null,
                 objectMapper.writeValueAsString(newRegisteredUser), "Initiated a request to register a user under a tenant");
