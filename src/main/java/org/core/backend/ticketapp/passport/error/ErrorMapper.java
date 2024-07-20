@@ -16,6 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -38,6 +39,8 @@ import java.util.stream.Collectors;
 public class ErrorMapper {
 
     public static final String BAD_REQUEST_CODE = "bad_request";
+    public static final String ACCESS_DENIED_CODE = "access_denied";
+    public static final String ACCESS_DENIED_MESSAGE = "Oops! You don't have access to this resource!";
     public static final String BAD_REQUEST_MESSAGE = "Request is not valid. Possible syntax or data type mismatch errors";
     public static final String REQUEST_NOT_AVAILABLE_CODE = "request_not_available";
     public static final String SERVER_ERROR_CODE = "server_error";
@@ -47,6 +50,10 @@ public class ErrorMapper {
         log.error("{0}", throwable);
         if (throwable instanceof RequestNotValidException) {
             return fromRequestNotValidException((RequestNotValidException) throwable);
+        }
+
+        if (throwable instanceof AccessDeniedException) {
+            return fromRequestAccessDeniedException((AccessDeniedException) throwable);
         }
 
         if (throwable instanceof HttpMessageConversionException) {
@@ -157,6 +164,10 @@ public class ErrorMapper {
 
         return new ErrorResponse(500, "request_failed",
                 String.format(LOG_KEY_MESSAGE_TEMPLATE, "Request failed", logKey));
+    }
+
+    private ErrorResponse fromRequestAccessDeniedException(AccessDeniedException throwable) {
+        return new ErrorResponse(403, ACCESS_DENIED_CODE, ACCESS_DENIED_MESSAGE, null);
     }
 
     private ErrorResponse fromRequestNotValidException(RequestNotValidException e) {

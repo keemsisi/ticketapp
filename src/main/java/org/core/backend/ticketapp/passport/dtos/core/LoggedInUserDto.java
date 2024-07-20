@@ -5,20 +5,30 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.thecarisma.ExcelColumn;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LoggedInUserDto {
+    @Value("${system.default.user_id}")
+    private UUID defaultUserId;
 
     @JsonProperty("user_id")
     private UUID userId;
     @JsonProperty("client_id")
     private UUID clientId;
+
+    @JsonProperty("tenant_id")
+    private UUID tenantId;
 
     @Email
     @ExcelColumn(columnName = "Email")
@@ -49,4 +59,11 @@ public class LoggedInUserDto {
     private List<String> roles = new ArrayList<>();
 
     private List<String> scope = new ArrayList<>();
+
+    public UUID getUserId() {
+        if (Objects.isNull(userId)) {
+            return defaultUserId;
+        }
+        return userId;
+    }
 }

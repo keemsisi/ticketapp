@@ -21,6 +21,11 @@ public class ActivityLogProcessorUtils {
 
     public void processActivityLog(UUID userId, String classTypeName, String oldDataJSON, String newDataJSON, String activityDescription) {
         HttpServletRequestProperty httpServletRequestProperty = activityLogPublisherUtil.getHttpServletRequestProperty(httpServletRequest);
-        executorService.submit(() -> activityLogPublisherUtil.publishActivityLog(httpServletRequestProperty, oldDataJSON, newDataJSON, userId, classTypeName,activityDescription));
+        executorService.submit(() -> activityLogPublisherUtil.publishActivityLog(httpServletRequestProperty, oldDataJSON, newDataJSON, userId, classTypeName, activityDescription));
+    }
+
+    public void processActivityLog(UUID tenantId, UUID userId, String classTypeName, String oldDataJSON, String newDataJSON, String activityDescription) {
+        HttpServletRequestProperty httpServletRequestProperty = activityLogPublisherUtil.getHttpServletRequestProperty(httpServletRequest);
+        executorService.submit(() -> activityLogPublisherUtil.publishActivityLog(httpServletRequestProperty, oldDataJSON, newDataJSON, userId, classTypeName, activityDescription, tenantId));
     }
 }

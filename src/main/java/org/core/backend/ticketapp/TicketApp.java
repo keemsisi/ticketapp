@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-@EnableAutoConfiguration()
+@EnableAutoConfiguration
 @EnableAsync
 @EnableFeignClients
 public class TicketApp {

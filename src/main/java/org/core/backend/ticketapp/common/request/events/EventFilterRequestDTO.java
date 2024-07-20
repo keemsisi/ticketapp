@@ -25,7 +25,7 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date startDateApproved;
     private ApprovalStatus approvalStatus;
-    private EventCategoryEnum eventCategory;
+    private String eventCategory;
     private UUID seatSectionId;
     private String seatSectionType; // eventTicketType each seat has section type
     private Double startPrice;
@@ -40,5 +40,6 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     private String description;
     private EventTicketType eventTicketType;
     private UUID userId;
+    private UUID tenantId;
 
 }

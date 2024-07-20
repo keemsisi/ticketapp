@@ -2,6 +2,8 @@ package org.core.backend.ticketapp.event.service;
 
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
+import org.core.backend.ticketapp.event.dao.EventResponseDTO;
+import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
@@ -16,7 +18,7 @@ public interface EventService {
 
     List<Event> getAll();
 
-    Page<Event> searchEvents(final EventFilterRequestDTO filterRequest);
+    Page<EventResponseDTO> searchEvents(final EventFilterRequestDTO filterRequest);
 
     Event getById(final UUID id);
 
@@ -25,4 +27,6 @@ public interface EventService {
     void delete(final UUID id);
 
     Event update(final EventUpdateRequestDTO requestDTO);
+
+    Event assignCategory(AssignCategoryToEventRequestDTO request);
 }

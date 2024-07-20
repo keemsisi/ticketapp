@@ -1,16 +1,14 @@
 package org.core.backend.ticketapp.event.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
-import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
@@ -19,6 +17,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -28,6 +27,7 @@ import java.util.UUID;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "event")
+@Builder
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class Event extends AbstractBaseEntity {
 
@@ -39,10 +39,10 @@ public class Event extends AbstractBaseEntity {
     @NotBlank
     private String description;
 
-    @Column(name = "physical_event", nullable = false)
+    @Column(name = "physical_event", columnDefinition = "bool", nullable = false)
     private boolean physicalEvent;
 
-    @Column(name = "free_event", nullable = false)
+    @Column(name = "free_event", columnDefinition = "bool", nullable = false)
     private boolean freeEvent;
 
     @Column(name = "tickets_available")
@@ -59,14 +59,17 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "street_address", nullable = false)
     private String streetAddress;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "event_category", nullable = false)
-    private EventCategoryEnum eventCategory;
+    @Type(type = "JSONB")
+    @Column(name = "categories", columnDefinition = "JSONB")
+    private Set<String> categories;
 
     private String eventBanner = "event-banner.jpg";
+
+    @Column(columnDefinition = "bool default false")
     private boolean recurring = false;
 
-    @Column(name = "time_zone", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "time_zone")
     private TimeZoneEnum timeZone = TimeZoneEnum.WAT;
 
     @Column(name = "event_date", nullable = false)
@@ -83,10 +86,11 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "ticket_type")
     private EventTicketType ticketType;
 
-    @Column(name = "approval_required")
+    @Column(name = "approval_required", columnDefinition = "bool default false")
     private boolean approvalRequired;
 
     @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<EventSeatSection> seatSections;
 
     @PrePersist

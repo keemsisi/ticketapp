@@ -1,11 +1,11 @@
 package org.core.backend.ticketapp.event.dto;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Set;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -20,7 +20,7 @@ public record EventUpdateRequestDTO(
         @NotNull String location,
         @NotNull String locationNumber,
         @NotNull String streetAddress,
-        @NotNull EventCategoryEnum eventCategory,
+        @NotNull Set<String> categories,
         String eventBanner,
         boolean recurring,
         @NotNull LocalDate eventDate,
