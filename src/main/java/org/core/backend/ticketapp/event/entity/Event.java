@@ -7,6 +7,7 @@ import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
@@ -15,6 +16,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -56,8 +58,9 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "street_address", nullable = false)
     private String streetAddress;
 
-    @Column(name = "categories", columnDefinition = "text[]")
-    private String[] categories;
+    @Type(type = "JSONB")
+    @Column(name = "categories", columnDefinition = "JSONB")
+    private Set<String> categories;
 
     private String eventBanner = "event-banner.jpg";
 

@@ -4,7 +4,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
-import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.passport.dao.BaseDao;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -38,7 +37,7 @@ public class EventDao extends BaseDao {
     }
 
     @SuppressWarnings("unchecked")
-    public Page<Event> filterSearch(EventFilterRequestDTO filterRequest) {
+    public Page<EventResponseDTO> filterSearch(EventFilterRequestDTO filterRequest) {
         assert getJdbcTemplate() != null;
         final var baseSQL = " SELECT %s FROM event e :innerQuery " +
                 " INNER JOIN users u ON u.id = e.user_id AND u.deleted=false WHERE e.deleted=false %s ";
@@ -105,11 +104,11 @@ public class EventDao extends BaseDao {
                 .replaceAll(":countQuery", countQuery);
         var cscFactory = new CallableStatementCreatorFactory(finalQuery);
         var returnedParams = Arrays.<SqlParameter>asList(
-                new SqlReturnResultSet("events", BeanPropertyRowMapper.newInstance(Event.class)),
+                new SqlReturnResultSet("events", BeanPropertyRowMapper.newInstance(EventResponseDTO.class)),
                 new SqlReturnResultSet("count", BeanPropertyRowMapper.newInstance(LongWrapper.class)));
         CallableStatementCreator csc = cscFactory.newCallableStatementCreator(new HashMap<>());
         Map<String, Object> results = getJdbcTemplate().call(csc, returnedParams);
-        return PageableExecutionUtils.getPage((List<Event>) results.get("events"), pageable,
+        return PageableExecutionUtils.getPage((List<EventResponseDTO>) results.get("events"), pageable,
                 () -> ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount());
     }
 

@@ -6,6 +6,7 @@ import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.event.dao.EventDao;
+import org.core.backend.ticketapp.event.dao.EventResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
@@ -50,7 +51,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<Event> searchEvents(final EventFilterRequestDTO filterRequest) {
+    public Page<EventResponseDTO> searchEvents(final EventFilterRequestDTO filterRequest) {
         return eventDao.filterSearch(filterRequest);
     }
 
@@ -70,7 +71,7 @@ public class EventServiceImpl implements EventService {
             }
         }
         final var newCategory = existingCategories.stream().map(EventCategory::getName)
-                .map(String::toUpperCase).distinct().toList().toArray(new String[0]);
+                .map(String::toUpperCase).collect(Collectors.toSet());
         event.setCategories(newCategory);
         event.setId(UUID.randomUUID());
         event.setUserId(userId);
@@ -109,7 +110,7 @@ public class EventServiceImpl implements EventService {
         event.setLocationNumber(request.locationNumber());
         event.setStreetAddress(request.streetAddress());
         event.setDateModified(LocalDateTime.now());
-        event.setCategories(request.categories().toArray(new String[0]));
+        event.setCategories(request.categories());
         return eventRepository.save(event);
     }
 
@@ -118,10 +119,10 @@ public class EventServiceImpl implements EventService {
         final var eventCategory = eventCategoryRepository.getAllByIds(request.categoryIds());
         if (eventCategory.isEmpty()) throw notFoundException();
         final var event = eventRepository.findById(request.eventId()).orElseThrow(this::notFoundException);
-        final var oldEventCategories = new ArrayList<>(Arrays.stream(event.getCategories()).toList());
+        final var oldEventCategories = new ArrayList<>(event.getCategories());
         oldEventCategories.addAll(eventCategory.stream().map(EventCategory::getName).collect(Collectors.toSet()));
-        final var newCategories = new TreeSet<>(oldEventCategories).stream().toList();
-        event.setCategories(newCategories.toArray(new String[0]));
+        final var newCategories = new TreeSet<>(oldEventCategories);
+        event.setCategories(newCategories);
         return eventRepository.save(event);
     }
 
