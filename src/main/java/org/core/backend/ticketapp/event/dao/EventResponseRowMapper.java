@@ -23,7 +23,6 @@ import java.util.UUID;
 public class EventResponseRowMapper implements RowMapper<EventResponseDTO> {
     private ObjectMapper objectMapper;
 
-    @SuppressWarnings("unchecked")
     @Override
     public EventResponseDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
         EventResponseDTO eventResponseDTO = new EventResponseDTO();
