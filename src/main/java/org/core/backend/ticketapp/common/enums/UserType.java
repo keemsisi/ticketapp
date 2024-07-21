@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.common.enums;
 
 public enum UserType {
     INDIVIDUAL("individual"),
+    REGULAR("individual"),
     TENANT_ADMIN("tenant_admin"),
     MERCHANT_OWNER("merchant_owner"),
     MERCHANT_USER("merchant_user"),

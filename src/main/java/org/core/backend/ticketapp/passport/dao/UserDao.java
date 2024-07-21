@@ -35,7 +35,10 @@ public class UserDao extends BaseDao {
     }
 
     public Optional<User> getUserByEmail(String email) {
-        String sql = "SELECT * FROM users u WHERE LOWER(u.email) = LOWER(?)";
+        String sql = "SELECT users.*, tenant.password_expiration_in_days, " +
+                " tenant.account_lockout_duration_in_minutes, tenant.account_lockout_threshold_count," +
+                " tenant.inactive_period_in_minutes, tenant.two_fa_enabled as two_fa_enabled" +
+                " FROM users LEFT JOIN tenant ON users.tenant_id = tenant.id WHERE LOWER(users.email) = LOWER(?)";
         var rowMapper = BeanPropertyRowMapper.newInstance(User.class);
         var user = jdbcTemplate.query(sql, rowMapper, email);
         if (user.isEmpty()) {

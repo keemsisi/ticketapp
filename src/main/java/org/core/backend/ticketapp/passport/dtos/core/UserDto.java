@@ -40,4 +40,5 @@ public class UserDto extends UserLiteDto {
     private Calendar passwordExpiryDate;
     private DateTime lockDate;
     private int loginAttempt;
+    private String password;
 }

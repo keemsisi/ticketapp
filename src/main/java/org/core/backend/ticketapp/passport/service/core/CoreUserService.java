@@ -7,6 +7,7 @@ import io.github.thecarisma.DocumentPojo;
 import io.github.thecarisma.FatalObjCopierException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.Gender;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
@@ -277,34 +278,45 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     @Transactional
     public User createUser(final UserDto userDto, final LoggedInUserDto loggedInUser) throws JsonProcessingException {
         final var user = new User();
+        final var userType = userDto.getType();
         BeanUtils.copyProperties(userDto, user);
         user.setId(UUID.randomUUID());
         user.setCreatedOn(new Date());
         user.setCreatedBy(loggedInUser.getUserId());
         user.setFirstTimeLogin(true);
         user.setTenantId(loggedInUser.getTenantId());
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         final var password = PasswordUtil.generatePassword();
-        user.setPassword(passwordEncoder.encode(password));
         user.setPasswordCreatedOn(Instant.now());
         user.setCreatedOn(new Date());
         final var gender = Gender.valueOf(userDto.getGender().toUpperCase());
         user.setGender(org.apache.commons.lang3.ObjectUtils.isEmpty(gender) ? "OTHERS" : gender.name());
         user.setType(userDto.getType());
+        if (StringUtils.isNotBlank(userDto.getPassword())) {
+            if (!passwordAdhereToPolicy(user, userDto.getPassword())) {
+                throw new ApplicationException(400, "bad_password", "Password does not adhere to system policies!");
+            }
+            final var hashedPassword = passwordEncoder.encode(userDto.getPassword());
+            user.setPassword(hashedPassword);
+        } else {
+            final var hashedPassword = passwordEncoder.encode(password);
+            user.setPassword(hashedPassword);
+        }
+
 
         userRepository.saveAndFlush(user);
-        user.setPassword(password); //set the password so it can be sent to the user via email
+//        user.setPassword(password); //set the password so it can be sent to the user via email
 
         final List<UserRoleDto> defaultUserRoleDto = new ArrayList<>();
         List<UserRoleDto> userRolesDtos = new ArrayList<>();
-        if (user.getType().equals(UserType.MERCHANT_USER)) {
+        if (userType.equals(UserType.MERCHANT_USER)) {
             List.of(tenantUserRoleId, merchantUserRole).forEach(roleId -> {
                 var userRole = new UserRoleDto();
                 userRole.setRoleId(roleId);
                 userRole.setUserId(user.getId());
                 defaultUserRoleDto.add(userRole);
             });
-        } else if (user.getType().equals(UserType.MERCHANT_OWNER)) {
+        } else if (userType.equals(UserType.MERCHANT_OWNER)) {
             List.of(onboardUserRoleId, tenantUserRoleId, tenantAdminRoleId, merchantUserRole, merchantOwnerRole)
                     .forEach(roleId -> {
                         var userRole = new UserRoleDto();
@@ -313,7 +325,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
                         defaultUserRoleDto.add(userRole);
                     });
             assignNewTenantAsOwner(user);
-        } else if (user.getType().equals(UserType.INDIVIDUAL)) {
+        } else if (userType.equals(UserType.INDIVIDUAL) || user.getType().equals(UserType.REGULAR)) {
             List.of(individualUserRoleId).forEach(roleId -> {
                 var userRole = new UserRoleDto();
                 userRole.setRoleId(roleId);
