@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.thecarisma.CopyProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.passport.entity.UserRole;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;

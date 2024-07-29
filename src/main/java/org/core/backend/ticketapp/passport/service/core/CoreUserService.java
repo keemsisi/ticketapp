@@ -96,6 +96,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     private SpringTemplateEngine templateEngine;
     @Autowired
     private Environment env;
+    @Autowired
     private AppConfigs appConfigs;
 
     @Autowired
