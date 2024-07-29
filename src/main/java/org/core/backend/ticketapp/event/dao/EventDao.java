@@ -3,7 +3,7 @@ package org.core.backend.ticketapp.event.dao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.core.backend.ticketapp.common.enums.UserType;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.passport.dao.BaseDao;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
@@ -139,20 +139,20 @@ public class EventDao extends BaseDao {
         final var userRoles = user.getRoles();
         final var tenantId = user.getTenantId();
         final var tenantQuery = new StringBuilder();
-        if (Objects.nonNull(user.getUserId()) && Objects.isNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(UserType.INDIVIDUAL.name()))) {
+        if (Objects.nonNull(user.getUserId()) && Objects.isNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(AccountType.INDIVIDUAL.name()))) {
             tenantQuery.append(" AND e.tenant_id IS NOT NULL AND u.type NOT IN ('SUPER_ADMIN','SUPER_ADMIN_USER') ");
-        } else if (Objects.nonNull(user.getUserId()) && Objects.nonNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(UserType.INDIVIDUAL.name()))) {
+        } else if (Objects.nonNull(user.getUserId()) && Objects.nonNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(AccountType.INDIVIDUAL.name()))) {
             tenantQuery.append(String.format(" AND e.tenant_id = '%s' AND u.type NOT IN ('SUPER_ADMIN','SUPER_ADMIN_USER') ", reqTenantId));
         } else if (Objects.isNull(user.getUserId()) && Objects.nonNull(reqTenantId)) {
             tenantQuery.append(String.format(" AND e.tenant_id = '%s' AND u.type NOT IN ('SUPER_ADMIN','SUPER_ADMIN_USER') ", reqTenantId));
         } else if (Objects.isNull(user.getUserId()) && Objects.isNull(reqTenantId)) {
 //            tenantQuery.append(" AND e.tenant_id IS NOT NULL AND u.type NOT IN ('SUPER_ADMIN','SUPER_ADMIN_USER') ");
             tenantQuery.append(" AND e.tenant_id IS NOT NULL ");
-        } else if (UserUtils.userHasAnyRole(userRoles, List.of(UserType.MERCHANT_USER.name(), UserType.MERCHANT_OWNER.name()))) {
+        } else if (UserUtils.userHasAnyRole(userRoles, AccountType.getPossibleAminAccountType())) {
             tenantQuery.append(String.format(" AND e.tenant_id = '%s' ", tenantId));
-        } else if (Objects.nonNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(UserType.SUPER_ADMIN.name(), UserType.SYSTEM_ADMIN_USER.name()))) {
+        } else if (Objects.nonNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(AccountType.SUPER_ADMIN.name(), AccountType.SYSTEM_ADMIN_USER.name()))) {
             tenantQuery.append(" AND e.tenant_id = '%s' ").append(reqTenantId);
-        } else if (Objects.isNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(UserType.SUPER_ADMIN.name(), UserType.SYSTEM_ADMIN_USER.name()))) {
+        } else if (Objects.isNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(AccountType.SUPER_ADMIN.name(), AccountType.SYSTEM_ADMIN_USER.name()))) {
             tenantQuery.append(" AND e.tenant_id IS NOT NULL ");
         }
         return tenantQuery.toString();

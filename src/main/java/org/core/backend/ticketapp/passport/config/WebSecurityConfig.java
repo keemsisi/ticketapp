@@ -34,7 +34,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/users/validate-2fa-auth",
             "/api/v1/users/onboard",
             "/api/v1/users/auth",
-            "/api/v1/events/filter-search",
+            "/api/v1/events/filter-search"
     };
     @Autowired
     private AuthenticationProviderConfig authenticationProvider;
