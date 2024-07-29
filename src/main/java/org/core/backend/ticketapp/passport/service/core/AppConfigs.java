@@ -27,10 +27,18 @@ public class AppConfigs {
     UUID tenantAdminRoleId;
     @Value("${system.default.role.tenant_user_role}")
     UUID tenantUserRoleId;
-    @Value("${system.default.role.merchant_owner_role}")
-    UUID merchantOwnerRole;
-    @Value("${system.default.role.merchant_user_role}")
-    UUID merchantUserRole;
+    @Value("${system.default.role.individual_merchant_owner_role}")
+    UUID individualMerchantOwnerRole;
+    @Value("${system.default.role.individual_merchant_user_role}")
+    UUID individualMerchantUserRole;
+    @Value("${system.default.role.organization_buyer_owner_role}")
+    UUID organizationBuyerOwnerRole;
+    @Value("${system.default.role.organization_buyer_user_role}")
+    UUID organizationBuyerUserRole;
+    @Value("${system.default.role.organization_merchant_owner_role}")
+    UUID organizationMerchantOwnerRole;
+    @Value("${system.default.role.organization_merchant_user_role}")
+    UUID organizationMerchantUserRole;
     @Value("${system.default.tenant.tenant_id}")
     UUID defaultTenantId;
 }

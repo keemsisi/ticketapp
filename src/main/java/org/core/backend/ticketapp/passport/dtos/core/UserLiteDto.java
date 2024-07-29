@@ -90,9 +90,16 @@ public class UserLiteDto {
 
     private String businessName;
 
-    public boolean isMerchantAccountType() {
-        return accountType == AccountType.INDIVIDUAL_MERCHANT_OWNER
-                || accountType == AccountType.ORGANIZATION_MERCHANT_OWNER;
+    public boolean isIndividualMerchant() {
+        return accountType == AccountType.INDIVIDUAL_MERCHANT_OWNER;
+    }
+
+    public boolean isOrganizationMerchant() {
+        return accountType == AccountType.ORGANIZATION_MERCHANT_OWNER;
+    }
+
+    public boolean isOrganizationBuyer() {
+        return accountType == AccountType.ORGANIZATION_BUYER_OWNER;
     }
 
 }

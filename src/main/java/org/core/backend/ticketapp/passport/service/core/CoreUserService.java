@@ -254,7 +254,8 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         final var user = new User();
         final var userType = userDto.getAccountType();
         if (userDto.getAccountType().equals(AccountType.ORGANIZATION_BUYER_OWNER) ||
-                userDto.getAccountType().equals(AccountType.ORGANIZATION_MERCHANT_OWNER)) {
+                userDto.getAccountType().equals(AccountType.ORGANIZATION_MERCHANT_OWNER) ||
+                userDto.getAccountType().equals(AccountType.INDIVIDUAL_MERCHANT_OWNER)) {
             if (StringUtils.isBlank(userDto.getBusinessName())) {
                 throw new ApplicationException(400, "not_allowed", "Business name required!");
             }
@@ -289,17 +290,32 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
 
         final List<UserRoleDto> defaultUserRoleDto = new ArrayList<>();
         List<UserRoleDto> userRolesDtos = new ArrayList<>();
-        if (userType.equals(AccountType.INDIVIDUAL_MERCHANT_USER)) {
-            List.of(appConfigs.tenantUserRoleId, appConfigs.merchantUserRole).forEach(roleId -> {
-                var userRole = new UserRoleDto();
-                userRole.setRoleId(roleId);
-                userRole.setUserId(user.getId());
-                defaultUserRoleDto.add(userRole);
-            });
-        } else if (userDto.isMerchantAccountType()) {
+        if (userDto.isOrganizationMerchant()) {
             List.of(appConfigs.onboardUserRoleId, appConfigs.tenantUserRoleId,
-                            appConfigs.tenantAdminRoleId,
-                            appConfigs.merchantUserRole, appConfigs.merchantOwnerRole)
+                            appConfigs.tenantAdminRoleId, appConfigs.organizationMerchantOwnerRole,
+                            appConfigs.organizationMerchantUserRole)
+                    .forEach(roleId -> {
+                        var userRole = new UserRoleDto();
+                        userRole.setRoleId(roleId);
+                        userRole.setUserId(user.getId());
+                        defaultUserRoleDto.add(userRole);
+                    });
+            assignNewTenantAsOwner(user, userDto);
+        } else if (userDto.isIndividualMerchant()) {
+            List.of(appConfigs.onboardUserRoleId, appConfigs.tenantUserRoleId,
+                            appConfigs.tenantAdminRoleId, appConfigs.individualMerchantOwnerRole,
+                            appConfigs.individualMerchantUserRole)
+                    .forEach(roleId -> {
+                        var userRole = new UserRoleDto();
+                        userRole.setRoleId(roleId);
+                        userRole.setUserId(user.getId());
+                        defaultUserRoleDto.add(userRole);
+                    });
+            assignNewTenantAsOwner(user, userDto);
+        } else if (userDto.isOrganizationBuyer()) {
+            List.of(appConfigs.onboardUserRoleId, appConfigs.tenantUserRoleId,
+                            appConfigs.tenantAdminRoleId, appConfigs.organizationBuyerOwnerRole,
+                            appConfigs.organizationBuyerUserRole)
                     .forEach(roleId -> {
                         var userRole = new UserRoleDto();
                         userRole.setRoleId(roleId);
