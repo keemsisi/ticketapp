@@ -1,11 +1,9 @@
 package org.core.backend.ticketapp.event.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
@@ -19,6 +17,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -28,6 +27,7 @@ import java.util.UUID;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "event")
+@Builder
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class Event extends AbstractBaseEntity {
 
@@ -59,19 +59,17 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "street_address", nullable = false)
     private String streetAddress;
 
-    @Column(name = "sub_categories", columnDefinition = "JSONB")
     @Type(type = "JSONB")
-    private List<String> subCategories;
-
-    @Column(nullable = false, name = "event_category")
-    private String eventCategory;
+    @Column(name = "categories", columnDefinition = "JSONB")
+    private Set<String> categories;
 
     private String eventBanner = "event-banner.jpg";
 
     @Column(columnDefinition = "bool default false")
     private boolean recurring = false;
 
-    @Column(name = "time_zone", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "time_zone")
     private TimeZoneEnum timeZone = TimeZoneEnum.WAT;
 
     @Column(name = "event_date", nullable = false)
@@ -92,6 +90,7 @@ public class Event extends AbstractBaseEntity {
     private boolean approvalRequired;
 
     @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<EventSeatSection> seatSections;
 
     @PrePersist

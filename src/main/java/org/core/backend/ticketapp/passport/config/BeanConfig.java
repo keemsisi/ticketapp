@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.passport.config;
 
 
+import org.core.backend.ticketapp.common.converters.PGobjectToListConverter;
 import org.core.backend.ticketapp.passport.util.SharedEnvironment;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,11 +37,11 @@ public class BeanConfig {
     private String password;
     @Value(value = "${spring.flyway.enabled}")
     private boolean enabled;
-//    @Value("${spring.redis.host}")
+    //    @Value("${spring.redis.host}")
     private String redisHost;
-//    @Value("${spring.redis.port}")
+    //    @Value("${spring.redis.port}")
     private int redisPort;
-//    @Value("${spring.redis.password}")
+    //    @Value("${spring.redis.password}")
     private String redisPassword;
 
     @Bean
@@ -67,7 +69,7 @@ public class BeanConfig {
         return flyway;
     }
 
-//    @Bean
+    //    @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         JedisConnectionFactory connectionFactory = new JedisConnectionFactory();
         connectionFactory.setHostName(redisHost);
@@ -76,7 +78,7 @@ public class BeanConfig {
         return connectionFactory;
     }
 
-//    @Bean
+    //    @Bean
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory());
@@ -84,3 +86,5 @@ public class BeanConfig {
         return template;
     }
 }
+
+

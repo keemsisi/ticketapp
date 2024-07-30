@@ -18,7 +18,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -51,6 +50,7 @@ public class TokenEnhancerService implements TokenEnhancer {
             additionalInformation.put("last_name", user.getLastName());
             additionalInformation.put("email", user.getEmail());
             additionalInformation.put("user_id", user.getId());
+            additionalInformation.put("tenant_id", user.getTenantId());
             additionalInformation.put("idle_time", userIdleTime);
             additionalInformation.put("exp", Instant.now().getEpochSecond() +
                     TimeUnit.SECONDS.convert(24 * 60, TimeUnit.MINUTES));
