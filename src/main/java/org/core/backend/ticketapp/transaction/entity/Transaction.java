@@ -1,45 +1,72 @@
 package org.core.backend.ticketapp.transaction.entity;
 
 import lombok.*;
+import org.core.backend.ticketapp.common.enums.PricingPlanType;
+import org.core.backend.ticketapp.passport.entity.User;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
-@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "transaction")
 public class Transaction {
+
     @Id
-    @Column(columnDefinition = "uuid not null default uuid_generate_v4()")
+    @Column(columnDefinition = "UUID NOT NULL default uuid_generate_v1()")
     private UUID id;
 
-    @NotNull
-    private String reference;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private User userId;
 
-    @NotNull
-    private String string;
-
-    @Column(name = "order_id", nullable = false)
+    @Column(name = "order_id")
     private UUID orderId;
 
-    @Column(name = "payment_date", nullable = false)
-    private LocalDateTime paymentDate;
+    @Column(name = "reference", unique = true)
+    private String reference;
 
-    @NotNull
-    private double amount;
+    @Column(name = "amount")
+    private BigDecimal amount;
 
-    private LocalDateTime dateCreated;
+    @Column(name = "gateway")
+    private String gateway;
 
-    private LocalDateTime dateModified;
+    @Column(name = "gateway_response")
+    private String gatewayResponse;
 
-    @PrePersist
-    public void onCreate() {
-        id = UUID.randomUUID();
-    }
+    @Column(name = "channel")
+    private String channel;
+
+    @Column(name = "currency")
+    private String currency;
+
+    @Column(name = "ip_address")
+    private String ipAddress;
+
+    @Column(name = "pricing_plan")
+    @Enumerated(EnumType.STRING)
+    private PricingPlanType pricingPlan;
+
+    @Column(name = "paid_at")
+    private String paidAt;
+
+    @Column(name = "payment_date")
+    private Timestamp paymentDate;
+
+    @Column(name = "created_at")
+    private String createdAt;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_on")
+    private Date createdOn;
 }

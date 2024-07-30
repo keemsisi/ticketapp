@@ -1,6 +1,6 @@
 package org.core.backend.ticketapp.common.util;
 
-interface Constants {
+public interface Constants {
     String[] supportedActions = {
             "CREATE",
             "UPDATE",
@@ -10,5 +10,9 @@ interface Constants {
             "DECLINE REQUEST",
             "PRINT REPORT"
     };
+
+    String PAYSTACK_INIT = "https://api.paystack.co/plan";
+    String PAYSTACK_INITIALIZE_PAY = "https://api.paystack.co/transaction/initialize";
+    String PAYSTACK_VERIFY = "https://api.paystack.co/transaction/verify/";
 
 }
