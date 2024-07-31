@@ -92,13 +92,11 @@ public class EventServiceImpl implements EventService {
 
     public Event getById(UUID id) {
         final var event = eventRepository.findById(id).orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
-        UserUtils.canAccessResource(event.getUserId());
         return event;
     }
 
     public Event update(final EventUpdateRequestDTO request) {
         final var event = eventRepository.findById(request.id()).orElseThrow(this::notFoundException);
-        UserUtils.canAccessResource(event.getUserId());
         event.setTitle(request.title());
         event.setDescription(request.description());
         event.setEventBanner(request.eventBanner());

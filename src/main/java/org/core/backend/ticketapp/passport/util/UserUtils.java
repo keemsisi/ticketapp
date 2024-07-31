@@ -155,6 +155,13 @@ public class UserUtils {
         }
     }
 
+    public static void containsActionName(String actionName) {
+        var jwtTokenUtil = new JwtTokenUtil();
+        if (!(((List<String>) jwtTokenUtil.getClaimByKey("scope")).contains(actionName))) {
+            throw new ApplicationException(403, "forbidden", "Oops! You don't have right permission over this resource");
+        }
+    }
+
 //    public static void canAccessResource(final UUID userId) {
 //        final var user = JwtTokenUtil.getAuthUser();
 //        final var authUser = JwtTokenUtil.getAuthUser();
