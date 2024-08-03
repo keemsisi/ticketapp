@@ -12,7 +12,7 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseResponse {
     private String status;
-    private String statusMessage;
+    private String message;
     @JsonProperty("data")
     private Object data;
 }

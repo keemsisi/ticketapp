@@ -30,8 +30,8 @@ public record TicketController(TicketService ticketService) implements ICrudCont
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Ticket>> update(@PathVariable UUID id, @RequestBody @Valid TicketUpdateRequestDTO request) {
-        final var data = ticketService.update(id, request);
+    public ResponseEntity<GenericResponse<Ticket>> update(@RequestBody @Valid TicketUpdateRequestDTO request) {
+        final var data = ticketService.update(request);
         return ResponseEntity.ok(new GenericResponse<>("00", "Updated successfully", data));
     }
 

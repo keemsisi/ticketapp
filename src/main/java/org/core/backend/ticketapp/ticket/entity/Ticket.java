@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.ticket.entity;
 
 import lombok.*;
+import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.TicketStatus;
 
 import javax.persistence.Id;
@@ -19,7 +20,7 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "ticket")
-public class Ticket {
+public class Ticket  extends AbstractBaseEntity {
     @Id
     @Column(columnDefinition = "uuid not null default uuid_generate_v4()")
     private UUID id;

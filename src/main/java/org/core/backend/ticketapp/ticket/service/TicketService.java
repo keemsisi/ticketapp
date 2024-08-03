@@ -11,7 +11,7 @@ public interface TicketService {
 
     Ticket getById(final UUID id);
 
-    Ticket update(final UUID id, TicketUpdateRequestDTO requestDTO);
+    Ticket update(TicketUpdateRequestDTO requestDTO);
 
     void delete(final UUID id);
 }

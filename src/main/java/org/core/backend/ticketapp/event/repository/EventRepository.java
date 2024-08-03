@@ -18,6 +18,10 @@ public interface EventRepository extends JpaRepository<Event, UUID>, PagingAndSo
     @Query(value = "SELECT e.* FROM event e WHERE e.id = ?1 AND e.deleted=false", nativeQuery = true)
     Optional<Event> findById(final @NotNull UUID id);
 
+    @NotNull
+    @Query(value = "SELECT e.* FROM event e WHERE e.id = ?1 AND e.tenant_id=?2 AND e.deleted=false", nativeQuery = true)
+    Optional<Event> findById(final @NotNull UUID id, final UUID tenantId);
+
     @Query(value = "SELECT e.* FROM event e WHERE e.ticket_type = ?1 AND e.deleted=false", nativeQuery = true)
     Page<Event> getByEventTicketType(@NotNull String eventTicketType, final Pageable pageRequest);
 }

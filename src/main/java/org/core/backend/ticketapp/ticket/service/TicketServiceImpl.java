@@ -89,26 +89,28 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Ticket getById(UUID id) {
-        Ticket ticket = ticketRepository.findById(id)
+        final var tenantId = jwtTokenUtil.getUser().getTenantId();
+        return ticketRepository.getById(id, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket does not exist", id.toString()));
-
-        return ticket;
     }
 
     @Override
-    public Ticket update(UUID id, TicketUpdateRequestDTO ticketDTO) {
-        Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", id.toString()));
-        eventRepository.findById(ticketDTO.eventId())
+    public Ticket update(final TicketUpdateRequestDTO ticketDTO) {
+        final var tenantId = jwtTokenUtil.getUser().getTenantId();
+        final var ticket = ticketRepository.getById(ticketDTO.ticketId(), tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", ticketDTO.ticketId().toString()));
+        eventRepository.findById(ticketDTO.eventId(), tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id", ticketDTO.eventId().toString()));
-        ticket.setEventId(ticketDTO.eventId());
         ticket.setSeatSectionId(ticketDTO.seatSectionId());
         return ticketRepository.save(ticket);
     }
 
-    public void delete(UUID id) {
-        Ticket ticket = ticketRepository.findById(id)
+    @Override
+    public void delete(final UUID id) {
+        final var tenantId = jwtTokenUtil.getUser().getTenantId();
+        final var ticket = ticketRepository.getById(id, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", id.toString()));
-        ticketRepository.delete(ticket);
+        ticket.setDeleted(true);
+        ticketRepository.save(ticket);
     }
 }
