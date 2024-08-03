@@ -21,6 +21,9 @@ public class Action {
     @Column(name = "module_id", nullable = false)
     private UUID moduleId;
 
+    @Column(name = "role_id")
+    private UUID roleId;
+
     @Column(name = "name")
     private String name;
 

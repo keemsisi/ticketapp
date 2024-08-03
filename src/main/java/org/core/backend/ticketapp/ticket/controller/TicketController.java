@@ -8,15 +8,17 @@ import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.service.TicketService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/api/v1/tickets")
-public record TicketController(TicketService ticketService) implements ICrudController {
+@RestController("/api/v1/tickets")
+public class TicketController implements ICrudController {
+    private TicketService ticketService;
 
+    @PreAuthorize("hasAuthority('SCOPE_super_admin')")
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> create(TicketCreateRequestDTO request) {
         final var data = ticketService.create(request);

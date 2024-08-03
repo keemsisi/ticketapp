@@ -80,6 +80,7 @@ public class EventServiceImpl implements EventService {
         event.setUserId(userId);
         event.setTenantId(tenantId);
         event.setDateCreated(LocalDateTime.now());
+        event.setType(eventDTO.getEventType());
 
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {

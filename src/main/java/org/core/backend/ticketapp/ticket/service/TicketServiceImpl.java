@@ -1,24 +1,29 @@
 package org.core.backend.ticketapp.ticket.service;
 
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.common.enums.UserType;
+import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
-import org.core.backend.ticketapp.event.entity.Event;
+import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
+import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.core.backend.ticketapp.passport.dtos.core.UserDto;
-import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.repository.TicketRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -31,60 +36,62 @@ public class TicketServiceImpl implements TicketService {
     private final CoreUserService userService;
     private final JwtTokenUtil jwtTokenUtil;
     private final EventSeatSectionRepository eventSeatSectionRepository;
+    private EventDao eventDao;
 
     @Override
     public Ticket create(TicketCreateRequestDTO ticketRequestDTO) {
-        Event event = eventRepository.findById(ticketRequestDTO.getEventId())
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id", ticketRequestDTO.getEventId().toString()));
-
-        if (event.getTicketsAvailable() > 0) {
-            event.setTicketsAvailable(event.getTicketsAvailable() - 1);
-
+        final var event = eventRepository.findById(ticketRequestDTO.getEventId())
+                .orElseThrow(() -> new ApplicationException(400, "not_found", "Event does not exists!"));
+        final var eventStats = eventDao.getEventsStats(event.getId(), event.getTenantId());
+        if (eventStats.getTotalAvailableTickets() > 0) {
             EventSeatSection seatSection = null;
 
             if (!ticketRequestDTO.getSeatSectionId().toString().isEmpty()) {
                 seatSection = eventSeatSectionRepository.findById(ticketRequestDTO.getSeatSectionId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Event seat section does not exist", ticketRequestDTO.getSeatSectionId().toString()));
+                        .orElseThrow(() -> new ResourceNotFoundException("Event seat section does not exist",
+                                ticketRequestDTO.getSeatSectionId().toString()));
                 if (seatSection.getCapacity() == 0)
                     throw new IllegalStateException("No available ticket for seat section");
-
             }
 
             try {
-
-                //TODO: Update this code to check if the user exists by email
-                // if the user does not exists by email, then create a new user account
-                Ticket ticket = new Ticket();
+                final var ticket = new Ticket();
                 ticket.setSeatSectionId(ticketRequestDTO.getSeatSectionId());
                 ticket.setEventId(ticketRequestDTO.getEventId());
                 assert seatSection != null;
                 ticket.setPrice(seatSection.getPrice());
-                seatSection.setCapacity(seatSection.getCapacity() + 1);
 
-                // Check if user exists
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-                if (authentication == null || !authentication.isAuthenticated()) {
-                    UserDto userDto = new UserDto();
+                if (Objects.isNull(jwtTokenUtil.getUser().getUserId())) {
+                    final var userDto = new UserDto();
                     userDto.setEmail(ticketRequestDTO.getEmail());
                     userDto.setFirstName(ticketRequestDTO.getFirstName());
                     userDto.setLastName(ticketRequestDTO.getLastName());
                     userDto.setPhone(ticketRequestDTO.getPhoneNumber());
+                    userDto.setGender(ticketRequestDTO.getGender().toString());
+                    userDto.setUserType(UserType.BUYER);
+                    userDto.setAccountType(AccountType.INDIVIDUAL);
+                    userDto.setPassword(RandomStringUtils.randomAlphanumeric(10));
 
-                    User user = userService.createUser(userDto, null);
+                    final var user = userService.createUser(userDto, new LoggedInUserDto());
+                    user.setFirstTimeLogin(true);
+                    user.setPasswordExpiryDate(LocalDateTime.now().plusMinutes(1));
+                    user.setModifiedOn(new Date());
+                    user.setModifiedBy(user.getId());
+                    userService.save(user);
                     ticket.setUserId(user.getId());
                 } else {
-                    UUID loggedInUserId = jwtTokenUtil.getUser().getUserId();
+                    final var loggedInUserId = jwtTokenUtil.getUser().getUserId();
                     ticket.setUserId(loggedInUserId);
                 }
-
+                ticket.setTenantId(event.getTenantId());
+                ticket.setDateCreated(LocalDateTime.now());
                 return ticketRepository.save(ticket);
             } catch (Exception e) {
                 event.setTicketsAvailable(event.getTicketsAvailable() + 1);
-                throw new IllegalStateException(e);
+                throw new ApplicationException(500, "server_error", e.getMessage());
             }
         }
-
-        throw new IllegalStateException("Ticket not available for event");
+        throw new ApplicationException(400, "bad_request", "Ticket not available for event");
     }
 
     @Override

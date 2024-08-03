@@ -66,4 +66,8 @@ public class LoggedInUserDto {
         }
         return userId;
     }
+
+    public boolean isAdmin() {
+        return getRoles().contains("super_admin") || getRoles().contains("admin");
+    }
 }
