@@ -52,4 +52,10 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
     public Page<EventWishList> getAll(Pageable pageable) {
         return repository.findAll(pageable);
     }
+
+    @Override
+    public Page<EventWishList> getAllWishList(final Pageable pageable) {
+        final var user = jwtTokenUtil.getUser();
+        return repository.findAll(user.getUserId(), pageable);
+    }
 }
