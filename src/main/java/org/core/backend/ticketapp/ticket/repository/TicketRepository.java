@@ -11,6 +11,6 @@ import java.util.UUID;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, UUID>, PagingAndSortingRepository<Ticket, UUID> {
-    @Query(value = "SELECT * FOM ticket WHERE id = ?1 AND tenant_id=?2 AND deleted=false ", nativeQuery = true)
+    @Query(value = "SELECT * FROM ticket WHERE id = ?1 AND tenant_id=?2 AND deleted=false ", nativeQuery = true)
     Optional<Ticket> getById(UUID id, UUID tenantId);
 }

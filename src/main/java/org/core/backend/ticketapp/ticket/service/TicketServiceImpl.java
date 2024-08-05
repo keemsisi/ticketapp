@@ -1,7 +1,6 @@
 package org.core.backend.ticketapp.ticket.service;
 
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
@@ -14,6 +13,7 @@ import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.core.backend.ticketapp.passport.dtos.core.UserDto;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.passport.util.PasswordUtil;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
@@ -62,15 +62,16 @@ public class TicketServiceImpl implements TicketService {
                 ticket.setPrice(seatSection.getPrice());
 
                 if (Objects.isNull(jwtTokenUtil.getUser().getUserId())) {
+                    final var gender = ticketRequestDTO.getGender();
                     final var userDto = new UserDto();
                     userDto.setEmail(ticketRequestDTO.getEmail());
                     userDto.setFirstName(ticketRequestDTO.getFirstName());
                     userDto.setLastName(ticketRequestDTO.getLastName());
                     userDto.setPhone(ticketRequestDTO.getPhoneNumber());
-                    userDto.setGender(ticketRequestDTO.getGender().toString());
+                    userDto.setGender(Objects.isNull(gender) ? null : gender.toString());
                     userDto.setUserType(UserType.BUYER);
                     userDto.setAccountType(AccountType.INDIVIDUAL);
-                    userDto.setPassword(RandomStringUtils.randomAlphanumeric(10));
+                    userDto.setPassword(PasswordUtil.generatePassword());
 
                     final var user = userService.createUser(userDto, new LoggedInUserDto());
                     user.setFirstTimeLogin(true);
@@ -98,7 +99,7 @@ public class TicketServiceImpl implements TicketService {
     public Ticket getById(UUID id) {
         final var tenantId = jwtTokenUtil.getUser().getTenantId();
         return ticketRepository.getById(id, tenantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket does not exist", id.toString()));
+                .orElseThrow(() -> new ApplicationException(400, "not_found", "Ticket not found!"));
     }
 
     @Override
