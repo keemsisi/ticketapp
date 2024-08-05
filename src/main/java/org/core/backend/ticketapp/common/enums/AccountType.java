@@ -29,4 +29,7 @@ public enum AccountType {
         );
     }
 
+    public String getType() {
+        return type;
+    }
 }

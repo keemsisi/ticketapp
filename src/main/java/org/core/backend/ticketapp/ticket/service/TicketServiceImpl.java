@@ -39,7 +39,7 @@ public class TicketServiceImpl implements TicketService {
     private EventDao eventDao;
 
     @Override
-    public Ticket create(TicketCreateRequestDTO ticketRequestDTO) {
+    public Ticket create(final TicketCreateRequestDTO ticketRequestDTO) {
         final var event = eventRepository.findById(ticketRequestDTO.getEventId())
                 .orElseThrow(() -> new ApplicationException(400, "not_found", "Event does not exists!"));
         final var eventStats = eventDao.getEventsStats(event.getId(), event.getTenantId());

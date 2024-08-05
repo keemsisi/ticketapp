@@ -28,7 +28,7 @@ public class Ticket  extends AbstractBaseEntity {
     @Column(name = "seat_section", nullable = false )
     private UUID seatSectionId;
 
-    @Column(name = "seat_number", nullable = false)
+    @Column(name = "seat_number")
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long seatNumber;
 

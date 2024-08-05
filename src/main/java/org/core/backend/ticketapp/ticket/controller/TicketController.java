@@ -1,26 +1,32 @@
 package org.core.backend.ticketapp.ticket.controller;
 
+import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
+import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.service.TicketService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.UUID;
 
-@RestController("/api/v1/tickets")
+@RequestMapping("/api/v1/tickets")
+@RestController
+@AllArgsConstructor
 public class TicketController implements ICrudController {
-    private TicketService ticketService;
+    private final TicketService ticketService;
+    private final JwtTokenUtil jwtTokenUtil;
 
-    @PreAuthorize("hasAuthority('SCOPE_super_admin')")
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> create(TicketCreateRequestDTO request) {
+    public ResponseEntity<?> create(@RequestBody TicketCreateRequestDTO request) {
+        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var data = ticketService.create(request);
         return ResponseEntity.ok(new GenericResponse<>("00", "Ticket created successfully", data));
     }
