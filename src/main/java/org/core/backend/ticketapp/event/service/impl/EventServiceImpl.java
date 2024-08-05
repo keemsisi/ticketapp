@@ -64,7 +64,7 @@ public class EventServiceImpl implements EventService {
         final var tenantId = jwtTokenUtil.getUser().getTenantId();
 
         Set<EventCategory> existingCategories = new HashSet<>();
-        if (!eventDTO.getCategories().isEmpty()) {
+        if (Objects.nonNull(eventDTO.getCategories()) && !eventDTO.getCategories().isEmpty()) {
             final var eventCategories = eventDTO.getCategories().stream().map(String::toUpperCase).toList();
             existingCategories = eventCategoryRepository.findAllByName(eventCategories);
             if (existingCategories.size() != eventCategories.size()) {

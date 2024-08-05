@@ -35,7 +35,7 @@ public record EventWishListController(EventWishListService eventWishListService)
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll(Pageable pageable) {
-        final var data = eventWishListService.getAllWishList(pageable);
+        final var data = eventWishListService.getUserWisList(pageable);
         final var response = PagedMapperUtil.map(data);
         return ResponseEntity.ok(
                 new GenericResponse<>("00", "Fetched Successfully", response));

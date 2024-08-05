@@ -5,5 +5,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface EventWishListService extends IService<EventWishList> {
-    Page<EventWishList> getAllWishList(Pageable pageable);
+    Page<EventWishList> getUserWisList(Pageable pageable);
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -25,6 +26,7 @@ public abstract class AbstractBaseEntity {
     @Column(columnDefinition = "UUID NOT NULL default uuid_generate_v1()")
     protected UUID id;
     @Column(columnDefinition = "timestamptz with time zone DEFAULT CURRENT_DATE NOT NULL", updatable = false)
+    @CreationTimestamp
     protected LocalDateTime dateCreated;
     @Column(updatable = false, name = "user_id")
     protected UUID userId;
@@ -43,6 +45,4 @@ public abstract class AbstractBaseEntity {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Column(name = "tenant_id", columnDefinition = "uuid default null")
     private UUID tenantId;
-    @Column(name = "type")
-    private String type;
 }

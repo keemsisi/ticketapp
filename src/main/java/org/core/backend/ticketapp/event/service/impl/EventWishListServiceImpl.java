@@ -28,6 +28,7 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
         final var event = eventService.getById(req.getEventId());
         final var userId = jwtTokenUtil.getUser().getUserId();
         final var eventWishList = new EventWishList(event.getId(), userId);
+        eventWishList.setDateCreated(LocalDateTime.now());
         return repository.save(eventWishList);
     }
 
@@ -54,7 +55,7 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
     }
 
     @Override
-    public Page<EventWishList> getAllWishList(final Pageable pageable) {
+    public Page<EventWishList> getUserWisList(final Pageable pageable) {
         final var user = jwtTokenUtil.getUser();
         return repository.findAll(user.getUserId(), pageable);
     }
