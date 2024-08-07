@@ -21,4 +21,5 @@ public interface EventCategoryService {
     void delete(final UUID id);
 
     EventCategory update(final EventCategoryUpdateRequestDTO requestDTO);
+
 }

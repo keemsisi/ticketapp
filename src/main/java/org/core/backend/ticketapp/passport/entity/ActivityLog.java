@@ -48,6 +48,8 @@ public class ActivityLog {
     private Integer remotePort;
     @Column
     private String entityTypeName;
+    @Column
+    private UUID tenantId;
 
     @PrePersist
     void onCreate() {

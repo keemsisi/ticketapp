@@ -56,7 +56,7 @@ public class EventSeatSectionServiceImpl implements EventSeatSectionService, ISe
     public EventSeatSection update(final EventSeatSectionUpdateRequestDTO seatSectionDTO) {
         final var seatSection = getById(seatSectionDTO.id());
         final var userId = jwtTokenUtil.getUser().getUserId();
-        UserUtils.isResourceOwner(userId);
+        UserUtils.canAccessResource(userId);
         final var seatSectionReq = seatSectionDTO.seatSection();
         seatSection.setType(seatSectionReq.type());
         seatSection.setUserId(userId);

@@ -34,7 +34,7 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
     @Override
     public void delete(UUID id) {
         final var userId = jwtTokenUtil.getUser().getUserId();
-        UserUtils.isResourceOwner(userId);
+        UserUtils.canAccessResource(userId);
         final var eventWishList = repository.getById(id, userId).orElseThrow(() -> new ApplicationException(404, "not_found", "Event wishlist not found!"));
         eventWishList.setDeleted(true);
         eventWishList.setDateModified(LocalDateTime.now());
@@ -44,7 +44,7 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
     @Override
     public EventWishList getById(UUID id) {
         final var userId = jwtTokenUtil.getUser().getUserId();
-        UserUtils.isResourceOwner(userId);
+        UserUtils.canAccessResource(userId);
         return repository.getById(id, userId).orElseThrow(() -> new ApplicationException(404, "not_found", "Event wishlist not found!"));
     }
 
