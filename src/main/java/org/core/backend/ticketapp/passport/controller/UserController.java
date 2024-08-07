@@ -453,9 +453,9 @@ public class UserController {
                 HttpStatus.OK);
     }
 
-    @RequestMapping(value = "{userId}/roles", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getRolesByUserId(@PathVariable(value = "userId") UUID userId) {
-        var userRoles = userDao.getUserRolesById(userId);
+    @RequestMapping(value = "/roles", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getRolesByUserId() {
+        var userRoles = userDao.getUserRolesById(jwtTokenUtil.getUser().getUserId());
         return new ResponseEntity<>(
                 new GenericResponse<>("00", "User roles retrieved successfully.", userRoles),
                 HttpStatus.OK);
