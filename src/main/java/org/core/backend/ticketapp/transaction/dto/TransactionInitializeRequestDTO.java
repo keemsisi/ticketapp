@@ -5,9 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.core.backend.ticketapp.plan.entity.Plan;
 
+import javax.persistence.Column;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,12 +20,14 @@ import java.math.BigDecimal;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TransactionInitializeRequestDTO {
         @NotNull(message = "Amount cannot be null")
+        @Digits(integer = 6, fraction = 2)
         private BigDecimal amount;
 
         @NotNull(message = "Email cannot be null")
         private String email;
 
-//        private String currency,
-//        private String plan,
+        private String plan;
+
+        private String currency;
 //        private String[] channels
 }

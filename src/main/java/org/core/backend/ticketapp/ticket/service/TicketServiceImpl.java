@@ -6,6 +6,9 @@ import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
+import org.core.backend.ticketapp.order.dto.OrderCreateRequestDTO;
+import org.core.backend.ticketapp.order.entity.Order;
+import org.core.backend.ticketapp.order.repository.OrderRepository;
 import org.core.backend.ticketapp.passport.dtos.core.UserDto;
 import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
@@ -31,9 +34,10 @@ public class TicketServiceImpl implements TicketService {
     private final CoreUserService userService;
     private final JwtTokenUtil jwtTokenUtil;
     private final EventSeatSectionRepository eventSeatSectionRepository;
+    private final OrderRepository orderRepository;
 
     @Override
-    public Ticket create(TicketCreateRequestDTO ticketRequestDTO) {
+    public Ticket create(TicketCreateRequestDTO ticketRequestDTO, OrderCreateRequestDTO orderCreateRequestDTO) {
         Event event = eventRepository.findById(ticketRequestDTO.getEventId())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id", ticketRequestDTO.getEventId().toString()));
 
@@ -51,6 +55,16 @@ public class TicketServiceImpl implements TicketService {
             }
 
             try {
+                // Create new order for payment
+                Order ticketOrder = new Order();
+                ticketOrder.setEventId(orderCreateRequestDTO.getEventId());
+                ticketOrder.setQuantity(orderCreateRequestDTO.getQuantity());
+                ticketOrder.setAmount(orderCreateRequestDTO.getTotalAmount());
+                Order savedOrder = orderRepository.save(ticketOrder);
+
+                // Initiate payment
+
+
 
                 //TODO: Update this code to check if the user exists by email
                 // if the user does not exists by email, then create a new user account

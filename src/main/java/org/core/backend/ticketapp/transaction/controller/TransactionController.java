@@ -9,6 +9,7 @@ import org.core.backend.ticketapp.event.dto.EventCategoryCreateRequestDTO;
 import org.core.backend.ticketapp.event.entity.EventCategory;
 import org.core.backend.ticketapp.plan.dto.PlanCreateRequestDTO;
 import org.core.backend.ticketapp.plan.dto.PlanCreateResponseDTO;
+import org.core.backend.ticketapp.plan.dto.PlanDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionInitializeRequestDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionInitializeResponseDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
@@ -41,7 +42,13 @@ public class TransactionController implements ICrudController {
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/create-plan")
     public ResponseEntity<GenericResponse<PlanCreateResponseDTO>> createPlan(@Validated @RequestBody PlanCreateRequestDTO request) throws Exception {
         final var plan = transactionService.createPlan(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Created successfully", plan), HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Plan created successfully", plan), HttpStatus.CREATED);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/plans")
+    public ResponseEntity<GenericResponse<PlanDTO>> allPlans() throws Exception {
+        final var plans = transactionService.getAllPlans();
+        return new ResponseEntity<>(new GenericResponse<>("00", "All plans", plans), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/initialize-payment")

@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.ticket.controller;
 
 import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
+import org.core.backend.ticketapp.order.dto.OrderCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
@@ -18,8 +19,8 @@ import java.util.UUID;
 public record TicketController(TicketService ticketService) implements ICrudController {
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> create(TicketCreateRequestDTO request) {
-        final var data = ticketService.create(request);
+    public ResponseEntity<?> create(TicketCreateRequestDTO ticketRequest, OrderCreateRequestDTO orderRequest) {
+        final var data = ticketService.create(ticketRequest, orderRequest);
         return ResponseEntity.ok(new GenericResponse<>("00", "Ticket created successfully", data));
     }
 

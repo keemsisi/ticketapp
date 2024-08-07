@@ -10,7 +10,6 @@ import java.util.UUID;
 public class TicketCreateRequestDTO {
     private UUID eventId;
     private UUID seatSectionId;
-    private UUID userId;
     private String firstName;
     private String lastName;
     private String email;

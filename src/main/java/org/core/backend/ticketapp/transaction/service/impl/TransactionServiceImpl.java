@@ -17,6 +17,7 @@ import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.plan.dto.PlanCreateRequestDTO;
 import org.core.backend.ticketapp.plan.dto.PlanCreateResponseDTO;
+import org.core.backend.ticketapp.plan.dto.PlanDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionInitializeRequestDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionInitializeResponseDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
@@ -52,6 +53,36 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public PlanDTO getAllPlans() throws Exception {
+        PlanDTO allPlans = null;
+        try {
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpGet httpGet = new HttpGet(PAYSTACK_INIT);
+            httpGet.setHeader("Authorization", "Bearer " + secretKey);
+            StringBuilder result = new StringBuilder();
+            HttpResponse response = client.execute(httpGet);
+
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+                String line;
+
+                while ((line = rd.readLine()) != null) {
+                    result.append(line);
+                }
+            } else {
+                throw new Exception("Could not fetch plans");
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            allPlans = mapper.readValue(result.toString(), PlanDTO.class);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
+        return allPlans;
+    }
+
+    @Override
     public PlanCreateResponseDTO createPlan(PlanCreateRequestDTO createPlanDto) throws Exception {
         PlanCreateResponseDTO createPlanResponse = null;
 
@@ -69,6 +100,7 @@ public class TransactionServiceImpl implements TransactionService {
             StringBuilder result = new StringBuilder();
             HttpResponse response = client.execute(httpPost);
 
+            System.out.println(response.getStatusLine().getStatusCode() + "\n\n\n\n----0\n\n" + requestBody);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
 
                 BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
