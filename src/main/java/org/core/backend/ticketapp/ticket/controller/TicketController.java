@@ -2,14 +2,18 @@ package org.core.backend.ticketapp.ticket.controller;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.PagedMapperUtil;
+import org.core.backend.ticketapp.common.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
+import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.service.TicketService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,5 +51,11 @@ public class TicketController implements ICrudController {
     public ResponseEntity<?> delete(@PathVariable UUID id) {
         ticketService.delete(id);
         return ResponseEntity.ok(new GenericResponse<>("00", "Deleted successfully", null));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(FilterTicketRequestDTO requestDTO, PageRequest pageRequest) {
+        final var records = PagedMapperUtil.map(ticketService.getAll(requestDTO, pageRequest));
+        return ResponseEntity.ok(new GenericResponse<>("00", "Successfully fetched records", records));
     }
 }

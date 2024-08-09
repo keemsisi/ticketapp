@@ -14,10 +14,14 @@ import org.core.backend.ticketapp.passport.dtos.core.UserDto;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.PasswordUtil;
+import org.core.backend.ticketapp.passport.util.UserUtils;
+import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.repository.TicketRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,5 +124,19 @@ public class TicketServiceImpl implements TicketService {
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", id.toString()));
         ticket.setDeleted(true);
         ticketRepository.save(ticket);
+    }
+
+    @Override
+    public Page<Ticket> getAll(final FilterTicketRequestDTO requestDTO, final PageRequest pageRequest) {
+        final var loggedInUser = jwtTokenUtil.getUser();
+        var tenantId = jwtTokenUtil.getUser().getTenantId();
+        if (requestDTO.tenantId() != null && UserUtils.userHasRole(loggedInUser.getRoles(), AccountType.SUPER_ADMIN.getType())) {
+            tenantId = requestDTO.tenantId();
+        }
+        if (requestDTO.eventId() != null) {
+            return ticketRepository.findByEventIdAndTenantId(requestDTO.eventId(), tenantId, pageRequest);
+        } else {
+            return ticketRepository.findByTenantId(tenantId, pageRequest);
+        }
     }
 }
