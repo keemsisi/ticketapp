@@ -34,9 +34,6 @@ public class UserDto extends UserLiteDto {
     private DateTime lastChangePasswordDate;
     private List<UserRole> roles;
     private boolean firstTimeLogin;
-    private String adminRegisterKey;
-    private boolean isSupervisor;
-    private boolean isSuperAdmin;
     private Calendar passwordExpiryDate;
     private DateTime lockDate;
     private int loginAttempt;

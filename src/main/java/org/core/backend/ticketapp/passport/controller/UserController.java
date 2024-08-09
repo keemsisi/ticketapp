@@ -162,11 +162,11 @@ public class UserController {
                 HttpStatus.OK);
     }
 
-    @RequestMapping(value = "{userId}/email/registration/resend", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> resendRegistrationEmail(@PathVariable(value = "userId") UUID userId) {
+    @RequestMapping(value = "/email/registration/resend", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> resendRegistrationEmail() {
         var loggedInUser = jwtTokenUtil.getUser();
         UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.SUPER_ADMIN);
-        Optional<User> userResult = userService.getUserById(userId);
+        Optional<User> userResult = userService.getUserById(jwtTokenUtil.getUser().getUserId());
         if (!userResult.isPresent()) {
             return new ResponseEntity<>(
                     new GenericResponse<>("01", "Unable to find member account. Ensure you are logged into the system", ""),
@@ -278,9 +278,11 @@ public class UserController {
                     new GenericResponse<>("01", "Unable to find member account. Ensure you are logged into the system", ""),
                     HttpStatus.FORBIDDEN);
         }
+        final var loggedInUser = jwtTokenUtil.getUser();
+        UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.SUPER_ADMIN);
         oldDataJSON = objectMapper.writeValueAsString(userResult.get());
         updatedUserAccount = userService.updateUser(userResult.get(), userDto);
-        activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUserAccount), "Initiated a request to update profile");
+        activityLogProcessorUtils.processActivityLog(loggedInUser.getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUserAccount), "Initiated a request to update profile");
         return new ResponseEntity<>(new GenericResponse<>("00", "", updatedUserAccount), HttpStatus.OK);
     }
 
@@ -445,25 +447,25 @@ public class UserController {
                 HttpStatus.OK);
     }
 
-    @RequestMapping(value = "{userId}/actions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/actions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getActionsByUserId(@PathVariable(value = "userId") UUID userId) {
-        var userActions = userDao.getUserActionsById(userId);
+        var userActions = userDao.getUserActionsById(jwtTokenUtil.getUser().getUserId());
         return new ResponseEntity<>(
                 new GenericResponse<>("00", "User actions retrieved successfully.", userActions),
                 HttpStatus.OK);
     }
 
-    @RequestMapping(value = "{userId}/roles", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getRolesByUserId(@PathVariable(value = "userId") UUID userId) {
-        var userRoles = userDao.getUserRolesById(userId);
+    @RequestMapping(value = "/roles", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getRolesByUserId() {
+        var userRoles = userDao.getUserRolesById(jwtTokenUtil.getUser().getUserId());
         return new ResponseEntity<>(
                 new GenericResponse<>("00", "User roles retrieved successfully.", userRoles),
                 HttpStatus.OK);
     }
 
-    @RequestMapping(value = "{userId}/groups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getGroupsByUserId(@PathVariable(value = "userId") UUID userId) {
-        var userGroups = userDao.getUserGroupsByUserId(userId);
+    @RequestMapping(value = "/groups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getGroupsByUserId() {
+        var userGroups = userDao.getUserGroupsByUserId(jwtTokenUtil.getUser().getUserId());
         return new ResponseEntity<>(
                 new GenericResponse<>("00", "User actions retrieved successfully.", userGroups),
                 HttpStatus.OK);
