@@ -28,7 +28,7 @@ public class QrCodeController implements ICrudController {
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> create(final @RequestBody QrCodeCreateRequestDTO request) {
+    public ResponseEntity<GenericResponse<QrCode>> create(final @RequestBody QrCodeCreateRequestDTO request) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var data = qrCodeService.create(request);
         return ResponseEntity.ok(new GenericResponse<>("00", "QrCode created successfully", data));
@@ -41,7 +41,7 @@ public class QrCodeController implements ICrudController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> delete(final @PathVariable UUID id) {
+    public ResponseEntity<GenericResponse<?>> delete(final @PathVariable UUID id) {
         qrCodeService.delete(id);
         return ResponseEntity.ok(new GenericResponse<>("00", "Deleted successfully", null));
     }

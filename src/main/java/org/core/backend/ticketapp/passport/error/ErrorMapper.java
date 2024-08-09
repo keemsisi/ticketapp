@@ -156,6 +156,9 @@ public class ErrorMapper {
             if (e.getMessage().contains("ix_tbl_event_seat_secs_type_event_id_user_id_uq")) {
                 message = "Oops! Duplicate seat section in request!";
             }
+            if (e.getMessage().contains("duplicate key value violates unique")) {
+                message = "Oops! Duplicate request!";
+            }
             return new ErrorResponse(400, "request_failed",
                     message);
         }

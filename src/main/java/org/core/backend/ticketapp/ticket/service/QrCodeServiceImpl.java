@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
+import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
@@ -25,17 +26,22 @@ public class QrCodeServiceImpl implements QrCodeService {
     private final QrCodeRepository qrCodeRepository;
     private final JwtTokenUtil jwtTokenUtil;
     private final TicketService ticketService;
+    private final AppConfigs appConfigs;
 
     @Override
     public QrCode create(final QrCodeCreateRequestDTO requestDTO) {
         final var ticket = ticketService.getById(requestDTO.ticketId());
+        final var id = UUID.randomUUID();
         final var qrcode = QrCode.builder()
-                .ticketId(requestDTO.ticketId())
-                .eventId(ticket.getEventId())
-                .build();
+                .id(id).ticketId(requestDTO.ticketId())
+                .eventId(ticket.getEventId()).build();
+        qrcode.setCode(id.toString().replace("-", "").toUpperCase());
         qrcode.setUserId(ticket.getUserId());
         qrcode.setTenantId(ticket.getTenantId());
-        return qrCodeRepository.save(qrcode);
+        qrCodeRepository.save(qrcode);
+        qrcode.setLink(String.format(appConfigs.baseUrl, qrcode.getCode()));
+        return qrcode;
+
     }
 
     @Override

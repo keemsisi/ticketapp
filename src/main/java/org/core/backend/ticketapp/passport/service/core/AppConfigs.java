@@ -41,4 +41,6 @@ public class AppConfigs {
     UUID organizationMerchantUserRole;
     @Value("${system.default.tenant.tenant_id}")
     UUID defaultTenantId;
+    @Value(value = "${ticket.app.baseUrl}")
+    public String baseUrl;
 }
