@@ -1,7 +1,6 @@
 package org.core.backend.ticketapp.plan.entity;
 
 import lombok.*;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.persistence.Id;
 import javax.persistence.*;
@@ -31,11 +30,11 @@ public class Plan {
     @Column(name = "plan_code", nullable = false)
     private String planCode;
 
+    @Column(name = "plan_id", nullable = false)
+    private Integer planId;
+
     @NotNull(message = "Amount cannot be null")
     @Digits(integer = 6, fraction = 2)
     private BigDecimal amount;
-
-    @Column(name = "usage_limit")
-    private String usageLimit;
 
 }

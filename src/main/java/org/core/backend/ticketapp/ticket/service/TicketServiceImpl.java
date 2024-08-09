@@ -17,6 +17,10 @@ import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.repository.TicketRepository;
+import org.core.backend.ticketapp.transaction.dto.TransactionInitializeRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.TransactionInitializeResponseDTO;
+import org.core.backend.ticketapp.transaction.repository.TransactionRepository;
+import org.core.backend.ticketapp.transaction.service.TransactionService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -35,6 +39,7 @@ public class TicketServiceImpl implements TicketService {
     private final JwtTokenUtil jwtTokenUtil;
     private final EventSeatSectionRepository eventSeatSectionRepository;
     private final OrderRepository orderRepository;
+    private final TransactionService transactionService;
 
     @Override
     public Ticket create(TicketCreateRequestDTO ticketRequestDTO, OrderCreateRequestDTO orderCreateRequestDTO) {
@@ -60,9 +65,14 @@ public class TicketServiceImpl implements TicketService {
                 ticketOrder.setEventId(orderCreateRequestDTO.getEventId());
                 ticketOrder.setQuantity(orderCreateRequestDTO.getQuantity());
                 ticketOrder.setAmount(orderCreateRequestDTO.getTotalAmount());
-                Order savedOrder = orderRepository.save(ticketOrder);
+//                Order savedOrder = orderRepository.save(ticketOrder);
 
                 // Initiate payment
+                var transactionRequest = new TransactionInitializeRequestDTO();
+                transactionRequest.setAmount(orderCreateRequestDTO.getTotalAmount());
+                transactionRequest.setEmail(ticketRequestDTO.getEmail());
+//                transactionRequest.setPlan();
+//                TransactionInitializeResponseDTO initTransaction = transactionService.initializePayment();
 
 
 

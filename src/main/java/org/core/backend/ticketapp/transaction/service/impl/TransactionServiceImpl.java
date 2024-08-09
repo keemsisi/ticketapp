@@ -1,6 +1,5 @@
 package org.core.backend.ticketapp.transaction.service.impl;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -15,9 +14,6 @@ import org.core.backend.ticketapp.common.enums.PricingPlanType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
-import org.core.backend.ticketapp.plan.dto.PlanCreateRequestDTO;
-import org.core.backend.ticketapp.plan.dto.PlanCreateResponseDTO;
-import org.core.backend.ticketapp.plan.dto.PlanDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionInitializeRequestDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionInitializeResponseDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
@@ -32,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,75 +45,6 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> getAll() {
         return transactionRepository.findAll();
-    }
-
-    @Override
-    public PlanDTO getAllPlans() throws Exception {
-        PlanDTO allPlans = null;
-        try {
-            HttpClient client = HttpClientBuilder.create().build();
-            HttpGet httpGet = new HttpGet(PAYSTACK_INIT);
-            httpGet.setHeader("Authorization", "Bearer " + secretKey);
-            StringBuilder result = new StringBuilder();
-            HttpResponse response = client.execute(httpGet);
-
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-                String line;
-
-                while ((line = rd.readLine()) != null) {
-                    result.append(line);
-                }
-            } else {
-                throw new Exception("Could not fetch plans");
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            allPlans = mapper.readValue(result.toString(), PlanDTO.class);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-
-        return allPlans;
-    }
-
-    @Override
-    public PlanCreateResponseDTO createPlan(PlanCreateRequestDTO createPlanDto) throws Exception {
-        PlanCreateResponseDTO createPlanResponse = null;
-
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String requestBody = objectMapper.writeValueAsString(createPlanDto);
-
-            StringEntity entity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
-            entity.setContentType("application/json");
-
-            HttpClient client = HttpClientBuilder.create().build();
-            HttpPost httpPost = new HttpPost(PAYSTACK_INIT);
-            httpPost.setEntity(entity);
-            httpPost.setHeader("Authorization", "Bearer " + secretKey);
-            StringBuilder result = new StringBuilder();
-            HttpResponse response = client.execute(httpPost);
-
-            System.out.println(response.getStatusLine().getStatusCode() + "\n\n\n\n----0\n\n" + requestBody);
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-
-                BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    result.append(line);
-                }
-            } else {
-                throw new Exception ("Unable to process request at the moment");
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            createPlanResponse = mapper.readValue(result.toString(), PlanCreateResponseDTO.class);
-        } catch(Throwable ex) {
-            ex.printStackTrace();
-        }
-        return createPlanResponse;
     }
 
     @Override

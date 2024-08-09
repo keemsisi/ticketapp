@@ -42,7 +42,7 @@ public record PlanCreateResponseDTO(
             String currency,
 
             @JsonProperty("id")
-            String id,
+            Integer id,
 
             @JsonProperty("createdAt")
             String createdAt,

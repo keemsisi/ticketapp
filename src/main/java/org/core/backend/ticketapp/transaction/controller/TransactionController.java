@@ -39,18 +39,6 @@ public class TransactionController implements ICrudController {
         return new ResponseEntity<>(new GenericResponse<>("00", "All transactions", transactions), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/create-plan")
-    public ResponseEntity<GenericResponse<PlanCreateResponseDTO>> createPlan(@Validated @RequestBody PlanCreateRequestDTO request) throws Exception {
-        final var plan = transactionService.createPlan(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Plan created successfully", plan), HttpStatus.CREATED);
-    }
-
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/plans")
-    public ResponseEntity<GenericResponse<PlanDTO>> allPlans() throws Exception {
-        final var plans = transactionService.getAllPlans();
-        return new ResponseEntity<>(new GenericResponse<>("00", "All plans", plans), HttpStatus.OK);
-    }
-
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/initialize-payment")
     public ResponseEntity<GenericResponse<TransactionInitializeResponseDTO>> initializePayment(@Validated @RequestBody TransactionInitializeRequestDTO request) throws Throwable {
         final var initializedPayment = transactionService.initializePayment(request);
