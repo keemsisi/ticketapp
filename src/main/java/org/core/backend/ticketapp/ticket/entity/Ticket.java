@@ -2,12 +2,10 @@ package org.core.backend.ticketapp.ticket.entity;
 
 import lombok.*;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
-import org.core.backend.ticketapp.common.enums.TicketStatus;
+import org.core.backend.ticketapp.common.enums.Status;
 
 import javax.persistence.Id;
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -33,7 +31,7 @@ public class Ticket  extends AbstractBaseEntity {
     private Long seatNumber;
 
     @Enumerated(EnumType.STRING)
-    private TicketStatus status = TicketStatus.PENDING;
+    private Status status = Status.PENDING;
 
     @Column(name = "user_id")
     private UUID userId;

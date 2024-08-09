@@ -21,7 +21,7 @@ import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.repository.TicketRepository;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,7 +127,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Page<Ticket> getAll(final FilterTicketRequestDTO requestDTO, final PageRequest pageRequest) {
+    public Page<Ticket> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageRequest) {
         final var loggedInUser = jwtTokenUtil.getUser();
         var tenantId = jwtTokenUtil.getUser().getTenantId();
         if (requestDTO.tenantId() != null && UserUtils.userHasRole(loggedInUser.getRoles(), AccountType.SUPER_ADMIN.getType())) {

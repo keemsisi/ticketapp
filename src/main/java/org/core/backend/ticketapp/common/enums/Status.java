@@ -1,6 +1,6 @@
 package org.core.backend.ticketapp.common.enums;
 
-public enum TicketStatus {
+public enum Status {
     PAID,
     PENDING
 }

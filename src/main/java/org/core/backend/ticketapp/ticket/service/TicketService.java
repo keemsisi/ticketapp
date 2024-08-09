@@ -6,7 +6,7 @@ import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -19,5 +19,5 @@ public interface TicketService {
 
     void delete(final UUID id);
 
-    Page<Ticket> getAll(final FilterTicketRequestDTO requestDTO, final PageRequest pageRequest);
+    Page<Ticket> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageRequest);
 }
