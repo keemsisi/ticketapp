@@ -27,6 +27,10 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
         final var req = (CreateEventWishListDTO) request;
         final var event = eventService.getById(req.getEventId());
         final var userId = jwtTokenUtil.getUser().getUserId();
+        final var existingEventWishList = repository.getByEventIdAndUserId(event.getId(), userId);
+        if (!existingEventWishList.isEmpty()) {
+            throw new ApplicationException(400, "already_exists", "Event already exists as wishlist!");
+        }
         final var eventWishList = new EventWishList(event.getId(), userId);
         eventWishList.setDateCreated(LocalDateTime.now());
         return repository.save(eventWishList);

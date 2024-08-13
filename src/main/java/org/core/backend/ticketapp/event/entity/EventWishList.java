@@ -6,23 +6,21 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "event_wishlist")
+@Table(name = "event_wishlist", indexes = {
+        @Index(name = "ix_event_id__user_id_uq", columnList = "event_id, user_id", unique = true)})
 @Getter
 @Setter
 public class EventWishList extends AbstractBaseEntity {
     @Column(nullable = false, name = "event_id")
     private UUID eventId;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "user_id")
     private UUID userId;
 
     @PrePersist
