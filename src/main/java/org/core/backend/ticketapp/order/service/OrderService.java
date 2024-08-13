@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface OrderService {
+    Order save(Order order);
     List<Order> getAll();
     Order getById(final UUID id);
     void delete(final UUID id);

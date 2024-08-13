@@ -13,6 +13,11 @@ public class OrderServiceImpl implements OrderService {
     OrderRepository orderRepository;
 
     @Override
+    public Order save(Order order) {
+        return orderRepository.save(order);
+    }
+
+    @Override
     public List<Order> getAll() {
         List<Order> orders = orderRepository.findAll();
         return orders.stream().toList();

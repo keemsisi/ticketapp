@@ -28,6 +28,5 @@ public class TransactionInitializeRequestDTO {
 
         private String plan;
 
-        private String currency;
-//        private String[] channels
+        private String currency = "NGN";
 }

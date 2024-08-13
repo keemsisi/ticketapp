@@ -65,10 +65,15 @@ public class UserUtils {
         }
     }
 
-    public static void assertUserHasRole(List<String> roles, String role) {
+    public static boolean assertUserHasRole(List<String> roles, String role) {
         if (!roles.contains(role)) {
             throw new ApplicationException(403, "403", "You don't have the right permission to complete this action.");
         }
+        return true;
+    }
+
+    public static boolean userHasRole(List<String> roles, String role) {
+        return roles.contains(role);
     }
 
     public static void assertUserHasAnyRole(final List<String> userRoles, List<String> roles) {
@@ -152,6 +157,13 @@ public class UserUtils {
         final var user = JwtTokenUtil.getAuthUser();
         if (Objects.nonNull(userId) && !userId.equals(JwtTokenUtil.getAuthUser().getUserId())) {
             UserUtils.assertUserHasRole(user.getRoles(), "system_admin");
+        }
+    }
+
+    public static void containsActionName(String actionName) {
+        var jwtTokenUtil = new JwtTokenUtil();
+        if (!(((List<String>) jwtTokenUtil.getClaimByKey("scope")).contains(actionName))) {
+            throw new ApplicationException(403, "forbidden", "Oops! You don't have right permission over this resource");
         }
     }
 

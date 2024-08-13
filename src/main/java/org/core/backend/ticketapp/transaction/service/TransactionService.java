@@ -11,6 +11,6 @@ import java.util.List;
 
 public interface TransactionService {
     List<Transaction> getAll();
-    TransactionInitializeResponseDTO initializePayment(TransactionInitializeRequestDTO initializePaymentDto);
-    TransactionVerifyResponseDTO verifyPayment(TransactionVerifyRequestDTO verifyRequestDTO) throws Exception;
+    String initializePayment(TransactionInitializeRequestDTO initializePaymentDto);
+    boolean verifyPayment(TransactionVerifyRequestDTO verifyRequestDTO) throws Exception;
 }

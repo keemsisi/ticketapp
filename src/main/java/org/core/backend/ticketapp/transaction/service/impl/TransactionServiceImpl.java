@@ -22,8 +22,13 @@ import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.core.backend.ticketapp.transaction.repository.TransactionRepository;
 import org.core.backend.ticketapp.transaction.service.TransactionService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -38,6 +43,7 @@ import static org.core.backend.ticketapp.common.util.Constants.*;
 public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final CoreUserService userService;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${paystack.secret.key}")
     private String secretKey;
@@ -48,92 +54,63 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionInitializeResponseDTO initializePayment(TransactionInitializeRequestDTO initializePaymentDto) {
-        TransactionInitializeResponseDTO initializePaymentResponse = null;
+    public String initializePayment(TransactionInitializeRequestDTO initializePaymentDto) {
+        ResponseEntity<String> response = null;
 
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String requestBody = objectMapper.writeValueAsString(initializePaymentDto);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + secretKey);
+            headers.set("Content-Type", "application/json");
 
-            StringEntity entity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
-            entity.setContentType("application/json");
+            String requestJson = String.format("{\"email\":\"%s\",\"amount\":%d}", initializePaymentDto.getEmail(), initializePaymentDto.getAmount());
+            HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
 
-            HttpClient client = HttpClientBuilder.create().build();
-            HttpPost httpPost = new HttpPost(PAYSTACK_INITIALIZE_PAY);
-            httpPost.setEntity(entity);
-            httpPost.setHeader("Authorization", "Bearer " + secretKey);
-            StringBuilder result = new StringBuilder();
-            HttpResponse response = client.execute(httpPost);
+            response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, String.class);
 
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-
-                BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    result.append(line);
-                }
-            } else {
+            if (response.getStatusCode().isError()) {
                 throw new Exception("Unable to initialize payment at the moment");
             }
-
-            ObjectMapper mapper = new ObjectMapper();
-            initializePaymentResponse = mapper.readValue(result.toString(), TransactionInitializeResponseDTO.class);
         } catch(Throwable e) {
             e.printStackTrace();
         }
-        return initializePaymentResponse;
+
+        assert response != null;
+        return response.getBody();
     }
 
     @Override
     @Transactional
-    public TransactionVerifyResponseDTO verifyPayment(TransactionVerifyRequestDTO verifyRequestDTO) throws Exception {
-        TransactionVerifyResponseDTO paymentVerificationResponse = null;
+    public boolean verifyPayment(TransactionVerifyRequestDTO verifyRequestDTO) throws Exception {
+        ResponseEntity<String> response = null;
         Transaction transaction = null;
 
         try {
-            HttpClient client = HttpClientBuilder.create().build();
-            HttpGet request = new HttpGet(PAYSTACK_VERIFY + verifyRequestDTO.getReference());
-            request.addHeader("Content-type", "application/json");
-            request.setHeader("Authorization", "Bearer " + secretKey);
-            StringBuilder result = new StringBuilder();
-            HttpResponse response = client.execute(request);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + secretKey);
+            headers.set("Content-Type", "application/json");
 
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-                String line;
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            response = restTemplate.exchange(PAYSTACK_VERIFY + verifyRequestDTO.getReference(), HttpMethod.GET, entity, String.class);
 
-                while ((line = rd.readLine()) != null) {
-                    result.append(line);
-                }
-            } else {
+            if (response.getStatusCode().isError()) {
                 throw new Exception("Unable to verify payment at the moment");
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            paymentVerificationResponse = mapper.readValue(result.toString(), TransactionVerifyResponseDTO.class);
-
-            if (!paymentVerificationResponse.getStatus()) {
-                throw new Exception("Payment verification could not be completed");
             } else {
-
                 User user = userService.getUserById(verifyRequestDTO.getUserId()).orElseThrow(() -> new ApplicationException(404, "not_found", "User not found!"));
                 PricingPlanType pricingPlanType = PricingPlanType.valueOf(String.valueOf(verifyRequestDTO.getPricingPlan()).toUpperCase());
 
                 transaction = Transaction.builder()
                         .id(UUID.randomUUID())
                         .userId(user)
-                        .reference(paymentVerificationResponse.getData().getReference())
-                        .amount(paymentVerificationResponse.getData().getAmount())
+                        .reference(verifyRequestDTO.getReference())
+                        .amount(verifyRequestDTO.getAmount())
                         .orderId(verifyRequestDTO.getOrderId())
-                        .gatewayResponse(paymentVerificationResponse.getData().getGatewayResponse())
-                        .paidAt(paymentVerificationResponse.getData().getPaidAt())
-                        .createdAt(paymentVerificationResponse.getData().getCreatedAt())
-                        .channel(paymentVerificationResponse.getData().getChannel())
-                        .currency(paymentVerificationResponse.getData().getCurrency())
-                        .ipAddress(paymentVerificationResponse.getData().getIpAddress())
+                        .gatewayResponse(verifyRequestDTO.getGatewayResponse())
+                        .paidAt(verifyRequestDTO.getPaidAt())
+                        .createdAt(verifyRequestDTO.getPaidAt())
+                        .channel(verifyRequestDTO.getChannel())
+                        .currency(verifyRequestDTO.getCurrency())
+                        .ipAddress(verifyRequestDTO.getIpAddress())
                         .pricingPlan(pricingPlanType)
-                        .createdAt(paymentVerificationResponse.getData().getCreatedAt())
                         .paymentDate(new Timestamp(System.currentTimeMillis()))
                         .build();
             }
@@ -143,6 +120,6 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         transactionRepository.save(transaction);
-        return paymentVerificationResponse;
+        return response.getBody().contains("\"status\":\"success\"");
     }
 }

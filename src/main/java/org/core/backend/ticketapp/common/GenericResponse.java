@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class GenericResponse<T> {
 
-    private String status, statusMessage;
+    private String status, message;
     private T data;
     private Date date = new Date();
 
@@ -14,7 +14,7 @@ public class GenericResponse<T> {
 
     public GenericResponse(String status, String statusMessage, T data) {
         this.status = status;
-        this.statusMessage = statusMessage;
+        this.message = statusMessage;
         this.data = data;
     }
 
@@ -26,12 +26,12 @@ public class GenericResponse<T> {
         this.status = status;
     }
 
-    public String getStatusMessage() {
-        return statusMessage;
+    public String getMessage() {
+        return message;
     }
 
-    public void setStatusMessage(String statusMessage) {
-        this.statusMessage = statusMessage;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public T getData() {

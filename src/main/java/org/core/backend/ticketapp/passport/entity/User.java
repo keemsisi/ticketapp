@@ -8,6 +8,8 @@ import io.github.thecarisma.ExcelColumn;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
@@ -202,13 +204,20 @@ public class User implements UserDetails {
     private int accountLockoutThresholdCount;
     @Transient
     private boolean twoFaEnabled = false;
+
+    @JsonIgnore
     @Version
     @Column(name = "version", columnDefinition = "numeric(19,2) default 0")
     private Long version;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "account_type")
+    private AccountType accountType;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private UserType type;
+    private UserType userType;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -241,6 +250,6 @@ public class User implements UserDetails {
     }
 
     public String getFullName() {
-        return String.format("%s %s %s", lastName, middleName, firstName);
+        return String.format("%s %s %s", lastName, StringUtils.defaultIfBlank(middleName, ""), firstName);
     }
 }

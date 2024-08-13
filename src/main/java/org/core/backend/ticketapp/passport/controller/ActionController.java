@@ -60,6 +60,7 @@ public class ActionController {
 
         BeanUtils.copyProperties(model, action);
         action.setId(UUID.randomUUID());
+        action.setRoleId(model.getRoleId());
         action.setCode(StringUtil.normalizeWithUnderscore(model.getName()));
         action.setCreatedBy(loggedInUser.getUserId());
         action.setCreatedOn(new Date());

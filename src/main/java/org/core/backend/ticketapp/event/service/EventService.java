@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.event.service;
 
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
+import org.core.backend.ticketapp.common.response.EventStatsDTO;
 import org.core.backend.ticketapp.event.dao.EventResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
@@ -29,4 +30,6 @@ public interface EventService {
     Event update(final EventUpdateRequestDTO requestDTO);
 
     Event assignCategory(AssignCategoryToEventRequestDTO request);
+
+    EventStatsDTO getEventStats(UUID eventId);
 }

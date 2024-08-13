@@ -3,8 +3,9 @@ package org.core.backend.ticketapp.event.dao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.core.backend.ticketapp.common.enums.UserType;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
+import org.core.backend.ticketapp.common.response.EventStatsDTO;
 import org.core.backend.ticketapp.passport.dao.BaseDao;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 @Component
@@ -115,6 +117,20 @@ public class EventDao extends BaseDao {
                 () -> ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount());
     }
 
+    @SuppressWarnings("unchecked")
+    public EventStatsDTO getEventsStats(final UUID eventId, final UUID tenantId) {
+        final var baseSQL = String.format("SELECT SUM(ess.capacity) total_capacity, COUNT(ess) total_ticket_sections, " +
+                " COUNT(tk) total_acquired_tickets, (SUM(ess.capacity) - COUNT(tk)) total_available_tickets " +
+                " FROM event e LEFT JOIN ticket tk ON tk.event_id = e.id " +
+                " INNER JOIN event_seat_sections ess ON ess.event_id = e.id AND ess.deleted=false " +
+                " WHERE e.deleted=false AND e.id = '%s' AND e.tenant_id = '%s';", eventId, tenantId);
+        final var results = executeQuery(baseSQL, EventStatsDTO.class);
+        final var result = ((List<EventStatsDTO>) results.get("result"));
+        if (ObjectUtils.isNotEmpty(result))
+            return (((List<EventStatsDTO>) results.get("result"))).get(0);
+        return EventStatsDTO.builder().build();
+    }
+
     private UUID getUserIdIfNotAdmin() {
         final var user = jwtTokenUtil.getUser();
         return user.getRoles().contains("tenant_owner") ? null : user.getUserId();
@@ -139,25 +155,33 @@ public class EventDao extends BaseDao {
         final var userRoles = user.getRoles();
         final var tenantId = user.getTenantId();
         final var tenantQuery = new StringBuilder();
-        if (Objects.nonNull(user.getUserId()) && Objects.isNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(UserType.INDIVIDUAL.name()))) {
+        if (Objects.nonNull(user.getUserId()) && Objects.isNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(AccountType.INDIVIDUAL.name()))) {
             tenantQuery.append(" AND e.tenant_id IS NOT NULL AND u.type NOT IN ('SUPER_ADMIN','SUPER_ADMIN_USER') ");
-        } else if (Objects.nonNull(user.getUserId()) && Objects.nonNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(UserType.INDIVIDUAL.name()))) {
+        } else if (Objects.nonNull(user.getUserId()) && Objects.nonNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(AccountType.INDIVIDUAL.name()))) {
             tenantQuery.append(String.format(" AND e.tenant_id = '%s' AND u.type NOT IN ('SUPER_ADMIN','SUPER_ADMIN_USER') ", reqTenantId));
         } else if (Objects.isNull(user.getUserId()) && Objects.nonNull(reqTenantId)) {
             tenantQuery.append(String.format(" AND e.tenant_id = '%s' AND u.type NOT IN ('SUPER_ADMIN','SUPER_ADMIN_USER') ", reqTenantId));
         } else if (Objects.isNull(user.getUserId()) && Objects.isNull(reqTenantId)) {
 //            tenantQuery.append(" AND e.tenant_id IS NOT NULL AND u.type NOT IN ('SUPER_ADMIN','SUPER_ADMIN_USER') ");
             tenantQuery.append(" AND e.tenant_id IS NOT NULL ");
-        } else if (UserUtils.userHasAnyRole(userRoles, List.of(UserType.TENANT_ADMIN.name(), UserType.TENANT_USER.name()))) {
+        } else if (UserUtils.userHasAnyRole(userRoles, AccountType.getPossibleAminAccountType())) {
             tenantQuery.append(String.format(" AND e.tenant_id = '%s' ", tenantId));
-        } else if (Objects.nonNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(UserType.SUPER_ADMIN.name(), UserType.SYSTEM_ADMIN_USER.name()))) {
+        } else if (Objects.nonNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(AccountType.SUPER_ADMIN.name(), AccountType.SYSTEM_ADMIN_USER.name()))) {
             tenantQuery.append(" AND e.tenant_id = '%s' ").append(reqTenantId);
-        } else if (Objects.isNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(UserType.SUPER_ADMIN.name(), UserType.SYSTEM_ADMIN_USER.name()))) {
+        } else if (Objects.isNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(AccountType.SUPER_ADMIN.name(), AccountType.SYSTEM_ADMIN_USER.name()))) {
             tenantQuery.append(" AND e.tenant_id IS NOT NULL ");
-        } else if (Objects.nonNull(reqTenantId) && UserUtils.userHasAnyRole(userRoles, List.of(UserType.SUPER_ADMIN.name(), UserType.SYSTEM_ADMIN_USER.name()))) {
-            tenantQuery.append(String.format(" AND e.tenant_id = '%s' ", reqTenantId));
         }
         return tenantQuery.toString();
+    }
+
+    private <E> Map<String, Object> executeQuery(final String query, final Class<E> _class) {
+        final var cscFactory = new CallableStatementCreatorFactory(query);
+        final var returnedParams = List.<SqlParameter>of(
+                new SqlReturnResultSet("result", BeanPropertyRowMapper.newInstance(_class)));
+        final var csc = cscFactory.newCallableStatementCreator(new HashMap<>());
+        assert getJdbcTemplate() != null;
+        final @NotNull Map<String, Object> results = jdbcTemplate.call(csc, returnedParams);
+        return results;
     }
 
 }

@@ -1,9 +1,12 @@
 package org.core.backend.ticketapp.ticket.service;
 
 import org.core.backend.ticketapp.order.dto.OrderCreateRequestDTO;
+import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -12,7 +15,9 @@ public interface TicketService {
 
     Ticket getById(final UUID id);
 
-    Ticket update(final UUID id, TicketUpdateRequestDTO requestDTO);
+    Ticket update(TicketUpdateRequestDTO requestDTO);
 
     void delete(final UUID id);
+
+    Page<Ticket> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageRequest);
 }

@@ -93,6 +93,9 @@ public class Event extends AbstractBaseEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<EventSeatSection> seatSections;
 
+    @Column(name = "type")
+    private String type;
+
     @PrePersist
     public void onCreate() {
         if (approvalStatus == null) approvalStatus = ApprovalStatus.APPROVED;

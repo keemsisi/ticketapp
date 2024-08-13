@@ -50,7 +50,7 @@ public class TenantService extends BaseRepoService<Tenant> {
         final var tenant = new Tenant();
         BeanUtils.copyProperties(tenantDto, tenant);
         tenant.setId(UUID.randomUUID());
-        tenant.setNormalizedName(StringUtil.normalizeString(user.getFullName()));
+        tenant.setNormalizedName(StringUtil.normalizeString(tenant.getName()));
         tenant.setCreatedBy(user.getId());
         tenant.setCreatedOn(new Date());
         tenant.setUserId(ownerId);
