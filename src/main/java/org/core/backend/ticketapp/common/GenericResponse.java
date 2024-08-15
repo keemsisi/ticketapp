@@ -12,9 +12,9 @@ public class GenericResponse<T> {
     public GenericResponse() {
     }
 
-    public GenericResponse(String status, String statusMessage, T data) {
+    public GenericResponse(String status, String message, T data) {
         this.status = status;
-        this.message = statusMessage;
+        this.message = message;
         this.data = data;
     }
 

@@ -157,6 +157,7 @@ public class RoleController {
 
     @RequestMapping(value = "/users/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> userRoles(@PathVariable(value = "userId") UUID userId) {
+        UserUtils.canAccessResource(userId);
         Optional<Set<UserRole>> roleResult = userDao.getUserRolesById(userId);
         return new ResponseEntity<>(new GenericResponse<>("00", "Successfully retrieved the user roles", roleResult.get()), HttpStatus.OK);
     }
