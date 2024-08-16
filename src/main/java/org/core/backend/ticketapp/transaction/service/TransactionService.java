@@ -1,16 +1,18 @@
 package org.core.backend.ticketapp.transaction.service;
 
-import org.core.backend.ticketapp.transaction.dto.TransactionInitializeRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.TransactionInitializeResponseDTO;
+import org.core.backend.ticketapp.transaction.dto.InitTransactionRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.PaymentInitResponseDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.TransactionVerifyResponseDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 public interface TransactionService {
-    List<Transaction> getAll();
-    String initializePayment(TransactionInitializeRequestDTO initializePaymentDto);
+
+    Page<Transaction> getAll(Pageable pageable);
+
+    PaymentInitResponseDTO initializePayment(InitTransactionRequestDTO initializePaymentDto);
+
     boolean verifyPayment(TransactionVerifyRequestDTO verifyRequestDTO) throws Exception;
 }

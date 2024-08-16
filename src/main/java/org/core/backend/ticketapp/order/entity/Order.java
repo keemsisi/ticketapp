@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.checkerframework.checker.units.qual.C;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.OrderStatus;
 import org.hibernate.annotations.Type;
@@ -43,7 +42,16 @@ public class Order extends AbstractBaseEntity {
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 
-    @Column( name = "meta", columnDefinition = "JSONB")
+    @Column(name = "meta", columnDefinition = "JSONB")
     @Type(type = "JSONB")
     private Map<String, String> meta;
+
+    @Column(name = "payment_link")
+    private String paymentLink;
+
+    @Column(name = "code")
+    private String code;
+
+    @Column(name = "reference")
+    private String reference;
 }

@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.ticket.service;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.common.enums.Status;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
@@ -56,6 +57,7 @@ public class TicketServiceImpl implements TicketService {
 
     private EventDao eventDao;
 
+    //call this create when the payment is successful
     @Override
     public Ticket create(final TicketCreateRequestDTO ticketRequestDTO, final OrderCreateRequestDTO orderRequestDTO) {
         final var event = eventRepository.findById(ticketRequestDTO.getEventId())
@@ -73,31 +75,12 @@ public class TicketServiceImpl implements TicketService {
             }
 
             try {
-                Order ticketOrder = new Order();
-                ticketOrder.setEventId(orderRequestDTO.getEventId());
-                ticketOrder.setQuantity(orderRequestDTO.getQuantity());
-                ticketOrder.setAmount(orderRequestDTO.getTotalAmount());
-
-                // Initiate payment
-                var transactionRequest = new TransactionInitializeRequestDTO();
-                transactionRequest.setAmount(orderRequestDTO.getTotalAmount());
-                transactionRequest.setEmail(ticketRequestDTO.getEmail());
-                transactionRequest.setCurrency("NGN");
-//                TransactionInitializeResponseDTO initTransaction = transactionService.initializePayment(transactionRequest);
-
-                var verifyTransaction = new TransactionVerifyRequestDTO();
-//                TransactionVerifyResponseDTO verified = transactionService.verifyPayment(verifyTransaction);
-//                if (!verified.getStatus()) {
-//                    throw new IllegalStateException("Could not verify payment");
-//                }
-
-                Order savedOrder = orderRepository.save(ticketOrder);
-
                 final var ticket = new Ticket();
                 ticket.setSeatSectionId(ticketRequestDTO.getSeatSectionId());
                 ticket.setEventId(ticketRequestDTO.getEventId());
                 assert seatSection != null;
                 ticket.setPrice(seatSection.getPrice());
+                ticket.setStatus(Status.ACTIVE);
 
                 if (Objects.isNull(jwtTokenUtil.getUser().getUserId())) {
                     final var gender = ticketRequestDTO.getGender();

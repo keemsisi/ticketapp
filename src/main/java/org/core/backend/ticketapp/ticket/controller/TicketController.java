@@ -5,14 +5,11 @@ import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.PagedMapperUtil;
 import org.core.backend.ticketapp.common.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
-<<<<<<< HEAD
 import org.core.backend.ticketapp.order.dto.OrderCreateRequestDTO;
-=======
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
->>>>>>> main
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.service.TicketService;
@@ -31,14 +28,9 @@ public class TicketController implements ICrudController {
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-<<<<<<< HEAD
     public ResponseEntity<?> create(TicketCreateRequestDTO ticketRequest, OrderCreateRequestDTO orderRequest) {
-        final var data = ticketService.create(ticketRequest, orderRequest);
-=======
-    public ResponseEntity<?> create(final @RequestBody TicketCreateRequestDTO request) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
-        final var data = ticketService.create(request);
->>>>>>> main
+        final var data = ticketService.create(ticketRequest, orderRequest);
         return ResponseEntity.ok(new GenericResponse<>("00", "Ticket created successfully", data));
     }
 
