@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.transaction.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.enums.OrderStatus;
@@ -7,7 +8,7 @@ import org.core.backend.ticketapp.common.enums.Status;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.service.OrderService;
-import org.core.backend.ticketapp.passport.service.core.CoreUserService;
+import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.transaction.dto.InitTransactionRequestDTO;
 import org.core.backend.ticketapp.transaction.dto.PaymentInitResponseDTO;
@@ -19,7 +20,6 @@ import org.core.backend.ticketapp.transaction.repository.TransactionRepository;
 import org.core.backend.ticketapp.transaction.service.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
@@ -41,12 +41,10 @@ public class TransactionServiceImpl implements TransactionService {
     private static final Logger log = LoggerFactory.getLogger(TransactionServiceImpl.class);
     private final TransactionRepository transactionRepository;
     private final OrderService orderService;
-    private final CoreUserService userService;
     private final RestTemplate restTemplate;
     private final JwtTokenUtil jwtTokenUtil;
-
-    @Value("${paystack.secret.key}")
-    private String secretKey;
+    private final AppConfigs appConfigs;
+    private final ObjectMapper objectMapper;
 
     @Override
     public Page<Transaction> getAll(final Pageable pageable) {
@@ -58,7 +56,7 @@ public class TransactionServiceImpl implements TransactionService {
         ResponseEntity<PaymentInitResponseDTO> response = null;
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + secretKey);
+            headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
             final var entity = new HttpEntity<>(request, headers);
             response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, PaymentInitResponseDTO.class);
@@ -93,7 +91,7 @@ public class TransactionServiceImpl implements TransactionService {
         final var order = orderService.getById(verifyRequestDTO.getOrderId());
         try {
             final var headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + secretKey);
+            headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
             HttpEntity<String> entity = new HttpEntity<>(headers);
             final var response = restTemplate.exchange(String.format(PAYSTACK_VERIFY, order.getReference()),
@@ -101,10 +99,19 @@ public class TransactionServiceImpl implements TransactionService {
             if (response.getStatusCode().isError()) {
                 log.error(">>> Payment verification was not successful for request {} ", verifyRequestDTO);
                 final var errorCode = System.nanoTime();
-                throw new ApplicationException(400, "payment_verification_failed",
+                throw new ApplicationException(400, "req_failed",
                         String.format("Failed to verify payment, please try again later or contact support with code: %s", errorCode));
             } else {
                 final var data = Objects.requireNonNull(Objects.requireNonNull(response.getBody()).getData());
+                final var gatewayResponse = objectMapper.writeValueAsString(response.getBody());
+                final var meta = PaymentGatewayMeta.builder()
+                        .paidAt(data.getPaidAt())
+                        .createdAt(data.getCreatedAt())
+                        .channel(data.getChannel())
+                        .currency(data.getCurrency())
+                        .gateway("PayStack")
+                        .gatewayResponse(gatewayResponse)
+                        .build();
                 //TODO: fetch the transaction if it already exists else create a new transaction
                 final var transaction = Transaction.builder()
                         .userId(order.getUserId())
@@ -112,13 +119,9 @@ public class TransactionServiceImpl implements TransactionService {
                         .amount(order.getAmount())
                         .orderId(verifyRequestDTO.getOrderId())
                         .status(Status.PAID)
-                        .gateWayMeta(PaymentGatewayMeta.builder()
-                                .paidAt(data.getPaidAt())
-                                .createdAt(data.getCreatedAt())
-                                .channel(data.getChannel())
-                                .currency(data.getCurrency())
-                                .build())
+                        .gateWayMeta(meta)
                         .build();
+                transaction.setTenantId(order.getTenantId());
                 return transactionRepository.save(transaction);
             }
         } catch (Exception e) {

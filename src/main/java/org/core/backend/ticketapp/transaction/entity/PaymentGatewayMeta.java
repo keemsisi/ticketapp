@@ -1,10 +1,7 @@
 package org.core.backend.ticketapp.transaction.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Column;
 
@@ -12,6 +9,7 @@ import javax.persistence.Column;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class PaymentGatewayMeta {
     @JsonIgnore
     @Column(name = "gateway_response")

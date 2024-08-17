@@ -64,7 +64,7 @@ public class PlanServiceImpl implements PlanService {
         try {
             System.out.println(mapper.writeValueAsString(createPlanDto));
             final var headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + appConfigs.secretKey);
+            headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
             final var entity = new HttpEntity<>(createPlanDto, headers);
             final var response = restTemplate.exchange(PAYSTACK_PLAN_BASE_URL, HttpMethod.POST, entity, PlanCreateResponseDTO.class);
@@ -82,7 +82,7 @@ public class PlanServiceImpl implements PlanService {
         try {
             final var client = HttpClientBuilder.create().build();
             HttpGet httpGet = new HttpGet(PAYSTACK_PLAN_BASE_URL);
-            httpGet.setHeader("Authorization", "Bearer " + appConfigs.secretKey);
+            httpGet.setHeader("Authorization", "Bearer " + appConfigs.payStackApiKey);
             StringBuilder result = new StringBuilder();
             HttpResponse response = client.execute(httpGet);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {

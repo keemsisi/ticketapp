@@ -44,5 +44,5 @@ public class AppConfigs {
     @Value(value = "${ticket.app.baseUrl}")
     public String baseUrl;
     @Value("${paystack.secret.key}")
-    public String secretKey;
+    public String payStackApiKey;
 }

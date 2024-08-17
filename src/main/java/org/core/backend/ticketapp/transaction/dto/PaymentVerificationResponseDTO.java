@@ -24,6 +24,8 @@ public class PaymentVerificationResponseDTO {
 
     @Getter
     @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Data {
 
         @JsonProperty("id")
@@ -83,9 +85,6 @@ public class PaymentVerificationResponseDTO {
         @JsonProperty("plan")
         private String plan;
 
-        @JsonProperty("split")
-        private Split split;
-
         @JsonProperty("order_id")
         private String orderId;
 
@@ -104,14 +103,10 @@ public class PaymentVerificationResponseDTO {
         @JsonProperty("transaction_date")
         private String transactionDate;
 
-        @JsonProperty("plan_object")
-        private PlanObject planObject;
-
-        @JsonProperty("subaccount")
-        private Subaccount subaccount;
-
         @Getter
         @Setter
+        @AllArgsConstructor
+        @NoArgsConstructor
         public static class Log {
 
             @JsonProperty("start_time")
@@ -140,6 +135,8 @@ public class PaymentVerificationResponseDTO {
 
             @Getter
             @Setter
+            @AllArgsConstructor
+            @NoArgsConstructor
             public static class History {
 
                 @JsonProperty("type")
@@ -155,6 +152,8 @@ public class PaymentVerificationResponseDTO {
 
         @Getter
         @Setter
+        @AllArgsConstructor
+        @NoArgsConstructor
         public static class Authorization {
 
             @JsonProperty("authorization_code")
@@ -199,6 +198,8 @@ public class PaymentVerificationResponseDTO {
 
         @Getter
         @Setter
+        @AllArgsConstructor
+        @NoArgsConstructor
         public static class Customer {
 
             @JsonProperty("id")
@@ -227,24 +228,6 @@ public class PaymentVerificationResponseDTO {
 
             @JsonProperty("international_format_phone")
             private String internationalFormatPhone;
-        }
-
-        @Getter
-        @Setter
-        public static class Split {
-            // Define fields as necessary. Currently, it's an empty object in JSON.
-        }
-
-        @Getter
-        @Setter
-        public static class PlanObject {
-            // Define fields as necessary. Currently, it's an empty object in JSON.
-        }
-
-        @Getter
-        @Setter
-        public static class Subaccount {
-            // Define fields as necessary. Currently, it's an empty object in JSON.
         }
     }
 }

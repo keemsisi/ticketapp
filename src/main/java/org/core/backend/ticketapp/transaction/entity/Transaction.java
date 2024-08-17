@@ -36,7 +36,7 @@ public class Transaction extends AbstractBaseEntity {
     private BigDecimal amount;
 
     @Type(type = "JSONB")
-    @Column(name = "gateway_meta")
+    @Column(name = "gateway_meta", columnDefinition = "JSON DEFAULT NULL")
     private PaymentGatewayMeta gateWayMeta;
 
     @Column(name = "status")
