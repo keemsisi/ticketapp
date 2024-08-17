@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.transaction.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -10,8 +11,9 @@ import javax.persistence.Column;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaymentGatewayMeta {
-    @JsonIgnore
     @Column(name = "gateway_response")
     private String gatewayResponse;
     @Column(name = "gateway")
