@@ -118,7 +118,7 @@ public class TransactionServiceImpl implements TransactionService {
                         .reference(order.getReference())
                         .amount(order.getAmount())
                         .orderId(verifyRequestDTO.getOrderId())
-                        .status(Status.PAID)
+                        .status(Objects.isNull(meta.getPaidAt()) ? Status.PENDING : Status.PAID)
                         .gateWayMeta(meta)
                         .build();
                 transaction.setTenantId(order.getTenantId());
