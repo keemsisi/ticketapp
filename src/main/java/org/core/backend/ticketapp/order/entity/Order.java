@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.OrderStatus;
 import org.hibernate.annotations.Type;
@@ -54,4 +55,10 @@ public class Order extends AbstractBaseEntity {
 
     @Column(name = "reference")
     private String reference;
+
+    @PrePersist
+    public void onCreate() {
+        id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
+        dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
+    }
 }

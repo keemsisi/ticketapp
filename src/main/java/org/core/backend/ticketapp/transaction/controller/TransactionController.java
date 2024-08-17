@@ -31,8 +31,8 @@ public class TransactionController implements ICrudController {
         return new ResponseEntity<>(new GenericResponse<>("00", "All transactions", transactions), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/verify-payment")
-    public ResponseEntity<GenericResponse<Boolean>> verifyPayment(@RequestBody TransactionVerifyRequestDTO request) throws Exception {
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/verify")
+    public ResponseEntity<GenericResponse<Transaction>> verifyPayment(@RequestBody TransactionVerifyRequestDTO request) throws Exception {
         final var verified = transactionService.verifyPayment(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Payment verified successfully", verified), HttpStatus.OK);
     }

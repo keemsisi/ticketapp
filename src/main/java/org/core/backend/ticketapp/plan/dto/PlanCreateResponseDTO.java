@@ -9,11 +9,7 @@ import lombok.Builder;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record PlanCreateResponseDTO(
-        Boolean status,
-        String message,
-        Data data
-) {
+public record PlanCreateResponseDTO(Boolean status, String message, Data data) {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Data(
@@ -48,6 +44,6 @@ public record PlanCreateResponseDTO(
             String createdAt,
 
             @JsonProperty("updatedAt")
-            String updatedAt
-    ) {}
+            String updatedAt) {
+    }
 }

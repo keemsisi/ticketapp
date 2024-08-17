@@ -65,6 +65,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .antMatchers(HttpMethod.GET,"/api/v1/events/*").permitAll()
+                .antMatchers(HttpMethod.GET,"/api/v1/plans/*").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2ResourceServer()

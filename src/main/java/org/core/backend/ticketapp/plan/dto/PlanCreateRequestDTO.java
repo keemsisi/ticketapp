@@ -4,9 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.core.backend.ticketapp.common.enums.PaymentPlanInterval;
 
-import javax.validation.constraints.Digits;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -14,17 +13,13 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlanCreateRequestDTO {
-        @NotNull(message = "Plan name cannot be null")
-        private String name;
-
-        @NotNull(message = "Interval cannot be null")
-        private PaymentPlanInterval interval;
-
-        @NotNull(message = "Amount cannot be null")
-//        @Digits(integer = 6, fraction = 2)
-        private String amount;
-
-        private String description;
-        private String currency;
-//        private Integer invoiceLimit;
+    @NotNull(message = "Plan name cannot be null")
+    private String name;
+    @NotNull(message = "Interval cannot be null")
+    private String interval;
+    @NotNull(message = "Amount cannot be null")
+    @Min(value = 100, message = "Amount is invalid. It must be a number and be 100 or greater")
+    private Double amount;
+    private String description;
+    private String currency;
 }

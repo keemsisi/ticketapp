@@ -2,7 +2,10 @@ package org.core.backend.ticketapp.order.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.PagedMapperUtil;
+import org.core.backend.ticketapp.common.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.enums.OrderStatus;
 import org.core.backend.ticketapp.order.entity.Order;
@@ -10,12 +13,12 @@ import org.core.backend.ticketapp.order.service.OrderService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.transaction.dto.InitTransactionRequestDTO;
 import org.core.backend.ticketapp.transaction.service.TransactionService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -31,23 +34,12 @@ public class OrderController implements ICrudController {
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<?>> create(@RequestBody final InitTransactionRequestDTO requestDTO) {
         final var response = transactionService.initializePayment(requestDTO);
-        final var initPaymentData = response.getData();
-        final Order order = new Order();
-        order.setEventId(requestDTO.getEventId());
-        order.setQuantity(requestDTO.getQuantity());
-        order.setUserId(jwtTokenUtil.getUser().getUserId());
-        order.setAmount(requestDTO.getAmount());
-        order.setStatus(OrderStatus.PENDING);
-        order.setPaymentLink(initPaymentData.getAuthorizationUrl());
-        order.setCode(initPaymentData.getAccessCode());
-        order.setReference(initPaymentData.getReference());
-        var savedOrder = orderService.save(order);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Payment init successful!", savedOrder));
+        return ResponseEntity.ok(new GenericResponse<>("00", "Payment init successful!", response));
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<List<Order>>> getAll() throws Exception {
-        final var orders = orderService.getAll();
+    public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
+        final var orders = PagedMapperUtil.map(orderService.getAll(pageable));
         return new ResponseEntity<>(new GenericResponse<>("00", "All orders", orders), HttpStatus.OK);
     }
 

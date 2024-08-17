@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.transaction.service;
 
+import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.transaction.dto.InitTransactionRequestDTO;
 import org.core.backend.ticketapp.transaction.dto.PaymentInitResponseDTO;
 import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
@@ -12,7 +13,7 @@ public interface TransactionService {
 
     Page<Transaction> getAll(Pageable pageable);
 
-    PaymentInitResponseDTO initializePayment(InitTransactionRequestDTO initializePaymentDto);
+    Order initializePayment(InitTransactionRequestDTO initializePaymentDto);
 
-    boolean verifyPayment(TransactionVerifyRequestDTO verifyRequestDTO) throws Exception;
+    Transaction verifyPayment(TransactionVerifyRequestDTO verifyRequestDTO) throws Exception;
 }

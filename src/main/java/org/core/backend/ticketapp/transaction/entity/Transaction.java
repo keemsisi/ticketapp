@@ -1,14 +1,17 @@
 package org.core.backend.ticketapp.transaction.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
-import org.core.backend.ticketapp.common.enums.PricingPlanType;
-import org.core.backend.ticketapp.passport.entity.User;
-import org.hibernate.annotations.CreationTimestamp;
+import org.apache.commons.lang3.ObjectUtils;
+import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
+import org.core.backend.ticketapp.common.enums.Status;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -17,16 +20,11 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class),})
 @Table(name = "transaction")
-public class Transaction {
-
-    @Id
-    @Column(columnDefinition = "UUID NOT NULL default uuid_generate_v1()")
-    private UUID id;
-
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+public class Transaction extends AbstractBaseEntity {
     @JoinColumn(name = "user_id")
-    private User userId;
+    private UUID userId;
 
     @Column(name = "order_id")
     private UUID orderId;
@@ -37,36 +35,17 @@ public class Transaction {
     @Column(name = "amount")
     private BigDecimal amount;
 
-    @Column(name = "gateway")
-    private String gateway;
+    @Type(type = "JSONB")
+    @Column(name = "gateway_meta")
+    private PaymentGatewayMeta gateWayMeta;
 
-    @Column(name = "gateway_response")
-    private String gatewayResponse;
+    @Column(name = "status")
+    @Enumerated(value = EnumType.STRING)
+    private Status status;
 
-    @Column(name = "channel")
-    private String channel;
-
-    @Column(name = "currency")
-    private String currency;
-
-    @Column(name = "ip_address")
-    private String ipAddress;
-
-    @Column(name = "pricing_plan")
-    @Enumerated(EnumType.STRING)
-    private PricingPlanType pricingPlan;
-
-    @Column(name = "paid_at")
-    private String paidAt;
-
-    @Column(name = "payment_date")
-    private Timestamp paymentDate;
-
-    @Column(name = "created_at")
-    private String createdAt;
-
-    @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_on")
-    private Date createdOn;
+    @PrePersist
+    public void onCreate() {
+        id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
+        dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
+    }
 }
