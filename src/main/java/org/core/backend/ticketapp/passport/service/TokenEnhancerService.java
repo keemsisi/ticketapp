@@ -1,8 +1,10 @@
 package org.core.backend.ticketapp.passport.service;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.core.backend.ticketapp.passport.dtos.core.BasicClientDetails;
+import org.core.backend.ticketapp.passport.entity.Tenant;
 import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
@@ -37,6 +39,8 @@ public class TokenEnhancerService implements TokenEnhancer {
     private ActivityLogProcessorUtils activityLogProcessorUtils;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private TenantService tenantService;
 
     @SneakyThrows
     @Override
@@ -45,7 +49,8 @@ public class TokenEnhancerService implements TokenEnhancer {
         User user = null;
         if (!authentication.isClientOnly()) {
             user = (User) authentication.getPrincipal();
-            var permissions = coreUserService.getUserPermissions(user.getId()).get();
+            final var tenant = tenantService.getByTenantId(user.getTenantId()).orElse(new Tenant());
+            var permissions = coreUserService.getUserPermissions(user.getId()).orElseThrow();
             additionalInformation.put("first_name", user.getFirstName());
             additionalInformation.put("last_name", user.getLastName());
             additionalInformation.put("email", user.getEmail());
@@ -54,6 +59,7 @@ public class TokenEnhancerService implements TokenEnhancer {
             additionalInformation.put("idle_time", userIdleTime);
             additionalInformation.put("account_type", user.getAccountType());
             additionalInformation.put("user_type", user.getUserType());
+            additionalInformation.put("plan_id", tenant.getPlanId());
             additionalInformation.put("exp", Instant.now().getEpochSecond() +
                     TimeUnit.SECONDS.convert(24 * 60, TimeUnit.MINUTES));
 
