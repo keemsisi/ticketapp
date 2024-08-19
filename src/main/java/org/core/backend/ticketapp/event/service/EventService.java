@@ -23,6 +23,8 @@ public interface EventService {
 
     Event getById(final UUID id);
 
+    List<Event> getAllByIds(final List<UUID> id);
+
     Page<Event> getByEventTicketType(EventTicketType eventTicketType, Pageable pageable);
 
     void delete(final UUID id);

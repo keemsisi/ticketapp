@@ -7,6 +7,7 @@ import io.github.thecarisma.FatalObjCopierException;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dao.UserDao;
@@ -58,6 +59,10 @@ public class UserController {
         final var request = modelMapper.map(userDto, UserDto.class);
         if (userDto.getAccountType().equals(AccountType.SUPER_ADMIN) || userDto.getAccountType().equals(AccountType.SYSTEM_ADMIN_USER)) {
             UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), "super_admin");
+        } else if (userDto.getUserType().equals(UserType.SELLER) && userDto.getAccountType().equals(AccountType.INDIVIDUAL)) {
+            return new ResponseEntity<>(
+                    new GenericResponse<>("01", "Seller with Individual account type not allowed!", null),
+                    HttpStatus.BAD_REQUEST);
         }
         final var newRegisteredUser = userService.createUser(request, new LoggedInUserDto());
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null,

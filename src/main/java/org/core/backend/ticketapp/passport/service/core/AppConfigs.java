@@ -7,6 +7,12 @@ import java.util.UUID;
 
 @Configuration
 public class AppConfigs {
+    @Value(value = "${ticket.app.baseUrl}")
+    public String baseUrl;
+    @Value("${paystack.secret.key}")
+    public String payStackApiKey;
+    @Value(value = "${system.default.plan.standard}")
+    public UUID defaultPlanId;
     @Value("${ticketapp.password-reset-url}")
     String resetPasswordUrl;
     @Value("${user.failed.login.threshold}")
@@ -41,8 +47,4 @@ public class AppConfigs {
     UUID organizationMerchantUserRole;
     @Value("${system.default.tenant.tenant_id}")
     UUID defaultTenantId;
-    @Value(value = "${ticket.app.baseUrl}")
-    public String baseUrl;
-    @Value("${paystack.secret.key}")
-    public String payStackApiKey;
 }

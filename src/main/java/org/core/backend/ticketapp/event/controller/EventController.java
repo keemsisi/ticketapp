@@ -42,6 +42,12 @@ public record EventController(EventService eventService, JwtTokenUtil jwtTokenUt
         return new ResponseEntity<>(new GenericResponse<>("00", "All events", PagedMapperUtil.map(eventService.searchEvents(filter))), HttpStatus.OK);
     }
 
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/fetch-by-ids")
+    public ResponseEntity<GenericResponse<List<Event>>> fetchEventByIds(final @RequestParam List<UUID> ids) {
+        final var event = eventService.getAllByIds(ids);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Fetched successfully", event), HttpStatus.OK);
+    }
+
 
     //    @PreAuthorize("hasAuthority('SCOPE_update_event')")
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)

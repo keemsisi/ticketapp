@@ -5,6 +5,9 @@ import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.PagedMapperUtil;
 import org.core.backend.ticketapp.common.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
+import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.plan.dto.PlanCreateRequestDTO;
 import org.core.backend.ticketapp.plan.entity.Plan;
 import org.core.backend.ticketapp.plan.service.PlanService;
@@ -23,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/plan")
 public class PlanController implements ICrudController {
     private final PlanService planService;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<Plan>> createPlan(@Validated @RequestBody PlanCreateRequestDTO request) throws Exception {
+        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var plan = planService.createPlan(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Plan created successfully", plan), HttpStatus.CREATED);
     }

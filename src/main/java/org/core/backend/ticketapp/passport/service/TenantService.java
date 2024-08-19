@@ -10,6 +10,7 @@ import org.core.backend.ticketapp.passport.entity.Tenant;
 import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.repository.SystemAlertRepository;
 import org.core.backend.ticketapp.passport.repository.TenantRepository;
+import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.BaseRepoService;
 import org.core.backend.ticketapp.passport.service.core.blobstorage.BlobStorageService;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
@@ -36,6 +37,7 @@ public class TenantService extends BaseRepoService<Tenant> {
     private final BlobStorageService blobStorageService;
     private final ObjectMapper objectMapper;
     private final JwtTokenUtil jwtTokenUtil;
+    private final AppConfigs appConfigs;
 
     public Optional<Tenant> getByTenantId(UUID tenantId) {
         return repository.findRegistrar(tenantId);
@@ -54,6 +56,7 @@ public class TenantService extends BaseRepoService<Tenant> {
         tenant.setCreatedBy(user.getId());
         tenant.setCreatedOn(new Date());
         tenant.setUserId(ownerId);
+        tenant.setPlanId(appConfigs.defaultPlanId);
         final var systemAlert = SystemAlert.builder().emailAlert(tenantDto.isEmailAlert())
                 .smsAlert(tenantDto.isSmsAlert()).id(UUID.randomUUID())
                 .dateCreated(LocalDateTime.now()).createdBy(jwtTokenUtil.getUser().getUserId())

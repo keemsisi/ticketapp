@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.thecarisma.ExcelColumn;
 import lombok.Data;
+import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.constraints.Email;
@@ -59,6 +61,10 @@ public class LoggedInUserDto {
     private List<String> roles = new ArrayList<>();
 
     private List<String> scope = new ArrayList<>();
+    @ExcelColumn(columnName = "account_type", failIfAbsent = false)
+    private AccountType accountType;
+    @ExcelColumn(columnName = "user_type", failIfAbsent = false)
+    private UserType userType;
 
     public UUID getUserId() {
         if (Objects.isNull(userId)) {

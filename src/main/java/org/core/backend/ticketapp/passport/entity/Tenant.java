@@ -1,6 +1,5 @@
 package org.core.backend.ticketapp.passport.entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,12 +18,12 @@ import java.util.UUID;
 @Setter
 @Table(name = "tenant", indexes = {@Index(name = "ix_tbl_tenant_col_name_uq", columnList = "normalized_name", unique = true)})
 public class Tenant extends AbstractBaseEntity {
+    @Column(name = "plan_id")
+    private UUID planId;
     @Column(name = "name")
     private String name;
-
     @Column(name = "normalized_name")
     private String normalizedName;
-
     @Column(name = "address")
     private String address;
 

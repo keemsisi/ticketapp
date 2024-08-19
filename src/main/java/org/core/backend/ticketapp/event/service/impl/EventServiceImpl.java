@@ -3,6 +3,7 @@ package org.core.backend.ticketapp.event.service.impl;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsDTO;
@@ -99,6 +100,17 @@ public class EventServiceImpl implements EventService {
     public Event getById(UUID id) {
         final var event = eventRepository.findById(id).orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
         return event;
+    }
+
+    @Override
+    public List<Event> getAllByIds(final List<UUID> ids) {
+        final var userType = jwtTokenUtil.getUser().getUserType();
+        if (Objects.isNull(userType)) {
+            return eventRepository.findAllById(ids);
+        }
+        return userType == UserType.BUYER ?
+                eventRepository.findAllById(ids)
+                : eventRepository.findAllById(ids, jwtTokenUtil.getUser().getUserId());
     }
 
     public Event update(final EventUpdateRequestDTO request) {
