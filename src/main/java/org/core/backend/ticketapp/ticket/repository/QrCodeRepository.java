@@ -21,4 +21,14 @@ public interface QrCodeRepository extends JpaRepository<QrCode, UUID>, PagingAnd
 
     @Query(value = "SELECT * FROM qr_code t WHERE t.tenant_id = ?1 ", nativeQuery = true)
     Page<QrCode> findByTenantId(final UUID tenantId, final Pageable pageRequest);
+
+    @Query(value = "SELECT * FROM qr_code t WHERE t.event_id = ?1 AND t.tenant_id = ?2 AND t.user_id = ?3 ", nativeQuery = true)
+    Page<QrCode> findByEventIdAndTenantIdAndUserId(final UUID eventId, final UUID tenantId,
+                                                   final UUID userId, final Pageable pageRequest);
+
+    @Query(value = "SELECT * FROM qr_code t WHERE t.tenant_id = ?1 AND t.user_id = ?2 AND t.deleted=false ", nativeQuery = true)
+    Page<QrCode> findByTenantIdAndUserId(final UUID tenantId, final UUID userId, final Pageable pageRequest);
+
+    @Query(value = "SELECT * FROM qr_code t WHERE t.user_id = ?1 AND t.deleted=false ", nativeQuery = true)
+    Page<QrCode> findByUserId(final UUID userId, final Pageable pageable);
 }

@@ -1,7 +1,8 @@
 package org.core.backend.ticketapp.ticket.service;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.enums.AccountType;
+import org.apache.commons.lang3.ObjectUtils;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -61,17 +63,27 @@ public class QrCodeServiceImpl implements QrCodeService {
     }
 
     @Override
-    public Page<QrCode> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageRequest) {
-        final var loggedInUser = jwtTokenUtil.getUser();
+    public Page<QrCode> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
+        final var userType = jwtTokenUtil.getUser().getUserType();
+        final var userId = jwtTokenUtil.getUser().getUserId();
+        final var eventId = requestDTO.eventId();
         var tenantId = jwtTokenUtil.getUser().getTenantId();
-        if (requestDTO.tenantId() != null && UserUtils.userHasRole(loggedInUser.getRoles(), AccountType.SUPER_ADMIN.getType())) {
+        if (requestDTO.tenantId() != null) {
+            UserUtils.containsActionName("event_view_qr");
             tenantId = requestDTO.tenantId();
+            return Objects.nonNull(requestDTO.eventId()) ?
+                    qrCodeRepository.findByEventIdAndTenantId(eventId, tenantId, pageable) :
+                    qrCodeRepository.findByTenantId(tenantId, pageable);
+        } else if (Objects.nonNull(userType) && userType.equals(UserType.SELLER)) {
+            return Objects.nonNull(requestDTO.userId()) ?
+                    qrCodeRepository.findByTenantIdAndUserId(tenantId, requestDTO.userId(), pageable) :
+                    qrCodeRepository.findByTenantId(tenantId, pageable);
+        } else if (Objects.nonNull(userType) && userType.equals(UserType.BUYER)) {
+            return Objects.nonNull(requestDTO.eventId()) ?
+                    qrCodeRepository.findByEventIdAndTenantIdAndUserId(eventId, tenantId, userId, pageable) :
+                    qrCodeRepository.findByTenantIdAndUserId(tenantId, userId, pageable);
         }
-        if (requestDTO.eventId() != null) {
-            return qrCodeRepository.findByEventIdAndTenantId(requestDTO.eventId(), tenantId, pageRequest);
-        } else {
-            return qrCodeRepository.findByTenantId(tenantId, pageRequest);
-        }
+        return qrCodeRepository.findByUserId(ObjectUtils.defaultIfNull(requestDTO.userId(), userId), pageable);
     }
 
     @Override
