@@ -195,15 +195,15 @@ public class User implements UserDetails {
     @Transient
     private String department;
     @Transient
-    private int passwordExpirationInDays;
+    private Integer passwordExpirationInDays;
     @Transient
-    private int accountLockoutDurationInMinutes;
+    private Integer accountLockoutDurationInMinutes;
     @Transient
-    private int inactivePeriodInMinutes;
+    private Integer inactivePeriodInMinutes;
     @Transient
-    private int accountLockoutThresholdCount;
+    private Integer accountLockoutThresholdCount;
     @Transient
-    private boolean twoFaEnabled = false;
+    private Boolean twoFaEnabled = false;
 
     @JsonIgnore
     @Version
