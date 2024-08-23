@@ -1,6 +1,5 @@
 package org.core.backend.ticketapp.passport.service;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.core.backend.ticketapp.passport.dtos.core.BasicClientDetails;
@@ -20,6 +19,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -49,7 +49,8 @@ public class TokenEnhancerService implements TokenEnhancer {
         User user = null;
         if (!authentication.isClientOnly()) {
             user = (User) authentication.getPrincipal();
-            final var tenant = tenantService.getByTenantId(user.getTenantId()).orElse(new Tenant());
+            final var tenantId = user.getTenantId();
+            final var tenant = Objects.isNull(tenantId) ? new Tenant() : tenantService.getByTenantId(user.getTenantId()).orElse(new Tenant());
             var permissions = coreUserService.getUserPermissions(user.getId()).orElseThrow();
             additionalInformation.put("first_name", user.getFirstName());
             additionalInformation.put("last_name", user.getLastName());
