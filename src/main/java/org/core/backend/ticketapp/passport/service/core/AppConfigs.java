@@ -18,7 +18,7 @@ public class AppConfigs {
     @Value("${user.failed.login.threshold}")
     Long failedLoginThreshold;
     @Value("${user.password.expiration.in.days}")
-    Long passwordExpirationInDays;
+    public Long passwordExpirationInDays;
     @Value("${baseFrontEndUrl}")
     String baseFrontEndUrl;
     @Value("${ticketapp.token-secret}")

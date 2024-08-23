@@ -32,4 +32,13 @@ public enum AccountType {
     public String getType() {
         return type;
     }
+
+    public static List<AccountType> allowedForUserOnboarding() {
+        return List.of(
+                INDIVIDUAL_MERCHANT_OWNER,
+                ORGANIZATION_BUYER_OWNER,
+                ORGANIZATION_MERCHANT_OWNER,
+                INDIVIDUAL
+        );
+    }
 }

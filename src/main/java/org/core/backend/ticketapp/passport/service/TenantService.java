@@ -57,6 +57,7 @@ public class TenantService extends BaseRepoService<Tenant> {
         tenant.setCreatedOn(new Date());
         tenant.setUserId(ownerId);
         tenant.setPlanId(appConfigs.defaultPlanId);
+        tenant.setPasswordExpirationInDays(appConfigs.passwordExpirationInDays.intValue());
         final var systemAlert = SystemAlert.builder().emailAlert(tenantDto.isEmailAlert())
                 .smsAlert(tenantDto.isSmsAlert()).id(UUID.randomUUID())
                 .dateCreated(LocalDateTime.now()).createdBy(jwtTokenUtil.getUser().getUserId())
