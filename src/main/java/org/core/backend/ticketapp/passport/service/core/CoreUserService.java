@@ -255,7 +255,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         final var user = new User();
         final var userType = userDto.getAccountType();
         if (!AccountType.allowedForUserOnboarding().contains(userDto.getAccountType())) {
-            throw new ApplicationException(402, "not_allowed", String.format("Oops! Only this account type are allowed : %s",
+            throw new ApplicationException(400, "not_allowed", String.format("Oops! Only this account type are allowed : %s",
                     AccountType.allowedForUserOnboarding()));
         } else if (userDto.getAccountType().equals(AccountType.ORGANIZATION_BUYER_OWNER) ||
                 userDto.getAccountType().equals(AccountType.ORGANIZATION_MERCHANT_OWNER) ||
