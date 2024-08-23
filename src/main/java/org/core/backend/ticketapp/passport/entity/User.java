@@ -8,6 +8,7 @@ import io.github.thecarisma.ExcelColumn;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.UserType;
@@ -253,7 +254,7 @@ public class User implements UserDetails {
         return String.format("%s %s %s", lastName, StringUtils.defaultIfBlank(middleName, ""), firstName);
     }
 
-    public boolean isTwoFaEnabled() {
-        return twoFaEnabled;
+    public Boolean isTwoFaEnabled() {
+        return ObjectUtils.defaultIfNull(twoFaEnabled,false);
     }
 }
