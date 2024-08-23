@@ -252,4 +252,8 @@ public class User implements UserDetails {
     public String getFullName() {
         return String.format("%s %s %s", lastName, StringUtils.defaultIfBlank(middleName, ""), firstName);
     }
+
+    public boolean isTwoFaEnabled() {
+        return twoFaEnabled;
+    }
 }
