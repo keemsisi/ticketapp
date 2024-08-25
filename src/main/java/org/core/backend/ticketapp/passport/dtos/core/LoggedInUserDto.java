@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.thecarisma.ExcelColumn;
 import lombok.Data;
 import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.common.enums.Gender;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -57,6 +58,8 @@ public class LoggedInUserDto {
     private String department;
 
     private String unit;
+    private Gender gender;
+
 
     private List<String> roles = new ArrayList<>();
 

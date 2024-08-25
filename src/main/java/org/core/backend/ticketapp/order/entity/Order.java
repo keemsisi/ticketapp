@@ -56,6 +56,12 @@ public class Order extends AbstractBaseEntity {
     @Column(name = "reference")
     private String reference;
 
+    @Column(name = "section_id")
+    private UUID seatSectionId;
+
+    @Column(name = "ticket_id", columnDefinition = "uuid default null")
+    private UUID ticketId;
+
     @PrePersist
     public void onCreate() {
         id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());

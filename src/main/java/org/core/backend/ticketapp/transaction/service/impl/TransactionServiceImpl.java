@@ -3,13 +3,19 @@ package org.core.backend.ticketapp.transaction.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.core.backend.ticketapp.common.enums.Gender;
 import org.core.backend.ticketapp.common.enums.OrderStatus;
 import org.core.backend.ticketapp.common.enums.Status;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.service.OrderService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
+import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
+import org.core.backend.ticketapp.ticket.service.TicketService;
 import org.core.backend.ticketapp.transaction.dto.InitTransactionRequestDTO;
 import org.core.backend.ticketapp.transaction.dto.PaymentInitResponseDTO;
 import org.core.backend.ticketapp.transaction.dto.PaymentVerificationResponseDTO;
@@ -30,7 +36,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.core.backend.ticketapp.common.util.Constants.PAYSTACK_INITIALIZE_PAY;
 import static org.core.backend.ticketapp.common.util.Constants.PAYSTACK_VERIFY;
@@ -45,6 +53,9 @@ public class TransactionServiceImpl implements TransactionService {
     private final JwtTokenUtil jwtTokenUtil;
     private final AppConfigs appConfigs;
     private final ObjectMapper objectMapper;
+    private final EventService eventService;
+    private final TicketService ticketService;
+    private final CoreUserService coreUserService;
 
     @Override
     public Page<Transaction> getAll(final Pageable pageable) {
@@ -53,6 +64,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Order initializePayment(final InitTransactionRequestDTO request) {
+        final var event = eventService.getById(request.getEventId());
+        if (event.isFreeEvent()) {
+            return processFreeEvent(request);
+        }
         ResponseEntity<PaymentInitResponseDTO> response = null;
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -113,21 +128,71 @@ public class TransactionServiceImpl implements TransactionService {
                         .gatewayResponse(gatewayResponse)
                         .build();
                 //TODO: fetch the transaction if it already exists else create a new transaction
-                final var transaction = Transaction.builder()
-                        .userId(order.getUserId())
-                        .reference(order.getReference())
-                        .amount(order.getAmount())
-                        .orderId(verifyRequestDTO.getOrderId())
-                        .status(Objects.isNull(meta.getPaidAt()) ? Status.PENDING : Status.PAID)
-                        .gateWayMeta(meta)
-                        .build();
-                transaction.setTenantId(order.getTenantId());
-                return transactionRepository.save(transaction);
+                final var transaction = createTransaction(order, meta);
+                processCreateTicketAndQrCode(order);
+                return transaction;
             }
         } catch (Exception e) {
             log.error(">>> Error Occurred while initiating transaction", e);
             final var errorCode = System.nanoTime();
             throw new ApplicationException(400, "req_failed", String.format("Could not verify payment, please try again later or contact support with code: %s", errorCode));
         }
+    }
+
+    @Transactional
+    public Transaction createTransaction(final Order order, final PaymentGatewayMeta meta) {
+        final var reference = order.getReference();
+        return transactionRepository.findByReference(reference).or(() -> {
+            final var trx = Transaction.builder()
+                    .userId(order.getUserId())
+                    .reference(order.getReference())
+                    .amount(order.getAmount())
+                    .orderId(order.getId())
+                    .status(Objects.isNull(meta.getPaidAt()) ? Status.PENDING : Status.PAID)
+                    .gateWayMeta(meta)
+                    .build();
+            trx.setTenantId(order.getTenantId());
+            transactionRepository.save(trx);
+            return Optional.of(trx);
+        }).orElseThrow(() -> new ApplicationException(400, "error", "Error while creating transaction"));
+    }
+
+    @Transactional
+    public Order processFreeEvent(final InitTransactionRequestDTO request) {
+        final var user = jwtTokenUtil.getUser();
+        final var order = new Order();
+        order.setEventId(request.getEventId());
+        order.setQuantity(ObjectUtils.defaultIfNull(request.getQuantity(), 1));
+        order.setUserId(jwtTokenUtil.getUser().getUserId());
+        order.setAmount(BigDecimal.ZERO);
+        order.setStatus(OrderStatus.SUCCESSFUL);
+        order.setSeatSectionId(request.getSeatSectionId());
+        order.setTenantId(jwtTokenUtil.getUser().getTenantId());
+        final var ticketDto = new TicketCreateRequestDTO(
+                order.getEventId(), order.getSeatSectionId(), order.getUserId(),
+                request.getFirstName(), request.getLastName(),
+                request.getEmail(), request.getPhoneNumber(),
+                Objects.isNull(user.getUserId()) ? Gender.OTHERS : user.getGender()
+        );
+        final var ticket = ticketService.create(ticketDto, order);
+        order.setTicketId(ticket.getId());
+        return orderService.save(order);
+    }
+
+    @Transactional
+    public void processCreateTicketAndQrCode(final Order order) {
+        final var user = coreUserService.getUserById(order.getId())
+                .orElseThrow(() -> new ApplicationException(404, "not_not",
+                        "Oops! User account not found to complete payment ticket and order process"));
+        final var ticketDto = new TicketCreateRequestDTO(
+                order.getEventId(), order.getSeatSectionId(), order.getUserId(),
+                user.getFirstName(), user.getLastName(),
+                user.getEmail(), user.getPhone(), Gender.valueOf(
+                StringUtils.defaultIfBlank(user.getGender(), Gender.OTHERS.name()))
+        );
+        final var ticket = ticketService.create(ticketDto, order);
+        order.setTicketId(ticket.getId());
+        orderService.save(order);
+        log.info("processCreateTicketAndQrCode competed successfully with order {} ", order);
     }
 }

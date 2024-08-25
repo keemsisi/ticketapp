@@ -46,7 +46,7 @@ public class PlanServiceImpl implements PlanService {
         }
         final var planResponse = Objects.requireNonNull(response.getBody());
         final var newPlan = new Plan();
-        newPlan.setPlanId(planResponse.data().id());
+        newPlan.setPlanId(String.valueOf(planResponse.data().id()));
         newPlan.setName(planResponse.data().name());
         newPlan.setPlanCode(planResponse.data().planCode());
         newPlan.setInterval(planResponse.data().interval());

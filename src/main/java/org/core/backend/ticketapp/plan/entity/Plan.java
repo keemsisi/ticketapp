@@ -20,7 +20,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "plan")
+@Table(name = "event_wishlist", indexes = {
+        @Index(name = "ix_event_id__user_id_uq", columnList = "event_id, user_id", unique = true)})
 public class Plan extends AbstractBaseEntity {
     @Id
     @Column(columnDefinition = "UUID NOT NULL default uuid_generate_v1()")
@@ -29,14 +30,17 @@ public class Plan extends AbstractBaseEntity {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "code_name")
+    private String codeName;
+
     @NotNull(message = "Interval cannot be null")
     private String interval;
 
-    @Column(name = "plan_code", nullable = false)
+    @Column(name = "plan_code")
     private String planCode;
 
-    @Column(name = "plan_id", nullable = false)
-    private Integer planId;
+    @Column(name = "plan_id")
+    private String planId;
 
     @NotNull(message = "Amount cannot be null")
     @Digits(integer = 6, fraction = 2)

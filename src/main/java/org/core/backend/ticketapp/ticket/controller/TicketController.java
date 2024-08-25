@@ -5,8 +5,8 @@ import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.PagedMapperUtil;
 import org.core.backend.ticketapp.common.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
-import org.core.backend.ticketapp.order.dto.OrderCreateRequestDTO;
 import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.order.dto.OrderCreateRequestDTO;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
@@ -16,7 +16,10 @@ import org.core.backend.ticketapp.ticket.service.TicketService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -30,7 +33,7 @@ public class TicketController implements ICrudController {
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> create(TicketCreateRequestDTO ticketRequest, OrderCreateRequestDTO orderRequest) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
-        final var data = ticketService.create(ticketRequest, orderRequest);
+        final var data = ticketService.create(ticketRequest, null);
         return ResponseEntity.ok(new GenericResponse<>("00", "Ticket created successfully", data));
     }
 

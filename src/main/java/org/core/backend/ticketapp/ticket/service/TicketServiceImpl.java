@@ -10,7 +10,6 @@ import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
-import org.core.backend.ticketapp.order.dto.OrderCreateRequestDTO;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.repository.OrderRepository;
 import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
@@ -20,18 +19,14 @@ import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.PasswordUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
+import org.core.backend.ticketapp.ticket.dto.QrCodeCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
+import org.core.backend.ticketapp.ticket.entity.QrCode;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.repository.TicketRepository;
-import org.core.backend.ticketapp.transaction.dto.TransactionInitializeRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.TransactionInitializeResponseDTO;
-import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.TransactionVerifyResponseDTO;
-import org.core.backend.ticketapp.transaction.repository.TransactionRepository;
-import org.core.backend.ticketapp.transaction.service.TransactionService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,25 +36,29 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Transactional
 @AllArgsConstructor
 public class TicketServiceImpl implements TicketService {
 
+    private static final Logger log = LoggerFactory.getLogger(TicketServiceImpl.class);
     private final TicketRepository ticketRepository;
     private final EventRepository eventRepository;
     private final CoreUserService userService;
     private final JwtTokenUtil jwtTokenUtil;
     private final EventSeatSectionRepository eventSeatSectionRepository;
     private final OrderRepository orderRepository;
-    private final TransactionService transactionService;
+    private final QrCodeService qrCodeService;
 
     private EventDao eventDao;
 
+
     //call this create when the payment is successful
     @Override
-    public Ticket create(final TicketCreateRequestDTO ticketRequestDTO, final OrderCreateRequestDTO orderRequestDTO) {
+    @Transactional
+    public Ticket create(final TicketCreateRequestDTO ticketRequestDTO, final Order order) {
         final var event = eventRepository.findById(ticketRequestDTO.getEventId())
                 .orElseThrow(() -> new ApplicationException(400, "not_found", "Event does not exists!"));
         final var eventStats = eventDao.getEventsStats(event.getId(), event.getTenantId());
@@ -82,31 +81,37 @@ public class TicketServiceImpl implements TicketService {
                 ticket.setPrice(seatSection.getPrice());
                 ticket.setStatus(Status.ACTIVE);
 
-                if (Objects.isNull(jwtTokenUtil.getUser().getUserId())) {
-                    final var gender = ticketRequestDTO.getGender();
-                    final var userDto = new UserDto();
-                    userDto.setEmail(ticketRequestDTO.getEmail());
-                    userDto.setFirstName(ticketRequestDTO.getFirstName());
-                    userDto.setLastName(ticketRequestDTO.getLastName());
-                    userDto.setPhone(ticketRequestDTO.getPhoneNumber());
-                    userDto.setGender(Objects.isNull(gender) ? null : gender.toString());
-                    userDto.setUserType(UserType.BUYER);
-                    userDto.setAccountType(AccountType.INDIVIDUAL);
-                    userDto.setPassword(PasswordUtil.generatePassword());
-
-                    final var user = userService.createUser(userDto, new LoggedInUserDto());
-                    user.setFirstTimeLogin(true);
-                    user.setPasswordExpiryDate(LocalDateTime.now().plusMinutes(1));
-                    user.setModifiedOn(new Date());
-                    user.setModifiedBy(user.getId());
-                    userService.save(user);
-                    ticket.setUserId(user.getId());
+                if (Objects.isNull(jwtTokenUtil.getUser().getUserId()) && Objects.nonNull(order)) {
+                    final var orderExists = orderRepository.existsById(order.getId());
+                    if (orderExists && Objects.nonNull(jwtTokenUtil.getUser().getUserId())) {
+                        final var gender = ticketRequestDTO.getGender();
+                        final var userDto = new UserDto();
+                        userDto.setEmail(ticketRequestDTO.getEmail());
+                        userDto.setFirstName(ticketRequestDTO.getFirstName());
+                        userDto.setLastName(ticketRequestDTO.getLastName());
+                        userDto.setPhone(ticketRequestDTO.getPhoneNumber());
+                        userDto.setGender(Objects.isNull(gender) ? null : gender.toString());
+                        userDto.setUserType(UserType.BUYER);
+                        userDto.setAccountType(AccountType.INDIVIDUAL);
+                        userDto.setPassword(PasswordUtil.generatePassword());
+                        final var user = userService.createUser(userDto, new LoggedInUserDto());
+                        user.setFirstTimeLogin(true);
+                        user.setPasswordExpiryDate(LocalDateTime.now().plusMinutes(1));
+                        user.setModifiedOn(new Date());
+                        user.setModifiedBy(user.getId());
+                        userService.save(user);
+                        ticket.setUserId(user.getId());
+                    }
+                    throw new ApplicationException(400, "not_found", "Order does not exists!");
                 } else {
                     final var loggedInUserId = jwtTokenUtil.getUser().getUserId();
                     ticket.setUserId(loggedInUserId);
                 }
                 ticket.setTenantId(event.getTenantId());
                 ticket.setDateCreated(LocalDateTime.now());
+                final var qrCode = createTicketQrCodeAndSendEmail(ticket);
+                log.info(">>> Successfully created ticketId: {} qrCodeId: {} and orderId: {}  processed",
+                        ticket.getId(), qrCode.getId(), order.getId());
                 return ticketRepository.save(ticket);
             } catch (Exception e) {
                 event.setTicketsAvailable(event.getTicketsAvailable() + 1);
@@ -155,5 +160,14 @@ public class TicketServiceImpl implements TicketService {
         } else {
             return ticketRepository.findByTenantId(tenantId, pageRequest);
         }
+    }
+
+    @Transactional
+    public QrCode createTicketQrCodeAndSendEmail(final Ticket ticket) {
+        final var qrCodeRequest = new QrCodeCreateRequestDTO(ticket.getId());
+        CompletableFuture.runAsync(() -> {
+            log.info(">>> Send Email to customer after successful qrcode generation with ticket {} ", ticket);
+        });
+        return qrCodeService.create(qrCodeRequest);
     }
 }
