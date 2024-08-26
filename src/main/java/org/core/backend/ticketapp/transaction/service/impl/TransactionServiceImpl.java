@@ -186,7 +186,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     public void processCreateTicketAndQrCode(final Order order) {
-        final var user = coreUserService.getUserById(order.getId())
+        final var user = coreUserService.getUserById(order.getUserId())
                 .orElseThrow(() -> new ApplicationException(404, "not_not",
                         "Oops! User account not found to complete payment ticket and order process"));
         final var ticketDto = new TicketCreateRequestDTO(

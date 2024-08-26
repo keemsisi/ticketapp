@@ -117,6 +117,7 @@ public class TicketServiceImpl implements TicketService {
                 return ticket;
             } catch (Exception e) {
                 event.setTicketsAvailable(event.getTicketsAvailable() + 1);
+                log.error(">>> Exception occurred while creating ticket ", e);
                 throw new ApplicationException(500, "server_error", e.getMessage());
             }
         }
