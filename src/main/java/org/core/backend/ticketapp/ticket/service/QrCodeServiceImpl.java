@@ -13,6 +13,8 @@ import org.core.backend.ticketapp.ticket.dto.QrCodeCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.ScannedQrCodeResponse;
 import org.core.backend.ticketapp.ticket.entity.QrCode;
 import org.core.backend.ticketapp.ticket.repository.QrCodeRepository;
+import org.core.backend.ticketapp.ticket.repository.TicketRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,12 +29,13 @@ import java.util.UUID;
 public class QrCodeServiceImpl implements QrCodeService {
     private final QrCodeRepository qrCodeRepository;
     private final JwtTokenUtil jwtTokenUtil;
-    private final TicketService ticketService;
+    private final TicketRepository ticketRepository;
     private final AppConfigs appConfigs;
 
     @Override
     public QrCode create(final QrCodeCreateRequestDTO requestDTO) {
-        final var ticket = ticketService.getById(requestDTO.ticketId());
+        final var ticket = ticketRepository.findById(requestDTO.ticketId())
+                .orElseThrow(()-> new ApplicationException(404, "not_found", "Ticket not found!"));
         final var id = UUID.randomUUID();
         final var qrcode = QrCode.builder()
                 .id(id).ticketId(requestDTO.ticketId())

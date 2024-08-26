@@ -8,6 +8,7 @@ import org.core.backend.ticketapp.common.enums.Gender;
 import org.core.backend.ticketapp.common.enums.OrderStatus;
 import org.core.backend.ticketapp.common.enums.Status;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.event.service.EventSeatSectionService;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.service.OrderService;
@@ -54,6 +55,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final AppConfigs appConfigs;
     private final ObjectMapper objectMapper;
     private final EventService eventService;
+    private final EventSeatSectionService eventSeatSectionService;
     private final TicketService ticketService;
     private final CoreUserService coreUserService;
 
@@ -67,6 +69,9 @@ public class TransactionServiceImpl implements TransactionService {
         final var event = eventService.getById(request.getEventId());
         if (event.isFreeEvent()) {
             return processFreeEvent(request);
+        } else {
+            final var eventSeatSection = eventSeatSectionService.getById(request.getSeatSectionId());
+            request.setAmount(eventSeatSection.getPrice());
         }
         ResponseEntity<PaymentInitResponseDTO> response = null;
         try {
@@ -91,7 +96,7 @@ public class TransactionServiceImpl implements TransactionService {
         order.setEventId(initRequest.getEventId());
         order.setQuantity(ObjectUtils.defaultIfNull(initRequest.getQuantity(), 1));
         order.setUserId(jwtTokenUtil.getUser().getUserId());
-        order.setAmount(initRequest.getAmount());
+        order.setAmount(new BigDecimal(String.valueOf(initRequest.getAmount())));
         order.setStatus(OrderStatus.PENDING);
         order.setPaymentLink(data.getAuthorizationUrl());
         order.setCode(data.getAccessCode());

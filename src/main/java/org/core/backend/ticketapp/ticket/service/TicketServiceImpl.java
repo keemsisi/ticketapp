@@ -65,7 +65,7 @@ public class TicketServiceImpl implements TicketService {
         if (eventStats.getTotalAvailableTickets() > 0) {
             EventSeatSection seatSection = null;
 
-            if (!ticketRequestDTO.getSeatSectionId().toString().isEmpty()) {
+            if (Objects.nonNull(ticketRequestDTO.getSeatSectionId())) {
                 seatSection = eventSeatSectionRepository.findById(ticketRequestDTO.getSeatSectionId())
                         .orElseThrow(() -> new ResourceNotFoundException("Event seat section does not exist",
                                 ticketRequestDTO.getSeatSectionId().toString()));
@@ -74,7 +74,7 @@ public class TicketServiceImpl implements TicketService {
             }
 
             try {
-                final var ticket = new Ticket();
+                var ticket = new Ticket();
                 ticket.setSeatSectionId(ticketRequestDTO.getSeatSectionId());
                 ticket.setEventId(ticketRequestDTO.getEventId());
                 assert seatSection != null;
@@ -109,10 +109,12 @@ public class TicketServiceImpl implements TicketService {
                 }
                 ticket.setTenantId(event.getTenantId());
                 ticket.setDateCreated(LocalDateTime.now());
+                ticket.setId(UUID.randomUUID());
+                ticket = ticketRepository.save(ticket);
                 final var qrCode = createTicketQrCodeAndSendEmail(ticket);
                 log.info(">>> Successfully created ticketId: {} qrCodeId: {} and orderId: {}  processed",
                         ticket.getId(), qrCode.getId(), order.getId());
-                return ticketRepository.save(ticket);
+                return ticket;
             } catch (Exception e) {
                 event.setTicketsAvailable(event.getTicketsAvailable() + 1);
                 throw new ApplicationException(500, "server_error", e.getMessage());

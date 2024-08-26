@@ -19,14 +19,13 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InitTransactionRequestDTO {
     @NotNull(message = "Amount cannot be null")
-    @Digits(integer = 6, fraction = 2)
-    private BigDecimal amount;
+    private double amount;
     private String plan;
     @NotNull(message = "Event Id can't be null")
     private UUID eventId;
     @Min(value = 1, message = "Minimum persons is 1!")
     private Integer quantity;
-    @Min(value = 1, message = "Seat section Id Required")
+    @NotNull(message = "seatSectionId Required")
     private UUID seatSectionId;
     private String firstName;
     private String lastName;

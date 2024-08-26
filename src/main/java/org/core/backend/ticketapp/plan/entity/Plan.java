@@ -20,8 +20,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "event_wishlist", indexes = {
-        @Index(name = "ix_event_id__user_id_uq", columnList = "event_id, user_id", unique = true)})
+@Table(name = "plan", indexes = {
+        @Index(name = "ix_code_name_uq", columnList = "code_name", unique = true)})
 public class Plan extends AbstractBaseEntity {
     @Id
     @Column(columnDefinition = "UUID NOT NULL default uuid_generate_v1()")
@@ -36,10 +36,10 @@ public class Plan extends AbstractBaseEntity {
     @NotNull(message = "Interval cannot be null")
     private String interval;
 
-    @Column(name = "plan_code")
+    @Column(name = "plan_code", nullable = false)
     private String planCode;
 
-    @Column(name = "plan_id")
+    @Column(name = "plan_id", nullable = false)
     private String planId;
 
     @NotNull(message = "Amount cannot be null")
@@ -50,6 +50,7 @@ public class Plan extends AbstractBaseEntity {
     public void onCreate() {
         id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
         dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
+        codeName = name.toUpperCase();
     }
 
 }
