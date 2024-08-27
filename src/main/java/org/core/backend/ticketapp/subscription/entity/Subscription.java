@@ -12,6 +12,7 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -23,16 +24,16 @@ import javax.persistence.Table;
 public class Subscription extends AbstractBaseEntity {
 
     @Column(name = "vendor_id")
-    private String vendorId;
+    private int vendorId;
 
     @Column(name = "vendor_link")
     private String vendorLink;
 
-    @Column(name = "vendor_email")
-    private String vendorEmail;
+    @Column(name = "amount")
+    private BigDecimal amount;
 
-    @Column(name = "is_active")
-    private boolean isActive;
+    @Column(name = "status")
+    private String status;
 
     @Column(name = "code")
     private String code;

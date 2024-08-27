@@ -7,7 +7,7 @@ import org.core.backend.ticketapp.common.enums.Status;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.service.OrderService;
-import org.core.backend.ticketapp.passport.service.core.CoreUserService;
+import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.transaction.dto.InitTransactionRequestDTO;
 import org.core.backend.ticketapp.transaction.dto.PaymentInitResponseDTO;
@@ -19,7 +19,6 @@ import org.core.backend.ticketapp.transaction.repository.TransactionRepository;
 import org.core.backend.ticketapp.transaction.service.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
@@ -41,12 +40,9 @@ public class TransactionServiceImpl implements TransactionService {
     private static final Logger log = LoggerFactory.getLogger(TransactionServiceImpl.class);
     private final TransactionRepository transactionRepository;
     private final OrderService orderService;
-    private final CoreUserService userService;
+    private final AppConfigs appConfigs;
     private final RestTemplate restTemplate;
     private final JwtTokenUtil jwtTokenUtil;
-
-    @Value("${paystack.secret.key}")
-    private String secretKey;
 
     @Override
     public Page<Transaction> getAll(final Pageable pageable) {
@@ -58,7 +54,7 @@ public class TransactionServiceImpl implements TransactionService {
         ResponseEntity<PaymentInitResponseDTO> response = null;
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + secretKey);
+            headers.set("Authorization", "Bearer " + appConfigs.secretKey);
             headers.set("Content-Type", "application/json");
             final var entity = new HttpEntity<>(request, headers);
             response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, PaymentInitResponseDTO.class);
@@ -93,7 +89,7 @@ public class TransactionServiceImpl implements TransactionService {
         final var order = orderService.getById(verifyRequestDTO.getOrderId());
         try {
             final var headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + secretKey);
+            headers.set("Authorization", "Bearer " + appConfigs.secretKey);
             headers.set("Content-Type", "application/json");
             HttpEntity<String> entity = new HttpEntity<>(headers);
             final var response = restTemplate.exchange(String.format(PAYSTACK_VERIFY, order.getReference()),

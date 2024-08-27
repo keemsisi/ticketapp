@@ -15,6 +15,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionCreateRequestDTO {
-    private UUID vendorId;
-    private String planCode;
+    private String customer;
+    private String plan;
 }
