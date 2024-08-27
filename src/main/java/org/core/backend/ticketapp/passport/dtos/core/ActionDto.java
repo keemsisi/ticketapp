@@ -14,4 +14,6 @@ public class ActionDto {
         private String description;
         @NotNull
         private UUID moduleId;
+        @NotNull(message = "roleId can't be empty")
+        private UUID roleId;
 }

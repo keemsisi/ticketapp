@@ -1,12 +1,40 @@
 package org.core.backend.ticketapp.transaction.controller;
 
+import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
+import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
+import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.core.backend.ticketapp.transaction.service.TransactionService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 
+@Validated
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/v1/transaction")
-public record TransactionController(TransactionService transactionService) implements ICrudController {
+public class TransactionController implements ICrudController {
+    TransactionService transactionService;
+
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<Page<Transaction>>> getAll(Pageable pageable) {
+        final var transactions = transactionService.getAll(pageable);
+        return new ResponseEntity<>(new GenericResponse<>("00", "All transactions", transactions), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/verify")
+    public ResponseEntity<GenericResponse<Transaction>> verifyPayment(@RequestBody TransactionVerifyRequestDTO request) throws Exception {
+        final var verified = transactionService.verifyPayment(request);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Payment verified successfully", verified), HttpStatus.OK);
+    }
+
 }

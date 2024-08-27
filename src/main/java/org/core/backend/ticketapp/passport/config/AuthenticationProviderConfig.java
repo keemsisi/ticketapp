@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.request.TwoFaValidationDTO;
 import org.core.backend.ticketapp.passport.entity.User;
-//import org.core.backend.ticketapp.passport.service.RedisService;
 import org.core.backend.ticketapp.passport.service.RedisService;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +24,12 @@ import java.util.Objects;
 @Slf4j
 public class AuthenticationProviderConfig implements AuthenticationProvider {
 
+    private static final String AUTH_2FA = "_AUTH_2FA";
+    private static final String DEFAULT_EXT = "+234";
     @Autowired
     private CoreUserService userService;
     @Autowired
     private RedisService redisService;
-    private static final String AUTH_2FA = "_AUTH_2FA";
-    private static final String DEFAULT_EXT = "+234";
-
 
     @SneakyThrows(value = JsonProcessingException.class)
     @Override
@@ -58,7 +56,7 @@ public class AuthenticationProviderConfig implements AuthenticationProvider {
                 userService.send2FAToken(user.getId() + "", phone, user);
                 throw new ApplicationException(200, "2fa_required",
                         String.format("Use the verification code sent to %s, for your TicketApp authentication.",
-                                userService.maskPhoneNumber(phone)));
+                                CoreUserService.maskPhoneNumber(phone)));
             }
             userService.updateLogin(user);
             return new UsernamePasswordAuthenticationToken(user, password, null);

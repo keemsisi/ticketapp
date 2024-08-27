@@ -9,6 +9,7 @@ import java.util.UUID;
 public record TicketUpdateRequestDTO(
         @NotNull UUID seatSectionId,
         @NotNull UUID eventId,
-        @NotNull UUID userId
+        @NotNull UUID userId,
+        @NotNull UUID ticketId
 ) {
 }

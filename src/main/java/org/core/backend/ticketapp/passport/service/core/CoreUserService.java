@@ -7,8 +7,9 @@ import io.github.thecarisma.DocumentPojo;
 import io.github.thecarisma.FatalObjCopierException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.Gender;
-import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.mailchimp.SendMessage;
 import org.core.backend.ticketapp.common.mailchimp.To;
@@ -34,7 +35,6 @@ import org.core.backend.ticketapp.passport.util.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -96,32 +96,8 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     private SpringTemplateEngine templateEngine;
     @Autowired
     private Environment env;
-    @Value("${ticketapp.password-reset-url}")
-    private String resetPasswordUrl;
-    @Value("${user.failed.login.threshold}")
-    private Long failedLoginThreshold;
-    @Value("${user.password.expiration.in.days}")
-    private Long passwordExpirationInDays;
-    @Value("${baseFrontEndUrl}")
-    private String baseFrontEndUrl;
-    @Value("${ticketapp.token-secret}")
-    private String secret;
-    @Value("${send-2fa-sms}")
-    private boolean send2faSms;
-    @Value("${system.default.role.onboard_user_role}")
-    private UUID onboardUserRoleId;
-    @Value("${system.default.role.individual_user_role}")
-    private UUID individualUserRoleId;
-    @Value("${system.default.role.tenant_admin_role}")
-    private UUID tenantAdminRoleId;
-    @Value("${system.default.role.tenant_user_role}")
-    private UUID tenantUserRoleId;
-    @Value("${system.default.role.merchant_owner_role}")
-    private UUID merchantOwnerRole;
-    @Value("${system.default.role.merchant_user_role}")
-    private UUID merchantUserRole;
-    @Value("${system.default.tenant.tenant_id}")
-    private UUID defaultTenantId;
+    @Autowired
+    private AppConfigs appConfigs;
 
     @Autowired
     private RedisService redisService;
@@ -277,50 +253,85 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     @Transactional
     public User createUser(final UserDto userDto, final LoggedInUserDto loggedInUser) throws JsonProcessingException {
         final var user = new User();
+        final var userType = userDto.getAccountType();
+        if (userDto.getAccountType().equals(AccountType.ORGANIZATION_BUYER_OWNER) ||
+                userDto.getAccountType().equals(AccountType.ORGANIZATION_MERCHANT_OWNER) ||
+                userDto.getAccountType().equals(AccountType.INDIVIDUAL_MERCHANT_OWNER)) {
+            if (StringUtils.isBlank(userDto.getBusinessName())) {
+                throw new ApplicationException(400, "not_allowed", "Business name required!");
+            }
+        }
         BeanUtils.copyProperties(userDto, user);
         user.setId(UUID.randomUUID());
         user.setCreatedOn(new Date());
         user.setCreatedBy(loggedInUser.getUserId());
         user.setFirstTimeLogin(true);
         user.setTenantId(loggedInUser.getTenantId());
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         final var password = PasswordUtil.generatePassword();
-        user.setPassword(passwordEncoder.encode(password));
         user.setPasswordCreatedOn(Instant.now());
         user.setCreatedOn(new Date());
         final var gender = Gender.valueOf(userDto.getGender().toUpperCase());
         user.setGender(org.apache.commons.lang3.ObjectUtils.isEmpty(gender) ? "OTHERS" : gender.name());
-        user.setType(userDto.getType());
+        user.setAccountType(userDto.getAccountType());
+        if (StringUtils.isNotBlank(userDto.getPassword())) {
+            if (!passwordAdhereToPolicy(user, userDto.getPassword())) {
+                throw new ApplicationException(400, "bad_password", "Password does not adhere to system policies!");
+            }
+            final var hashedPassword = passwordEncoder.encode(userDto.getPassword());
+            user.setPassword(hashedPassword);
+        } else {
+            final var hashedPassword = passwordEncoder.encode(password);
+            user.setPassword(hashedPassword);
+        }
+
 
         userRepository.saveAndFlush(user);
-        user.setPassword(password); //set the password so it can be sent to the user via email
+//        user.setPassword(password); //set the password so it can be sent to the user via email
 
         final List<UserRoleDto> defaultUserRoleDto = new ArrayList<>();
         List<UserRoleDto> userRolesDtos = new ArrayList<>();
-        if (user.getType().equals(UserType.MERCHANT_USER)) {
-            List.of(tenantUserRoleId, merchantUserRole).forEach(roleId -> {
-                var userRole = new UserRoleDto();
-                userRole.setRoleId(roleId);
-                userRole.setUserId(user.getId());
-                defaultUserRoleDto.add(userRole);
-            });
-        } else if (user.getType().equals(UserType.MERCHANT_OWNER)) {
-            List.of(onboardUserRoleId, tenantUserRoleId, tenantAdminRoleId, merchantUserRole, merchantOwnerRole)
+        if (userDto.isOrganizationMerchant()) {
+            List.of(appConfigs.onboardUserRoleId, appConfigs.tenantUserRoleId,
+                            appConfigs.tenantAdminRoleId, appConfigs.organizationMerchantOwnerRole,
+                            appConfigs.organizationMerchantUserRole)
                     .forEach(roleId -> {
                         var userRole = new UserRoleDto();
                         userRole.setRoleId(roleId);
                         userRole.setUserId(user.getId());
                         defaultUserRoleDto.add(userRole);
                     });
-            assignNewTenantAsOwner(user);
-        } else if (user.getType().equals(UserType.INDIVIDUAL)) {
-            List.of(individualUserRoleId).forEach(roleId -> {
+            assignNewTenantAsOwner(user, userDto);
+        } else if (userDto.isIndividualMerchant()) {
+            List.of(appConfigs.onboardUserRoleId, appConfigs.tenantUserRoleId,
+                            appConfigs.tenantAdminRoleId, appConfigs.individualMerchantOwnerRole,
+                            appConfigs.individualMerchantUserRole)
+                    .forEach(roleId -> {
+                        var userRole = new UserRoleDto();
+                        userRole.setRoleId(roleId);
+                        userRole.setUserId(user.getId());
+                        defaultUserRoleDto.add(userRole);
+                    });
+            assignNewTenantAsOwner(user, userDto);
+        } else if (userDto.isOrganizationBuyer()) {
+            List.of(appConfigs.onboardUserRoleId, appConfigs.tenantUserRoleId,
+                            appConfigs.tenantAdminRoleId, appConfigs.organizationBuyerOwnerRole,
+                            appConfigs.organizationBuyerUserRole)
+                    .forEach(roleId -> {
+                        var userRole = new UserRoleDto();
+                        userRole.setRoleId(roleId);
+                        userRole.setUserId(user.getId());
+                        defaultUserRoleDto.add(userRole);
+                    });
+            assignNewTenantAsOwner(user, userDto);
+        } else if (userType.equals(AccountType.INDIVIDUAL)) {
+            List.of(appConfigs.individualUserRoleId).forEach(roleId -> {
                 var userRole = new UserRoleDto();
                 userRole.setRoleId(roleId);
                 userRole.setUserId(user.getId());
                 defaultUserRoleDto.add(userRole);
             });
-            user.setTenantId(defaultTenantId);
+            user.setTenantId(appConfigs.defaultTenantId);
         }
 
         if (!userDto.getRoleIds().isEmpty()) {
@@ -359,14 +370,17 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     }
 
     @Transactional
-    public void assignNewTenantAsOwner(@NotNull final User user) throws JsonProcessingException {
-        if (user.getType().equals(UserType.MERCHANT_OWNER) && Objects.isNull(user.getTenantId())) {
+    public void assignNewTenantAsOwner(@NotNull final User user, UserDto userDto) throws JsonProcessingException {
+        if ((user.getAccountType().equals(AccountType.INDIVIDUAL_MERCHANT_OWNER)
+                || user.getAccountType().equals(AccountType.ORGANIZATION_BUYER_OWNER))
+                && Objects.isNull(user.getTenantId())) {
             final var tenantDto = modelMapper.map(user, TenantDto.class);
             tenantDto.setAccountLockoutDurationInMinutes(5);
             tenantDto.setAccountLockoutThresholdCount(5);
             tenantDto.setState(user.getStateOfOrigin());
             tenantDto.setPasswordExpirationInDays(365);
             tenantDto.setInactivePeriodInMinutes(10);
+            tenantDto.setName(userDto.getBusinessName());
             tenantDto.setCurrency("NGN");
             tenantDto.setEmailAlert(true);
             tenantDto.setId(UUID.randomUUID());
@@ -374,8 +388,8 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
             user.setTenantId(tenant.getId());
             user.setModifiedOn(new Date());
             user.setModifiedBy(user.getId());
-        } else if (user.getType().equals(UserType.INDIVIDUAL)) {
-            user.setTenantId(defaultTenantId);
+        } else if (user.getAccountType().equals(AccountType.INDIVIDUAL)) {
+            user.setTenantId(appConfigs.defaultTenantId);
         }
         save(user);
     }
@@ -388,7 +402,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         context.setVariable("firstName", user.getFirstName());
         context.setVariable("supportEmail", sharedEnvironment.supportEmailAddress);
         context.setVariable("date", new Date().toString());
-        context.setVariable("baseFrontEndUrl", baseFrontEndUrl);
+        context.setVariable("baseFrontEndUrl", appConfigs.baseFrontEndUrl);
 
         String html = templateEngine.process("user-registration-template", context);
 
@@ -411,7 +425,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         context.setVariable("firstName", user.getFirstName());
         context.setVariable("supportEmail", sharedEnvironment.supportEmailAddress);
         context.setVariable("date", new Date().toString());
-        context.setVariable("baseFrontEndUrl", baseFrontEndUrl);
+        context.setVariable("baseFrontEndUrl", appConfigs.baseFrontEndUrl);
 
         String html = templateEngine.process("user-registration-template", context);
 
@@ -442,7 +456,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
 
     public void sendPasswordResetEmail(User user) throws NoSuchAlgorithmException {
         String passwordResetUrl = String.format("%s?token=%s",
-                resetPasswordUrl,
+                appConfigs.resetPasswordUrl,
                 generateUniqueVerificationToken(user, 24));
         Context context = new Context();
         context.setVariable("iconUrl", sharedEnvironment.iconUrl);
@@ -470,7 +484,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         Date expiryDate = new Date(System.currentTimeMillis() + ((long) expiryHour * 60 * 60) * 1000);
         String token = Helpers.MD5(Helpers.GetSaltString(
                 String.format("%s%d%s", user.getEmail(),
-                        dateIssued.getTime(), secret), 10
+                        dateIssued.getTime(), appConfigs.secret), 10
         ));
         token = Helpers.GetSaltString(user.getFirstName() + token + user.getEmail(), 40);
 
@@ -570,14 +584,14 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         } else if (user.isLocked()) {
             throw new ApplicationException(401, "unauthorized", "Your account is currently locked. Please reach out to support.");
         }
-        if (user.getLoginAttempt() >= failedLoginThreshold) {
+        if (user.getLoginAttempt() >= appConfigs.failedLoginThreshold) {
             user.setLocked(true);
             user.setLockDate(new Date());
             user.setLockedBy(user.getCreatedBy());
             userRepository.save(user);
             throw new ApplicationException(401, "unauthorized", "Your account is currently locked. Please reach out to support.");
         }
-        if (ChronoUnit.DAYS.between(user.getPasswordCreatedOn(), Instant.now()) >= passwordExpirationInDays) {
+        if (ChronoUnit.DAYS.between(user.getPasswordCreatedOn(), Instant.now()) >= appConfigs.passwordExpirationInDays) {
             throw new ApplicationException(401, "password_expired", "Your password has expired, kindly change your password.");
         }
     }
@@ -603,7 +617,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         twoFADTO.setPurpose("Authentication");
         redisService.storeDataAsString(userId + AUTH_2FA, objectMapper.writeValueAsString(twoFADTO), 1L);
 
-        if (send2faSms) {
+        if (appConfigs.send2faSms) {
             smsService.sendSingleSms(
                     MessagingServiceRequest.builder()
                             .to(phone)
@@ -617,7 +631,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
             context.setVariable("firstName", user.getFirstName());
             context.setVariable("supportEmail", sharedEnvironment.supportEmailAddress);
             context.setVariable("date", new Date().toString());
-            context.setVariable("baseFrontEndUrl", baseFrontEndUrl);
+            context.setVariable("baseFrontEndUrl", appConfigs.baseFrontEndUrl);
             context.setVariable("authToken", twoFADTO.getOtp());
             String html = templateEngine.process("user-2fa-template", context);
             var to = new To();

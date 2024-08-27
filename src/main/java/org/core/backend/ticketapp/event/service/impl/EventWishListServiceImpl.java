@@ -32,6 +32,7 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
             throw new ApplicationException(400, "already_exists", "Event already exists as wishlist!");
         }
         final var eventWishList = new EventWishList(event.getId(), userId);
+        eventWishList.setDateCreated(LocalDateTime.now());
         return repository.save(eventWishList);
     }
 
@@ -55,5 +56,11 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
     @Override
     public Page<EventWishList> getAll(Pageable pageable) {
         return repository.findAll(pageable);
+    }
+
+    @Override
+    public Page<EventWishList> getUserWisList(final Pageable pageable) {
+        final var user = jwtTokenUtil.getUser();
+        return repository.findAll(user.getUserId(), pageable);
     }
 }

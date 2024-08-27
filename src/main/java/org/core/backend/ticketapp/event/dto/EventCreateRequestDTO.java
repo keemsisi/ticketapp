@@ -52,4 +52,6 @@ public class EventCreateRequestDTO {
     private Set<String> categories;
     @NotNull
     private EventTicketType ticketType;
+    @NotBlank(message = "eventType is required")
+    private String eventType;
 }

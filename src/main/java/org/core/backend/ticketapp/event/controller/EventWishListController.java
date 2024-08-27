@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.event.controller;
 
 import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.PagedMapperUtil;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.request.events.wishlist.CreateEventWishListDTO;
 import org.core.backend.ticketapp.event.entity.EventWishList;
@@ -33,8 +34,11 @@ public record EventWishListController(EventWishListService eventWishListService)
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getAll(@PathVariable Pageable pageable) {
-        return ResponseEntity.ok(new GenericResponse<>("00", "Fetched Successfully", eventWishListService.getAll(pageable)));
+    public ResponseEntity<?> getAll(Pageable pageable) {
+        final var data = eventWishListService.getUserWisList(pageable);
+        final var response = PagedMapperUtil.map(data);
+        return ResponseEntity.ok(
+                new GenericResponse<>("00", "Fetched Successfully", response));
     }
 
 }

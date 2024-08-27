@@ -1,45 +1,51 @@
 package org.core.backend.ticketapp.transaction.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
+import org.apache.commons.lang3.ObjectUtils;
+import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
+import org.core.backend.ticketapp.common.enums.Status;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
-@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class),})
 @Table(name = "transaction")
-public class Transaction {
-    @Id
-    @Column(columnDefinition = "uuid not null default uuid_generate_v4()")
-    private UUID id;
+public class Transaction extends AbstractBaseEntity {
+    @JoinColumn(name = "user_id")
+    private UUID userId;
 
-    @NotNull
-    private String reference;
-
-    @NotNull
-    private String string;
-
-    @Column(name = "order_id", nullable = false)
+    @Column(name = "order_id")
     private UUID orderId;
 
-    @Column(name = "payment_date", nullable = false)
-    private LocalDateTime paymentDate;
+    @Column(name = "reference", unique = true)
+    private String reference;
 
-    @NotNull
-    private double amount;
+    @Column(name = "amount")
+    private BigDecimal amount;
 
-    private LocalDateTime dateCreated;
+    @Type(type = "JSONB")
+    @Column(name = "gateway_meta")
+    private PaymentGatewayMeta gateWayMeta;
 
-    private LocalDateTime dateModified;
+    @Column(name = "status")
+    @Enumerated(value = EnumType.STRING)
+    private Status status;
 
     @PrePersist
     public void onCreate() {
-        id = UUID.randomUUID();
+        id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
+        dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
     }
 }

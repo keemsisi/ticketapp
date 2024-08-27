@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -22,13 +23,14 @@ import java.util.UUID;
 @MappedSuperclass
 public abstract class AbstractBaseEntity {
     @Id
-    @Column(columnDefinition = "UUID NOT NULL default uuid_generate_v1()")
+    @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4() NOT NULL")
     protected UUID id;
-    @Column(columnDefinition = "timestamptz with time zone DEFAULT CURRENT_DATE NOT NULL", updatable = false)
+    @Column(columnDefinition = "timestamptz DEFAULT CURRENT_DATE NOT NULL", updatable = false)
+    @CreationTimestamp
     protected LocalDateTime dateCreated;
     @Column(updatable = false, name = "user_id")
     protected UUID userId;
-    @Column(columnDefinition = "timestamptz with time zone")
+    @Column(columnDefinition = "timestamptz")
     protected LocalDateTime dateModified;
     protected UUID modifiedBy;
     @NotNull

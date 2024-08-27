@@ -1,24 +1,45 @@
 package org.core.backend.ticketapp.ticket.service;
 
 import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.common.enums.Status;
+import org.core.backend.ticketapp.common.enums.UserType;
+import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
-import org.core.backend.ticketapp.event.entity.Event;
+import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
+import org.core.backend.ticketapp.order.dto.OrderCreateRequestDTO;
+import org.core.backend.ticketapp.order.entity.Order;
+import org.core.backend.ticketapp.order.repository.OrderRepository;
+import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.core.backend.ticketapp.passport.dtos.core.UserDto;
-import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.passport.util.PasswordUtil;
+import org.core.backend.ticketapp.passport.util.UserUtils;
+import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.TicketUpdateRequestDTO;
 import org.core.backend.ticketapp.ticket.entity.Ticket;
 import org.core.backend.ticketapp.ticket.repository.TicketRepository;
+import org.core.backend.ticketapp.transaction.dto.TransactionInitializeRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.TransactionInitializeResponseDTO;
+import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.TransactionVerifyResponseDTO;
+import org.core.backend.ticketapp.transaction.repository.TransactionRepository;
+import org.core.backend.ticketapp.transaction.service.TransactionService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -31,84 +52,108 @@ public class TicketServiceImpl implements TicketService {
     private final CoreUserService userService;
     private final JwtTokenUtil jwtTokenUtil;
     private final EventSeatSectionRepository eventSeatSectionRepository;
+    private final OrderRepository orderRepository;
+    private final TransactionService transactionService;
 
+    private EventDao eventDao;
+
+    //call this create when the payment is successful
     @Override
-    public Ticket create(TicketCreateRequestDTO ticketRequestDTO) {
-        Event event = eventRepository.findById(ticketRequestDTO.getEventId())
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id", ticketRequestDTO.getEventId().toString()));
-
-        if (event.getTicketsAvailable() > 0) {
-            event.setTicketsAvailable(event.getTicketsAvailable() - 1);
-
+    public Ticket create(final TicketCreateRequestDTO ticketRequestDTO, final OrderCreateRequestDTO orderRequestDTO) {
+        final var event = eventRepository.findById(ticketRequestDTO.getEventId())
+                .orElseThrow(() -> new ApplicationException(400, "not_found", "Event does not exists!"));
+        final var eventStats = eventDao.getEventsStats(event.getId(), event.getTenantId());
+        if (eventStats.getTotalAvailableTickets() > 0) {
             EventSeatSection seatSection = null;
 
             if (!ticketRequestDTO.getSeatSectionId().toString().isEmpty()) {
                 seatSection = eventSeatSectionRepository.findById(ticketRequestDTO.getSeatSectionId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Event seat section does not exist", ticketRequestDTO.getSeatSectionId().toString()));
+                        .orElseThrow(() -> new ResourceNotFoundException("Event seat section does not exist",
+                                ticketRequestDTO.getSeatSectionId().toString()));
                 if (seatSection.getCapacity() == 0)
                     throw new IllegalStateException("No available ticket for seat section");
-
             }
 
             try {
-
-                //TODO: Update this code to check if the user exists by email
-                // if the user does not exists by email, then create a new user account
-                Ticket ticket = new Ticket();
+                final var ticket = new Ticket();
                 ticket.setSeatSectionId(ticketRequestDTO.getSeatSectionId());
                 ticket.setEventId(ticketRequestDTO.getEventId());
                 assert seatSection != null;
                 ticket.setPrice(seatSection.getPrice());
-                seatSection.setCapacity(seatSection.getCapacity() + 1);
+                ticket.setStatus(Status.ACTIVE);
 
-                // Check if user exists
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-                if (authentication == null || !authentication.isAuthenticated()) {
-                    UserDto userDto = new UserDto();
+                if (Objects.isNull(jwtTokenUtil.getUser().getUserId())) {
+                    final var gender = ticketRequestDTO.getGender();
+                    final var userDto = new UserDto();
                     userDto.setEmail(ticketRequestDTO.getEmail());
                     userDto.setFirstName(ticketRequestDTO.getFirstName());
                     userDto.setLastName(ticketRequestDTO.getLastName());
                     userDto.setPhone(ticketRequestDTO.getPhoneNumber());
+                    userDto.setGender(Objects.isNull(gender) ? null : gender.toString());
+                    userDto.setUserType(UserType.BUYER);
+                    userDto.setAccountType(AccountType.INDIVIDUAL);
+                    userDto.setPassword(PasswordUtil.generatePassword());
 
-                    User user = userService.createUser(userDto, null);
+                    final var user = userService.createUser(userDto, new LoggedInUserDto());
+                    user.setFirstTimeLogin(true);
+                    user.setPasswordExpiryDate(LocalDateTime.now().plusMinutes(1));
+                    user.setModifiedOn(new Date());
+                    user.setModifiedBy(user.getId());
+                    userService.save(user);
                     ticket.setUserId(user.getId());
                 } else {
-                    UUID loggedInUserId = jwtTokenUtil.getUser().getUserId();
+                    final var loggedInUserId = jwtTokenUtil.getUser().getUserId();
                     ticket.setUserId(loggedInUserId);
                 }
-
+                ticket.setTenantId(event.getTenantId());
+                ticket.setDateCreated(LocalDateTime.now());
                 return ticketRepository.save(ticket);
             } catch (Exception e) {
                 event.setTicketsAvailable(event.getTicketsAvailable() + 1);
-                throw new IllegalStateException(e);
+                throw new ApplicationException(500, "server_error", e.getMessage());
             }
         }
-
-        throw new IllegalStateException("Ticket not available for event");
+        throw new ApplicationException(400, "bad_request", "Ticket not available for event");
     }
 
     @Override
     public Ticket getById(UUID id) {
-        Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket does not exist", id.toString()));
-
-        return ticket;
+        final var tenantId = jwtTokenUtil.getUser().getTenantId();
+        return ticketRepository.getById(id, tenantId)
+                .orElseThrow(() -> new ApplicationException(400, "not_found", "Ticket not found!"));
     }
 
     @Override
-    public Ticket update(UUID id, TicketUpdateRequestDTO ticketDTO) {
-        Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", id.toString()));
-        eventRepository.findById(ticketDTO.eventId())
+    public Ticket update(final TicketUpdateRequestDTO ticketDTO) {
+        final var tenantId = jwtTokenUtil.getUser().getTenantId();
+        final var ticket = ticketRepository.getById(ticketDTO.ticketId(), tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", ticketDTO.ticketId().toString()));
+        eventRepository.findById(ticketDTO.eventId(), tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id", ticketDTO.eventId().toString()));
-        ticket.setEventId(ticketDTO.eventId());
         ticket.setSeatSectionId(ticketDTO.seatSectionId());
         return ticketRepository.save(ticket);
     }
 
-    public void delete(UUID id) {
-        Ticket ticket = ticketRepository.findById(id)
+    @Override
+    public void delete(final UUID id) {
+        final var tenantId = jwtTokenUtil.getUser().getTenantId();
+        final var ticket = ticketRepository.getById(id, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id", id.toString()));
-        ticketRepository.delete(ticket);
+        ticket.setDeleted(true);
+        ticketRepository.save(ticket);
+    }
+
+    @Override
+    public Page<Ticket> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageRequest) {
+        final var loggedInUser = jwtTokenUtil.getUser();
+        var tenantId = jwtTokenUtil.getUser().getTenantId();
+        if (requestDTO.tenantId() != null && UserUtils.userHasRole(loggedInUser.getRoles(), AccountType.SUPER_ADMIN.getType())) {
+            tenantId = requestDTO.tenantId();
+        }
+        if (requestDTO.eventId() != null) {
+            return ticketRepository.findByEventIdAndTenantId(requestDTO.eventId(), tenantId, pageRequest);
+        } else {
+            return ticketRepository.findByTenantId(tenantId, pageRequest);
+        }
     }
 }

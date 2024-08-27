@@ -5,6 +5,7 @@ import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
+import org.core.backend.ticketapp.common.response.EventStatsDTO;
 import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.dao.EventResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
@@ -63,25 +64,30 @@ public class EventServiceImpl implements EventService {
         final var tenantId = jwtTokenUtil.getUser().getTenantId();
 
         Set<EventCategory> existingCategories = new HashSet<>();
-        if (!eventDTO.getCategories().isEmpty()) {
+        if (Objects.nonNull(eventDTO.getCategories()) && !eventDTO.getCategories().isEmpty()) {
             final var eventCategories = eventDTO.getCategories().stream().map(String::toUpperCase).toList();
             existingCategories = eventCategoryRepository.findAllByName(eventCategories);
             if (existingCategories.size() != eventCategories.size()) {
                 throw new ApplicationException(400, "missing_categories", "Some categories does not exist!");
             }
         }
+        final var totalCapacity = eventDTO.getSeatSections().stream().map(EventSeatSection::getCapacity).mapToInt(Long::intValue).sum();
         final var newCategory = existingCategories.stream().map(EventCategory::getName)
                 .map(String::toUpperCase).collect(Collectors.toSet());
         event.setCategories(newCategory);
+        event.setTicketsAvailable(totalCapacity);
         event.setId(UUID.randomUUID());
         event.setUserId(userId);
         event.setTenantId(tenantId);
+        event.setDateCreated(LocalDateTime.now());
+        event.setType(eventDTO.getEventType());
 
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {
             final var seatSectionsVal = new EventSeatSection(event.getId(), userId, seatSection.getType(),
                     seatSection.getCapacity(), seatSection.getPrice(), 0L, ApprovalStatus.APPROVED);
             seatSectionsVal.setTenantId(tenantId);
+            seatSectionsVal.setDateCreated(LocalDateTime.now());
             seatSections.add(seatSectionsVal);
         });
         eventRepository.saveAndFlush(event);
@@ -92,13 +98,11 @@ public class EventServiceImpl implements EventService {
 
     public Event getById(UUID id) {
         final var event = eventRepository.findById(id).orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
-        UserUtils.canAccessResource(event.getUserId());
         return event;
     }
 
     public Event update(final EventUpdateRequestDTO request) {
         final var event = eventRepository.findById(request.id()).orElseThrow(this::notFoundException);
-        UserUtils.canAccessResource(event.getUserId());
         event.setTitle(request.title());
         event.setDescription(request.description());
         event.setEventBanner(request.eventBanner());
@@ -127,6 +131,14 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public EventStatsDTO getEventStats(final UUID eventId) {
+        validateEventExists(eventId);
+        final var user = jwtTokenUtil.getUser();
+        final var tenantId = user.getTenantId();
+        return eventDao.getEventsStats(eventId, tenantId);
+    }
+
+    @Override
     public Page<Event> getByEventTicketType(final EventTicketType eventTicketType, final Pageable pageable) {
         return eventRepository.getByEventTicketType(eventTicketType.name(), pageable);
     }
@@ -148,5 +160,9 @@ public class EventServiceImpl implements EventService {
 
     private ApplicationException notFoundException() {
         return new ApplicationException(404, "not_found", "Resource not found!");
+    }
+
+    private Event validateEventExists(final UUID eventId) {
+        return eventRepository.findById(eventId).orElseThrow(this::notFoundException);
     }
 }
