@@ -28,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.core.backend.ticketapp.common.util.Constants.PAYSTACK_PLAN_BASE_URL;
 
@@ -57,6 +58,16 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public Page<Plan> getAllPlans(final Pageable pageable) {
         return planRepository.findAll(pageable);
+    }
+
+    @Override
+    public Plan getById(final UUID planId) {
+        return planRepository.findById(planId).orElseThrow(() -> new ApplicationException(404, "not_found", "Plan not found!"));
+    }
+
+    @Override
+    public Plan getByCode(final String code) {
+        return planRepository.findByCode(code).orElseThrow(() -> new ApplicationException(404, "not_found", "Plan not found!"));
     }
 
     @Override

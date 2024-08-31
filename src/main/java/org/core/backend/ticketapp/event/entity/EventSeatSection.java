@@ -25,7 +25,6 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @TypeDef(name = "UUID", typeClass = PostgresUUIDType.class)
 @Table(name = "event_seat_sections", indexes = {@Index(name = "ix_tbl_event_seat_secs_type_event_id_user_id_uq", columnList = "type,event_id,user_id", unique = true)})
-@OptimisticLocking(type = OptimisticLockType.VERSION)
 public class EventSeatSection extends AbstractBaseEntity {
     @Column(name = "event_id")
     private UUID eventId;

@@ -43,6 +43,9 @@ public class Transaction extends AbstractBaseEntity {
     @Enumerated(value = EnumType.STRING)
     private Status status;
 
+    @Column(name = "comment")
+    private String comment;
+
     @PrePersist
     public void onCreate() {
         id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());

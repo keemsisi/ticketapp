@@ -21,7 +21,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "plan", indexes = {
-        @Index(name = "ix_code_name_uq", columnList = "code_name", unique = true)})
+        @Index(name = "ix_code_name_uq", columnList = "code_name", unique = true),
+        @Index(name = "ix_code_n_uq", columnList = "code_name", unique = true),
+})
 public class Plan extends AbstractBaseEntity {
     @Id
     @Column(columnDefinition = "UUID NOT NULL default uuid_generate_v1()")

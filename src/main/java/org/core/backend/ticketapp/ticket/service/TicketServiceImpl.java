@@ -59,6 +59,9 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional
     public Ticket create(final TicketCreateRequestDTO ticketRequestDTO, final Order order) {
+        if (Objects.isNull(order.getEventId())) {
+            throw new ApplicationException(400, "not_allowed", "Can't create ticket for an order without eventId");
+        }
         final var event = eventRepository.findById(ticketRequestDTO.getEventId())
                 .orElseThrow(() -> new ApplicationException(400, "not_found", "Event does not exists!"));
         final var eventStats = eventDao.getEventsStats(event.getId(), event.getTenantId());

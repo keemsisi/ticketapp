@@ -47,4 +47,6 @@ public class AppConfigs {
     UUID organizationMerchantUserRole;
     @Value("${system.default.tenant.tenant_id}")
     UUID defaultTenantId;
+    @Value("${server.port}")
+    public Integer port;
 }

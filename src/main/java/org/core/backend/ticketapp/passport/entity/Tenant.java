@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
+import org.core.backend.ticketapp.common.enums.SubscriptionStatus;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -80,9 +81,14 @@ public class Tenant extends AbstractBaseEntity {
     @Column(name = "two_fa_enabled", columnDefinition = "bool default(false)")
     private boolean twoFaEnabled;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "subscription_status", columnDefinition = "varchar(255) default 'ACTIVE'")
+    private SubscriptionStatus subscriptionStatus;
+
     @PrePersist
     public void onCreate() {
         if (Objects.isNull(id)) this.id = UUID.randomUUID();
         if (Objects.isNull(dateCreated)) this.dateCreated = LocalDateTime.now();
+        if (Objects.isNull(subscriptionStatus)) this.subscriptionStatus = SubscriptionStatus.ACTIVE;
     }
 }

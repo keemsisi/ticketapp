@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.transaction.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
@@ -7,14 +8,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.Gender;
 import org.core.backend.ticketapp.common.enums.OrderStatus;
 import org.core.backend.ticketapp.common.enums.Status;
+import org.core.backend.ticketapp.common.enums.SubscriptionStatus;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.event.service.EventSeatSectionService;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.service.OrderService;
+import org.core.backend.ticketapp.passport.entity.Tenant;
+import org.core.backend.ticketapp.passport.service.TenantService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
+import org.core.backend.ticketapp.passport.util.ActivityLogPublisherUtil;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.plan.service.PlanService;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.service.TicketService;
 import org.core.backend.ticketapp.transaction.dto.InitTransactionRequestDTO;
@@ -38,8 +44,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static org.core.backend.ticketapp.common.util.Constants.PAYSTACK_INITIALIZE_PAY;
 import static org.core.backend.ticketapp.common.util.Constants.PAYSTACK_VERIFY;
@@ -58,6 +69,9 @@ public class TransactionServiceImpl implements TransactionService {
     private final EventSeatSectionService eventSeatSectionService;
     private final TicketService ticketService;
     private final CoreUserService coreUserService;
+    private final PlanService planService;
+    private final TenantService tenantService;
+    private final ActivityLogPublisherUtil activityLogPublisherUtil;
 
     @Override
     public Page<Transaction> getAll(final Pageable pageable) {
@@ -66,12 +80,17 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Order initializePayment(final InitTransactionRequestDTO request) {
-        final var event = eventService.getById(request.getEventId());
-        if (event.isFreeEvent()) {
-            return processFreeEvent(request);
+        if (ObjectUtils.isNotEmpty(request.getPlan()) && ObjectUtils.isEmpty(request.getEventId())) {
+            final var plan = planService.getByCode(request.getPlan());
+            request.setAmount(plan.getAmount().doubleValue());
         } else {
-            final var eventSeatSection = eventSeatSectionService.getById(request.getSeatSectionId());
-            request.setAmount(eventSeatSection.getPrice());
+            final var event = eventService.getById(request.getEventId());
+            if (event.isFreeEvent()) {
+                return processFreeEvent(request);
+            } else {
+                final var eventSeatSection = eventSeatSectionService.getById(request.getSeatSectionId());
+                request.setAmount(eventSeatSection.getPrice());
+            }
         }
         ResponseEntity<PaymentInitResponseDTO> response = null;
         try {
@@ -132,9 +151,18 @@ public class TransactionServiceImpl implements TransactionService {
                         .gateway("PayStack")
                         .gatewayResponse(gatewayResponse)
                         .build();
-                //TODO: fetch the transaction if it already exists else create a new transaction
-                final var transaction = createTransaction(order, meta);
-                processCreateTicketAndQrCode(order);
+                final var transaction = createOrGetExistingTransaction(order, meta);
+                if (!transaction.getStatus().isCompleted()) {
+                    if (ObjectUtils.isNotEmpty(data.getPlan())) {
+                        CompletableFuture.runAsync(() -> {
+                            log.info(">>> Processing plan upgrade with user : {} code : {} and amount {} ",
+                                    transaction.getUserId(), data.getPlan(), data.getAmount());
+                            updateUserSubscriptionPlan(transaction, order, data);
+                        });
+                        return transaction;
+                    }
+                    processCreateTicketAndQrCode(transaction, order);
+                }
                 return transaction;
             }
         } catch (Exception e) {
@@ -145,7 +173,59 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Transactional
-    public Transaction createTransaction(final Order order, final PaymentGatewayMeta meta) {
+    public void updateUserSubscriptionPlan(final Transaction transaction, final Order order, final PaymentVerificationResponseDTO.Data data) {
+        try {
+            if (transaction.getStatus().isPaid()) {
+                final var user = coreUserService.getUserById(transaction.getUserId())
+                        .orElseThrow(() -> new ApplicationException(400, "not_found", "User not found!"));
+                final var tenant = tenantService.getByTenantId(user.getTenantId()).
+                        orElseThrow(() -> new ApplicationException(400, "not_found", "Tenant not found!"));
+                if (Objects.nonNull(tenant.getPlanId())) {
+                    final var oldTenantData = objectMapper.writeValueAsString(tenant);
+                    final var oldPlan = planService.getById(tenant.getPlanId());
+                    final var newPlan = planService.getByCode(data.getPlan());
+                    log.info(">>> Upgrading plan for tenant {} tenantId: {} oldPlan: {} newPlanId: {} ",
+                            tenant.getName(), tenant.getId(), oldPlan.getPlanCode(), newPlan.getPlanCode());
+                    tenant.setPlanId(newPlan.getId());
+                    tenant.setDateModified(LocalDateTime.now());
+                    tenant.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
+                    tenantService.save(tenant);
+                    final var newTenantData = objectMapper.writeValueAsString(tenant);
+                    log.info(">>> Tenant Plan successfully upgraded {} tenantId: {} newPlanId: {} ",
+                            tenant.getName(), tenant.getId(), data.getPlan());
+                    activityLogPublisherUtil.saveActivityLog(order.getUserId(), Tenant.class.getTypeName(), oldTenantData, newTenantData,
+                            "Processed payment for account and subscription plan updated!");
+                    transaction.setStatus(Status.COMPLETED);
+                    transaction.setDateModified(LocalDateTime.now());
+                    transaction.setComment(String.format("Tenant subscription was processed and transaction marked as completed on %s", new Date()));
+                    transactionRepository.save(transaction);
+                    //process the new roles and permissions to be added to the user if the new plan is not the same as the old plan
+                    //--> if the new plan is > than the old plan, all the roles in the new plan should be skipped and the
+                    //tenant owner will need to add the new roles / group
+                    //==================================================================================================
+                    //-> if the new plan < old plan all the roles / permission and group should be stripped of the owner account and all the
+                    // tenant users
+                    //the owner of the tenant will have the new roles / groups and permissions
+                    //the tenant users will have to get the similar roles that they have before
+                    // meaning that the tenant users will only have roles that exists only in the new plan if they have it before
+                    //Example:
+                    /**
+                     * tenant user has ->>> old plan roles -> [event_role,payment_role,finance_role,dashboard_role]
+                     * new plan roles -> [event_role,payment_role]
+                     * ie tenant user will now have ->> [event_role,payment_role] because it has it before
+                     * if it does not have it before, then the new roles for the user will be empty!
+                     */
+                    //==========================================================================================================
+                }
+            }
+        } catch (final Exception e) {
+            log.error(">>> Failed to process tenant subscription update with data {}", data, e);
+        }
+        throw new ApplicationException(400, "exception_occurred", "Failed to process user subscription update!");
+    }
+
+    @Transactional
+    public Transaction createOrGetExistingTransaction(final Order order, final PaymentGatewayMeta meta) {
         final var reference = order.getReference();
         return transactionRepository.findByReference(reference).or(() -> {
             final var trx = Transaction.builder()
@@ -185,10 +265,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Transactional
-    public void processCreateTicketAndQrCode(final Order order) {
+    public void processCreateTicketAndQrCode(final Transaction transaction, final Order order) throws JsonProcessingException {
         final var user = coreUserService.getUserById(order.getUserId())
                 .orElseThrow(() -> new ApplicationException(404, "not_not",
                         "Oops! User account not found to complete payment ticket and order process"));
+        if (Objects.isNull(order.getEventId())) {
+            return; //payment like subscription and others
+        }
         final var ticketDto = new TicketCreateRequestDTO(
                 order.getEventId(), order.getSeatSectionId(), order.getUserId(),
                 user.getFirstName(), user.getLastName(),
@@ -198,6 +281,21 @@ public class TransactionServiceImpl implements TransactionService {
         final var ticket = ticketService.create(ticketDto, order);
         order.setTicketId(ticket.getId());
         orderService.save(order);
+
+        transaction.setStatus(Status.COMPLETED);
+        transaction.setDateModified(LocalDateTime.now());
+        transaction.setComment(String.format("User event payment was processed and transaction marked as completed on %s", new Date()));
+        transactionRepository.save(transaction);
+        activityLogPublisherUtil.saveActivityLog(order.getUserId(), Order.class.getTypeName(),
+                null, objectMapper.writeValueAsString(order),
+                String.format("Event payment of NGN%s was processed successfully...ticket and QR Code created!", formatAmount(order.getAmount().doubleValue())));
         log.info("processCreateTicketAndQrCode competed successfully with order {} ", order);
+    }
+
+    private String formatAmount(final double amount) {
+        final var nf = NumberFormat.getNumberInstance(Locale.US);
+        nf.setMinimumFractionDigits(2);
+        nf.setMaximumFractionDigits(2);
+        return nf.format(amount);
     }
 }

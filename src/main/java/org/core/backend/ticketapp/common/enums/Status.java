@@ -7,5 +7,14 @@ public enum Status {
     SCANNED,
     DELETED,
     BLACKLISTED,
-    EXPIRED
+    EXPIRED,
+    COMPLETED;
+
+    public boolean isPaid() {
+        return this == PAID;
+    }
+
+    public boolean isCompleted() {
+        return this == COMPLETED;
+    }
 }

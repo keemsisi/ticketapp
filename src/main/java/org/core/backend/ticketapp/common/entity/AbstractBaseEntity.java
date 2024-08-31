@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OptimisticLockType;
+import org.hibernate.annotations.OptimisticLocking;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -21,6 +23,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @MappedSuperclass
+@OptimisticLocking(type = OptimisticLockType.VERSION)
 public abstract class AbstractBaseEntity {
     @Id
     @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4() NOT NULL")

@@ -69,4 +69,9 @@ public class TenantService extends BaseRepoService<Tenant> {
                 objectMapper.writeValueAsString(newTenant), "Created a new tenant account!");
         return newTenant;
     }
+
+    @Override
+    public Tenant save(Tenant tenant) {
+        return repository.save(tenant);
+    }
 }
