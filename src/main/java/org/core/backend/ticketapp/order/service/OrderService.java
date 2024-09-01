@@ -14,5 +14,6 @@ public interface OrderService {
     List<Order> saveAll(Collection<Order> order);
     Page<Order> getAll(Pageable pageable);
     Order getById(final UUID id);
+    List<Order> getByBatchId(final UUID id);
     void delete(final UUID id);
 }

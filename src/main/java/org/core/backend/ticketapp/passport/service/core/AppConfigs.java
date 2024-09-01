@@ -13,12 +13,22 @@ public class AppConfigs {
     public String payStackApiKey;
     @Value(value = "${system.default.plan.standard}")
     public UUID defaultPlanId;
+    @Value("${user.password.expiration.in.days}")
+    public Long passwordExpirationInDays;
+    @Value("${system.default.tenant.tenant_id}")
+    public UUID defaultTenantId;
+    @Value("${server.port}")
+    public Integer port;
+    @Value("${system.payment.vendor.paystack.callback}")
+    public String callback;
+    @Value("${system.payment.vendor.paystack.channels}")
+    public String[] channels;
+    @Value("${system.default.order.max.order}")
+    public Long maxOrder;
     @Value("${ticketapp.password-reset-url}")
     String resetPasswordUrl;
     @Value("${user.failed.login.threshold}")
     Long failedLoginThreshold;
-    @Value("${user.password.expiration.in.days}")
-    public Long passwordExpirationInDays;
     @Value("${baseFrontEndUrl}")
     String baseFrontEndUrl;
     @Value("${ticketapp.token-secret}")
@@ -45,12 +55,4 @@ public class AppConfigs {
     UUID organizationMerchantOwnerRole;
     @Value("${system.default.role.organization_merchant_user_role}")
     UUID organizationMerchantUserRole;
-    @Value("${system.default.tenant.tenant_id}")
-    public UUID defaultTenantId;
-    @Value("${server.port}")
-    public Integer port;
-    @Value("${system.payment.vendor.paystack.callback}")
-    public String callback;
-    @Value("${system.payment.vendor.paystack.channels}")
-    public String[] channels;
 }

@@ -38,6 +38,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<Order> getByBatchId(final UUID id) {
+        return orderRepository.findByBatchId(id);
+    }
+
+    @Override
     public void delete(UUID id) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new ApplicationException(400, "not_found", "Order not found"));
         order.setDeleted(true);

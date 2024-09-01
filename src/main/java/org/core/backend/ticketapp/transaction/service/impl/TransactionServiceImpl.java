@@ -386,6 +386,21 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public void processCreateTicketAndQrCode(final Transaction transaction, final Order order) throws JsonProcessingException {
         processQrCodeAndTicketHelper(order, transaction);
+        if (Objects.nonNull(order.getBatchId())) {
+            final var orders = orderService.getByBatchId(order.getBatchId());
+            if (orders.isEmpty()) {
+                log.info(">>> Could not find batch orders with batchId : {} ", orders);
+            }
+            orders.forEach(_order -> {
+                final var _transaction = modelMapper.map(transaction, Transaction.class);
+                _transaction.setId(UUID.randomUUID());
+                _transaction.setAmount(order.getAmount());
+                _transaction.setUserId(order.getUserId());
+                _transaction.setDateCreated(LocalDateTime.now());
+                transactionRepository.save(_transaction);
+                processQrCodeAndTicketHelper(_order, _transaction);
+            });
+        }
         activityLogPublisherUtil.saveActivityLog(order.getUserId(), Order.class.getTypeName(),
                 null, objectMapper.writeValueAsString(order),
                 String.format("Event payment of NGN%s was processed successfully...ticket and QR Code created!", formatAmount(order.getAmount().doubleValue())));
@@ -400,7 +415,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
-    private void processQrCodeAndTicketHelper(final Order order, final Transaction transaction) {
+    @Transactional
+    public void processQrCodeAndTicketHelper(final Order order, final Transaction transaction) {
         final var user = coreUserService.getUserById(order.getUserId())
                 .orElseThrow(() -> new ApplicationException(404, "not_not",
                         "Oops! User account not found to complete payment ticket and order process"));
