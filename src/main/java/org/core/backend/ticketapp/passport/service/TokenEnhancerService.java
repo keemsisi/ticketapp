@@ -16,10 +16,8 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -78,6 +76,7 @@ public class TokenEnhancerService implements TokenEnhancer {
 
             if (user.isFirstTimeLogin()) {
                 additionalInformation.put("scope", List.of("first_time_login"));
+                updateFirstTimeLogin(user);
             }
         } else {
             String clientId = authentication.getOAuth2Request().getClientId();
@@ -91,6 +90,14 @@ public class TokenEnhancerService implements TokenEnhancer {
         ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInformation);
         activityLogProcessorUtils.processActivityLog(user != null ? user.getId() : null, User.class.getTypeName(), null, objectMapper.writeValueAsString(additionalInformation), "User login");
         return accessToken;
+    }
+
+    final void updateFirstTimeLogin(final User user) {
+        CompletableFuture.runAsync(() -> {
+            user.setFirstTimeLogin(false);
+            user.setModifiedOn(new Date());
+            coreUserService.save(user);
+        });
     }
 }
 

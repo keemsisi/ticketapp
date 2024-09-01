@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.order.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import org.apache.commons.lang3.ObjectUtils;
@@ -64,14 +65,19 @@ public class Order extends AbstractBaseEntity {
     @Column(name = "ticket_id", columnDefinition = "uuid default null")
     private UUID ticketId;
 
+    @JsonIgnore
     @Transient
     private String email;
+    @JsonIgnore
     @Transient
     private String firstName;
+    @JsonIgnore
     @Transient
     private String lastName;
+    @JsonIgnore
     @Transient
     private String phone;
+    @JsonIgnore
     @Transient
     private Gender gender;
 

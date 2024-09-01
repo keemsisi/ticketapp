@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.*;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
@@ -90,6 +91,7 @@ public class TransactionServiceImpl implements TransactionService {
             if (eventService.getEventStats(event.getId()).getTotalAvailableTickets() == 0) {
                 throw new ApplicationException(403, "forbidden", "Oops! No tickets are available for this event again!");
             } else if (event.isFreeEvent()) {
+                request.setFree(true);
                 return processFreeEvent(request);
             } else {
                 if (!secondary.isEmpty()) {
@@ -144,7 +146,7 @@ public class TransactionServiceImpl implements TransactionService {
         order.setQuantity(quantity);
         order.setUserId(jwtTokenUtil.getUser().getUserId());
         order.setAmount(new BigDecimal(String.valueOf(amount)));
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(initRequest.isFree() ? OrderStatus.SUCCESSFUL : OrderStatus.PENDING);
         order.setPaymentLink(data.getAuthorizationUrl());
         order.setCode(data.getAccessCode());
         order.setReference(data.getReference());
@@ -168,7 +170,7 @@ public class TransactionServiceImpl implements TransactionService {
                         .eventId(eventId)
                         .quantity(1)
                         .amount(new BigDecimal(String.valueOf(sec.getAmount())))
-                        .status(OrderStatus.PENDING)
+                        .status(order.getStatus())
                         .paymentLink(data.getAuthorizationUrl())
                         .reference(data.getReference())
                         .orderDate(LocalDateTime.now())
@@ -209,8 +211,10 @@ public class TransactionServiceImpl implements TransactionService {
             createUserRequestDto.setUserType(UserType.BUYER);
             createUserRequestDto.setPassword(PasswordUtil.generatePassword());
             createUserRequestDto.setTenantId(appConfigs.defaultTenantId);
-            createUserRequestDto.setPhone(requestDTO.getPhoneNumber());
+            createUserRequestDto.setPhone(StringUtils.defaultIfBlank(requestDTO.getPhoneNumber(),
+                    RandomStringUtils.randomAlphanumeric(11)));
             createUserRequestDto.setEmail(requestDTO.getEmail());
+            createUserRequestDto.setFirstTimeLogin(true);
             CompletableFuture.runAsync(() -> {
                 try {
                     log.info(">>> Creating new buyer account for none existing user {} ", requestDTO);

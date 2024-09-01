@@ -5,10 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
+@Validated
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,9 +21,11 @@ public class BasePaymentOrderRequestDTO {
     private UUID eventId;
     @NotNull(message = "seatSectionId Required")
     private UUID seatSectionId;
-    @NotNull(message = "Email cannot be null")
+    @NotBlank(message = "Email cannot be null")
     private String email;
+    @NotBlank(message = "First name cannot be null")
     private String firstName;
+    @NotBlank(message = "Last name cannot be null")
     private String lastName;
     private String phoneNumber;
     private String plan;
