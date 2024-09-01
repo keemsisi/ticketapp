@@ -68,6 +68,11 @@ public class EventSeatSectionServiceImpl implements EventSeatSectionService, ISe
         return seatSectionRepository.save(seatSection);
     }
 
+    @Override
+    public List<EventSeatSection> getAllByIds(final List<UUID> seatSectionsIds) {
+        return seatSectionRepository.findAllById(seatSectionsIds);
+    }
+
     public void delete(UUID id) {
         EventSeatSection eventSeatSection = seatSectionRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(400, "not_found", "Event seat section not found!"));

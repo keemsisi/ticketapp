@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.passport.dtos.core;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.thecarisma.CopyProperty;
 import lombok.Getter;
@@ -38,4 +39,6 @@ public class UserDto extends UserLiteDto {
     private DateTime lockDate;
     private int loginAttempt;
     private String password;
+    @JsonIgnore
+    private UUID tenantId;
 }

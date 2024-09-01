@@ -9,7 +9,7 @@ import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.service.OrderService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.core.backend.ticketapp.transaction.dto.InitTransactionRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.InitPaymentOrderRequestDTO;
 import org.core.backend.ticketapp.transaction.service.TransactionService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -30,7 +30,7 @@ public class OrderController implements ICrudController {
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<?>> create(@RequestBody final InitTransactionRequestDTO requestDTO) {
+    public ResponseEntity<GenericResponse<?>> create(@RequestBody final InitPaymentOrderRequestDTO requestDTO) {
         final var response = transactionService.initializePayment(requestDTO);
         return ResponseEntity.ok(new GenericResponse<>("00", "Payment init successful!", response));
     }
@@ -53,7 +53,7 @@ public class OrderController implements ICrudController {
         return ResponseEntity.ok(new GenericResponse<>("00", "Deleted successfully", null));
     }
 
-    @RequestMapping(value = "/callback", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/paystack/callback", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> paymentCallback(final @RequestBody Map<String, Object> paymentCallback) {
         log.info(">>> Vendor Payment Callback Received>>>> {} ", paymentCallback);
         //call the verify payment here when order is successful

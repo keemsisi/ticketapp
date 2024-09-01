@@ -4,6 +4,7 @@ import org.core.backend.ticketapp.event.dto.CreateEventSeatSectionDTO;
 import org.core.backend.ticketapp.event.dto.EventSeatSectionUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,4 +16,6 @@ public interface EventSeatSectionService {
     void delete(final UUID id);
 
     EventSeatSection update(final EventSeatSectionUpdateRequestDTO requestDTO);
+
+    List<EventSeatSection> getAllByIds(List<UUID> seatSectionsIds);
 }

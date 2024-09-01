@@ -84,9 +84,9 @@ public class TicketServiceImpl implements TicketService {
                 ticket.setPrice(seatSection.getPrice());
                 ticket.setStatus(Status.ACTIVE);
 
-                if (Objects.isNull(jwtTokenUtil.getUser().getUserId()) && Objects.nonNull(order)) {
+                if (!jwtTokenUtil.isLoggedIn()) {
                     final var orderExists = orderRepository.existsById(order.getId());
-                    if (orderExists && Objects.nonNull(jwtTokenUtil.getUser().getUserId())) {
+                    if (orderExists) {
                         final var gender = ticketRequestDTO.getGender();
                         final var userDto = new UserDto();
                         userDto.setEmail(ticketRequestDTO.getEmail());

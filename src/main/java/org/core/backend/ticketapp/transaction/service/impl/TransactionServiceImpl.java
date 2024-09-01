@@ -3,36 +3,35 @@ package org.core.backend.ticketapp.transaction.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.core.backend.ticketapp.common.enums.Gender;
-import org.core.backend.ticketapp.common.enums.OrderStatus;
-import org.core.backend.ticketapp.common.enums.Status;
-import org.core.backend.ticketapp.common.enums.SubscriptionStatus;
+import org.core.backend.ticketapp.common.enums.*;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.service.EventSeatSectionService;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.service.OrderService;
+import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
+import org.core.backend.ticketapp.passport.dtos.core.UserDto;
 import org.core.backend.ticketapp.passport.entity.Tenant;
 import org.core.backend.ticketapp.passport.service.TenantService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.ActivityLogPublisherUtil;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.passport.util.PasswordUtil;
 import org.core.backend.ticketapp.plan.service.PlanService;
 import org.core.backend.ticketapp.ticket.dto.TicketCreateRequestDTO;
 import org.core.backend.ticketapp.ticket.service.TicketService;
-import org.core.backend.ticketapp.transaction.dto.InitTransactionRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.PaymentInitResponseDTO;
-import org.core.backend.ticketapp.transaction.dto.PaymentVerificationResponseDTO;
-import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.*;
+import org.core.backend.ticketapp.transaction.dto.payment_gateway.paystack.InitPayStackPaymentRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.PaymentGatewayMeta;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.core.backend.ticketapp.transaction.repository.TransactionRepository;
 import org.core.backend.ticketapp.transaction.service.TransactionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
@@ -46,19 +45,17 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static org.core.backend.ticketapp.common.util.Constants.PAYSTACK_INITIALIZE_PAY;
 import static org.core.backend.ticketapp.common.util.Constants.PAYSTACK_VERIFY;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
-    private static final Logger log = LoggerFactory.getLogger(TransactionServiceImpl.class);
     private final TransactionRepository transactionRepository;
     private final OrderService orderService;
     private final RestTemplate restTemplate;
@@ -72,24 +69,49 @@ public class TransactionServiceImpl implements TransactionService {
     private final PlanService planService;
     private final TenantService tenantService;
     private final ActivityLogPublisherUtil activityLogPublisherUtil;
+    private final ModelMapper modelMapper;
 
     @Override
     public Page<Transaction> getAll(final Pageable pageable) {
         return transactionRepository.findAll(pageable);
     }
 
+
     @Override
-    public Order initializePayment(final InitTransactionRequestDTO request) {
-        if (ObjectUtils.isNotEmpty(request.getPlan()) && ObjectUtils.isEmpty(request.getEventId())) {
-            final var plan = planService.getByCode(request.getPlan());
-            request.setAmount(plan.getAmount().doubleValue());
+    public OrderResponseDto initializePayment(final InitPaymentOrderRequestDTO request) {
+        final var primary = request.getPrimary();
+        final var secondary = request.getSecondary();
+        final var paymentRequest = new InitPayStackPaymentRequestDTO();
+        if (ObjectUtils.isNotEmpty(primary.getPlan()) && ObjectUtils.isEmpty(primary.getEventId())) {
+            final var plan = planService.getByCode(primary.getPlan());
+            paymentRequest.setAmount(plan.getAmount().doubleValue());
         } else {
-            final var event = eventService.getById(request.getEventId());
-            if (event.isFreeEvent()) {
+            final var event = eventService.getById(primary.getEventId());
+            if (eventService.getEventStats(event.getId()).getTotalAvailableTickets() == 0) {
+                throw new ApplicationException(403, "forbidden", "Oops! No tickets are available for this event again!");
+            } else if (event.isFreeEvent()) {
                 return processFreeEvent(request);
             } else {
-                final var eventSeatSection = eventSeatSectionService.getById(request.getSeatSectionId());
-                request.setAmount(eventSeatSection.getPrice());
+                if (!secondary.isEmpty()) {
+                    final var seatSectionsIds = new java.util.ArrayList<>(secondary.stream()
+                            .map(BasePaymentOrderRequestDTO::getSeatSectionId).toList());
+                    seatSectionsIds.add(primary.getSeatSectionId());
+                    final var eventSeatSection = eventSeatSectionService.getAllByIds(seatSectionsIds);
+                    if (eventSeatSection.size() != seatSectionsIds.size()) {
+                        throw new ApplicationException(400, "not_allowed", "Some seat sections does not exists!");
+                    }
+                    final var secondaryMap = eventSeatSection.stream().collect(Collectors.toMap(EventSeatSection::getId, sec -> sec));
+                    secondary.forEach(sec -> {
+                        sec.setAmount(secondaryMap.get(sec.getSeatSectionId()).getPrice());
+                    });
+                    final var totalPrice = eventSeatSection.stream()
+                            .map(EventSeatSection::getPrice)
+                            .mapToDouble(Double::doubleValue).sum();
+                    paymentRequest.setAmount(totalPrice);
+                } else {
+                    final var eventSeatSection = eventSeatSectionService.getById(primary.getSeatSectionId());
+                    paymentRequest.setAmount(eventSeatSection.getPrice());
+                }
             }
         }
         ResponseEntity<PaymentInitResponseDTO> response = null;
@@ -97,31 +119,108 @@ public class TransactionServiceImpl implements TransactionService {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
-            final var entity = new HttpEntity<>(request, headers);
+            final var entity = new HttpEntity<>(paymentRequest, headers);
             response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, PaymentInitResponseDTO.class);
             if (response.getStatusCode().isError()) {
                 throw new ApplicationException(400, "init_payment_failed", "Failed to init payment");
             }
-            return getOrder(request, Objects.requireNonNull(response.getBody()));
+            return getOrders(request, paymentRequest.getAmount(), Objects.requireNonNull(response.getBody()));
         } catch (Throwable e) {
             log.error(">>> Error Occurred while initiating transaction", e);
         }
         throw new ApplicationException(400, "init_payment_failed", "Failed to init payment with checkout link!");
     }
 
-    private Order getOrder(final InitTransactionRequestDTO initRequest, final PaymentInitResponseDTO response) {
-        final var data = response.getData();
+    private OrderResponseDto getOrders(final InitPaymentOrderRequestDTO initRequest, final double amount, final PaymentInitResponseDTO response) {
+        final var quantity = !initRequest.getSecondary().isEmpty() ? initRequest.getSecondary().size() + 1 : 1;
+        final var primary = initRequest.getPrimary();
+        final var secondary = initRequest.getSecondary();
+        final var eventId = initRequest.getPrimary().getEventId();
+        final var secondaryOrders = new ArrayList<Order>();
         final var order = new Order();
-        order.setEventId(initRequest.getEventId());
-        order.setQuantity(ObjectUtils.defaultIfNull(initRequest.getQuantity(), 1));
+        final var data = Objects.isNull(response) ? new PaymentInitResponseDTO.Data() : response.getData();
+        final var primaryUserDto = getOrCreateNewUser(primary);
+        order.setEventId(eventId);
+        order.setQuantity(quantity);
         order.setUserId(jwtTokenUtil.getUser().getUserId());
-        order.setAmount(new BigDecimal(String.valueOf(initRequest.getAmount())));
+        order.setAmount(new BigDecimal(String.valueOf(amount)));
         order.setStatus(OrderStatus.PENDING);
         order.setPaymentLink(data.getAuthorizationUrl());
         order.setCode(data.getAccessCode());
-        order.setTenantId(jwtTokenUtil.getUser().getTenantId());
         order.setReference(data.getReference());
-        return orderService.save(order);
+        order.setTenantId(jwtTokenUtil.getUser().getTenantId());
+        order.setDateCreated(LocalDateTime.now());
+        order.setUserId(primaryUserDto.getUserId());
+        order.setTenantId(primaryUserDto.getTenantId());
+        orderService.save(order);
+
+        order.setFirstName(primaryUserDto.getFirstName());
+        order.setLastName(primaryUserDto.getLastName());
+        order.setPhone(primaryUserDto.getPhone());
+        order.setEmail(primaryUserDto.getEmail());
+        order.setGender(primaryUserDto.getGender());
+
+        if (!secondary.isEmpty()) {
+            order.setBatchId(order.getId());
+            secondary.forEach(sec -> {
+                final var userDto = getOrCreateNewUser(sec);
+                final var secOrder = Order.builder()
+                        .eventId(eventId)
+                        .quantity(1)
+                        .amount(new BigDecimal(String.valueOf(sec.getAmount())))
+                        .status(OrderStatus.PENDING)
+                        .paymentLink(data.getAuthorizationUrl())
+                        .reference(data.getReference())
+                        .orderDate(LocalDateTime.now())
+                        .batchId(order.getBatchId())
+                        .build();
+                secOrder.setTenantId(userDto.getTenantId());
+                secOrder.setUserId(userDto.getUserId());
+                secOrder.setFirstName(userDto.getFirstName());
+                secOrder.setLastName(userDto.getLastName());
+                secOrder.setPhone(userDto.getPhone());
+                secOrder.setEmail(userDto.getEmail());
+                secondaryOrders.add(secOrder);
+            });
+        }
+        orderService.saveAll(secondaryOrders);
+        return OrderResponseDto.builder()
+                .primary(order)
+                .secondary(secondaryOrders)
+                .build();
+    }
+
+    private LoggedInUserDto getOrCreateNewUser(final BasePaymentOrderRequestDTO requestDTO) {
+        final var loggedInUser = jwtTokenUtil.getUser();
+        if (Objects.nonNull(loggedInUser.getUserId()) && loggedInUser.getEmail().equalsIgnoreCase(requestDTO.getEmail())) {
+            return loggedInUser;
+        }
+        final var user = coreUserService.getMemberByEmail(requestDTO.getEmail().strip());
+        if (user.isEmpty()) {
+            final var userId = UUID.randomUUID();
+            final var createUserRequestDto = new UserDto();
+            createUserRequestDto.setFirstName(requestDTO.getFirstName());
+            createUserRequestDto.setLastName(requestDTO.getLastName());
+            createUserRequestDto.setId(userId);
+            createUserRequestDto.setGender(Gender.OTHERS.toString());
+            createUserRequestDto.setAccountType(AccountType.INDIVIDUAL);
+            createUserRequestDto.setUserType(UserType.BUYER);
+            createUserRequestDto.setPassword(PasswordUtil.generatePassword());
+            createUserRequestDto.setTenantId(appConfigs.defaultTenantId);
+            createUserRequestDto.setPhone(requestDTO.getPhoneNumber());
+            CompletableFuture.runAsync(() -> {
+                try {
+                    log.info(">>> Creating new buyer account for none existing user {} ", requestDTO);
+                    final var response = coreUserService.createUser(createUserRequestDto, new LoggedInUserDto());
+                    log.info(">>> Successfully onboarded new none-existing " +
+                            "buyer account through ticket buying process {} ", response);
+                } catch (final Exception e) {
+                    log.error("An exception occurred while creating user ", e);
+                }
+            });
+            return modelMapper.map(createUserRequestDto, LoggedInUserDto.class);
+        }
+        return modelMapper.map(user, LoggedInUserDto.class);
     }
 
     @Override
@@ -243,29 +342,47 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Transactional
-    public Order processFreeEvent(final InitTransactionRequestDTO request) {
-        final var user = jwtTokenUtil.getUser();
-        final var order = new Order();
-        order.setEventId(request.getEventId());
-        order.setQuantity(ObjectUtils.defaultIfNull(request.getQuantity(), 1));
-        order.setUserId(jwtTokenUtil.getUser().getUserId());
-        order.setAmount(BigDecimal.ZERO);
-        order.setStatus(OrderStatus.SUCCESSFUL);
-        order.setSeatSectionId(request.getSeatSectionId());
-        order.setTenantId(jwtTokenUtil.getUser().getTenantId());
+    public OrderResponseDto processFreeEvent(final InitPaymentOrderRequestDTO request) {
+        final var orders = getOrders(request, 0.0, null);
+        final var primaryOrder = orders.getPrimary();
+        final var secondaryOrders = orders.getSecondary();
         final var ticketDto = new TicketCreateRequestDTO(
-                order.getEventId(), order.getSeatSectionId(), order.getUserId(),
-                request.getFirstName(), request.getLastName(),
-                request.getEmail(), request.getPhoneNumber(),
-                Objects.isNull(user.getUserId()) ? Gender.OTHERS : user.getGender()
+                primaryOrder.getEventId(), primaryOrder.getSeatSectionId(), primaryOrder.getUserId(),
+                primaryOrder.getFirstName(), primaryOrder.getLastName(),
+                primaryOrder.getEmail(), primaryOrder.getPhone(), primaryOrder.getGender()
         );
-        final var ticket = ticketService.create(ticketDto, order);
-        order.setTicketId(ticket.getId());
-        return orderService.save(order);
+        final var ticket = ticketService.create(ticketDto, primaryOrder);
+        primaryOrder.setTicketId(ticket.getId());
+        secondaryOrders.forEach(secondaryOrder -> {
+            final var secondaryTicketDto = new TicketCreateRequestDTO(
+                    secondaryOrder.getEventId(), secondaryOrder.getSeatSectionId(), secondaryOrder.getUserId(),
+                    secondaryOrder.getFirstName(), secondaryOrder.getLastName(),
+                    secondaryOrder.getEmail(), secondaryOrder.getPhone(), secondaryOrder.getGender()
+            );
+            final var secondaryTicket = ticketService.create(secondaryTicketDto, secondaryOrder);
+            secondaryOrder.setTicketId(secondaryTicket.getId());
+        });
+        return OrderResponseDto.builder().primary(primaryOrder).secondary(secondaryOrders).build();
     }
 
     @Transactional
     public void processCreateTicketAndQrCode(final Transaction transaction, final Order order) throws JsonProcessingException {
+        processQrCodeAndTicketHelper(order, transaction);
+        activityLogPublisherUtil.saveActivityLog(order.getUserId(), Order.class.getTypeName(),
+                null, objectMapper.writeValueAsString(order),
+                String.format("Event payment of NGN%s was processed successfully...ticket and QR Code created!", formatAmount(order.getAmount().doubleValue())));
+        log.info("processCreateTicketAndQrCode competed successfully with order {} ", order);
+    }
+
+    private String formatAmount(final double amount) {
+        final var nf = NumberFormat.getNumberInstance(Locale.US);
+        nf.setMinimumFractionDigits(2);
+        nf.setMaximumFractionDigits(2);
+        return nf.format(amount);
+    }
+
+
+    private void processQrCodeAndTicketHelper(final Order order, final Transaction transaction) {
         final var user = coreUserService.getUserById(order.getUserId())
                 .orElseThrow(() -> new ApplicationException(404, "not_not",
                         "Oops! User account not found to complete payment ticket and order process"));
@@ -281,21 +398,9 @@ public class TransactionServiceImpl implements TransactionService {
         final var ticket = ticketService.create(ticketDto, order);
         order.setTicketId(ticket.getId());
         orderService.save(order);
-
         transaction.setStatus(Status.COMPLETED);
         transaction.setDateModified(LocalDateTime.now());
         transaction.setComment(String.format("User event payment was processed and transaction marked as completed on %s", new Date()));
         transactionRepository.save(transaction);
-        activityLogPublisherUtil.saveActivityLog(order.getUserId(), Order.class.getTypeName(),
-                null, objectMapper.writeValueAsString(order),
-                String.format("Event payment of NGN%s was processed successfully...ticket and QR Code created!", formatAmount(order.getAmount().doubleValue())));
-        log.info("processCreateTicketAndQrCode competed successfully with order {} ", order);
-    }
-
-    private String formatAmount(final double amount) {
-        final var nf = NumberFormat.getNumberInstance(Locale.US);
-        nf.setMinimumFractionDigits(2);
-        nf.setMaximumFractionDigits(2);
-        return nf.format(amount);
     }
 }

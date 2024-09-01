@@ -2,8 +2,6 @@ package org.core.backend.ticketapp.passport.util;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.core.backend.ticketapp.common.ApplicationContextProvider;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
@@ -63,5 +61,9 @@ public class JwtTokenUtil {
 
     public LoggedInUserDto getUser() {
         return objectMapper.convertValue(getAllClaims(), LoggedInUserDto.class);
+    }
+
+    public boolean isLoggedIn() {
+        return Objects.nonNull(getUser().getUserId());
     }
 }

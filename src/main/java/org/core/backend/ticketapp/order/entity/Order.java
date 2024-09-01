@@ -1,12 +1,10 @@
 package org.core.backend.ticketapp.order.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
+import org.core.backend.ticketapp.common.enums.Gender;
 import org.core.backend.ticketapp.common.enums.OrderStatus;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -18,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
+@Builder
 @Getter
 @Setter
 @Entity
@@ -56,11 +55,25 @@ public class Order extends AbstractBaseEntity {
     @Column(name = "reference")
     private String reference;
 
+    @Column(name = "batch_id")
+    private UUID batchId;
+
     @Column(name = "section_id")
     private UUID seatSectionId;
 
     @Column(name = "ticket_id", columnDefinition = "uuid default null")
     private UUID ticketId;
+
+    @Transient
+    private String email;
+    @Transient
+    private String firstName;
+    @Transient
+    private String lastName;
+    @Transient
+    private String phone;
+    @Transient
+    private Gender gender;
 
     @PrePersist
     public void onCreate() {

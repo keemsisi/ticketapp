@@ -9,7 +9,7 @@ import java.util.UUID;
 public class AppConfigs {
     @Value(value = "${ticket.app.baseUrl}")
     public String baseUrl;
-    @Value("${paystack.secret.key}")
+    @Value("${system.payment.vendor.paystack.secret.api_key}")
     public String payStackApiKey;
     @Value(value = "${system.default.plan.standard}")
     public UUID defaultPlanId;
@@ -46,7 +46,7 @@ public class AppConfigs {
     @Value("${system.default.role.organization_merchant_user_role}")
     UUID organizationMerchantUserRole;
     @Value("${system.default.tenant.tenant_id}")
-    UUID defaultTenantId;
+    public UUID defaultTenantId;
     @Value("${server.port}")
     public Integer port;
 }

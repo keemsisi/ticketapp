@@ -1,8 +1,7 @@
 package org.core.backend.ticketapp.transaction.service;
 
-import org.core.backend.ticketapp.order.entity.Order;
-import org.core.backend.ticketapp.transaction.dto.InitTransactionRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.PaymentInitResponseDTO;
+import org.core.backend.ticketapp.transaction.dto.InitPaymentOrderRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.OrderResponseDto;
 import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.springframework.data.domain.Page;
@@ -13,7 +12,7 @@ public interface TransactionService {
 
     Page<Transaction> getAll(Pageable pageable);
 
-    Order initializePayment(InitTransactionRequestDTO initializePaymentDto);
+    OrderResponseDto initializePayment(InitPaymentOrderRequestDTO initializePaymentDto);
 
     Transaction verifyPayment(TransactionVerifyRequestDTO verifyRequestDTO) throws Exception;
 }
