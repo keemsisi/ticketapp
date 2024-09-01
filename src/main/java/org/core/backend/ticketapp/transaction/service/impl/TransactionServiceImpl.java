@@ -82,7 +82,13 @@ public class TransactionServiceImpl implements TransactionService {
     public OrderResponseDto initializePayment(final InitPaymentOrderRequestDTO request) {
         final var primary = request.getPrimary();
         final var secondary = request.getSecondary();
-        final var paymentRequest = new InitPayStackPaymentRequestDTO();
+        final var paymentRequest = InitPayStackPaymentRequestDTO.builder()
+                .email(primary.getEmail())
+                .amount(primary.getAmount())
+                .plan(primary.getPlan())
+                .callback(appConfigs.callback)
+                .channels(appConfigs.channels)
+                .build();
         if (ObjectUtils.isNotEmpty(primary.getPlan()) && ObjectUtils.isEmpty(primary.getEventId())) {
             final var plan = planService.getByCode(primary.getPlan());
             paymentRequest.setAmount(plan.getAmount().doubleValue());
@@ -150,7 +156,7 @@ public class TransactionServiceImpl implements TransactionService {
         order.setPaymentLink(data.getAuthorizationUrl());
         order.setCode(data.getAccessCode());
         order.setReference(data.getReference());
-        order.setTenantId(jwtTokenUtil.getUser().getTenantId());
+        order.setTenantId(primaryUserDto.getTenantId());
         order.setDateCreated(LocalDateTime.now());
         order.setUserId(primaryUserDto.getUserId());
         order.setTenantId(primaryUserDto.getTenantId());

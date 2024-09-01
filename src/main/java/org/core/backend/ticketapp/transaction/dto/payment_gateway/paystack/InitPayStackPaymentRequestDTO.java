@@ -1,14 +1,12 @@
 package org.core.backend.ticketapp.transaction.dto.payment_gateway.paystack;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.constraints.NotNull;
 
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor

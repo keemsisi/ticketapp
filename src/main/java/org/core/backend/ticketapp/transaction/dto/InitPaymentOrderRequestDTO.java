@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @Validated
@@ -18,7 +19,7 @@ import java.util.List;
 public class InitPaymentOrderRequestDTO {
     @NotNull(message = "primary field is required!")
     private BasePaymentOrderRequestDTO primary;
-    private List<BasePaymentOrderRequestDTO> secondary;
+    private List<BasePaymentOrderRequestDTO> secondary = new ArrayList<>();
     @JsonIgnore
     private boolean free = false;
 }

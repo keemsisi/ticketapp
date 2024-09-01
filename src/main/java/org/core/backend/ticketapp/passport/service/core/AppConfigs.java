@@ -49,4 +49,8 @@ public class AppConfigs {
     public UUID defaultTenantId;
     @Value("${server.port}")
     public Integer port;
+    @Value("${system.payment.vendor.paystack.callback}")
+    public String callback;
+    @Value("${system.payment.vendor.paystack.channels}")
+    public String[] channels;
 }
