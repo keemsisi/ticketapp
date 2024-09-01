@@ -152,6 +152,7 @@ public class TransactionServiceImpl implements TransactionService {
         order.setDateCreated(LocalDateTime.now());
         order.setUserId(primaryUserDto.getUserId());
         order.setTenantId(primaryUserDto.getTenantId());
+        order.setSeatSectionId(primary.getSeatSectionId());
         orderService.save(order);
 
         order.setFirstName(primaryUserDto.getFirstName());
@@ -172,6 +173,7 @@ public class TransactionServiceImpl implements TransactionService {
                         .paymentLink(data.getAuthorizationUrl())
                         .reference(data.getReference())
                         .orderDate(LocalDateTime.now())
+                        .seatSectionId(sec.getSeatSectionId())
                         .batchId(order.getBatchId())
                         .build();
                 secOrder.setTenantId(userDto.getTenantId());
