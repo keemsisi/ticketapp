@@ -80,8 +80,7 @@ public class TicketServiceImpl implements TicketService {
                 var ticket = new Ticket();
                 ticket.setSeatSectionId(ticketRequestDTO.getSeatSectionId());
                 ticket.setEventId(ticketRequestDTO.getEventId());
-                assert seatSection != null;
-                ticket.setPrice(seatSection.getPrice());
+                ticket.setPrice(Objects.requireNonNull(seatSection).getPrice());
                 ticket.setStatus(Status.ACTIVE);
 
                 if (!jwtTokenUtil.isLoggedIn()) {

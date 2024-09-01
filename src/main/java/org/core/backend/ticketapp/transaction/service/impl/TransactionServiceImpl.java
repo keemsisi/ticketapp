@@ -191,12 +191,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private LoggedInUserDto getOrCreateNewUser(final BasePaymentOrderRequestDTO requestDTO) {
+        final var createdUserDto = new LoggedInUserDto();
         final var loggedInUser = jwtTokenUtil.getUser();
         if (Objects.nonNull(loggedInUser.getUserId()) && loggedInUser.getEmail().equalsIgnoreCase(requestDTO.getEmail())) {
             return loggedInUser;
         }
-        final var user = coreUserService.getMemberByEmail(requestDTO.getEmail().strip());
-        if (user.isEmpty()) {
+        final var optUser = coreUserService.getMemberByEmail(requestDTO.getEmail().strip());
+        if (optUser.isEmpty()) {
             final var userId = UUID.randomUUID();
             final var createUserRequestDto = new UserDto();
             createUserRequestDto.setFirstName(requestDTO.getFirstName());
@@ -219,9 +220,14 @@ public class TransactionServiceImpl implements TransactionService {
                     log.error("An exception occurred while creating user ", e);
                 }
             });
-            return modelMapper.map(createUserRequestDto, LoggedInUserDto.class);
+            modelMapper.map(createUserRequestDto, LoggedInUserDto.class);
+            createdUserDto.setUserId(userId);
+            return createdUserDto;
         }
-        return modelMapper.map(user, LoggedInUserDto.class);
+        final var user = optUser.get();
+        modelMapper.map(optUser, LoggedInUserDto.class);
+        createdUserDto.setUserId(user.getId());
+        return createdUserDto;
     }
 
     @Override
