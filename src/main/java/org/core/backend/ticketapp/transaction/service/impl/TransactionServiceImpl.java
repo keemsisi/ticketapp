@@ -162,7 +162,6 @@ public class TransactionServiceImpl implements TransactionService {
         order.setGender(primaryUserDto.getGender());
 
         if (!secondary.isEmpty()) {
-            order.setBatchId(order.getId());
             secondary.forEach(sec -> {
                 final var userDto = getOrCreateNewUser(sec);
                 final var secOrder = Order.builder()
