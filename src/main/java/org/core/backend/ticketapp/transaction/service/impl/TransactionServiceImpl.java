@@ -48,7 +48,6 @@ import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import static org.core.backend.ticketapp.common.util.Constants.PAYSTACK_INITIALIZE_PAY;
 import static org.core.backend.ticketapp.common.util.Constants.PAYSTACK_VERIFY;
@@ -82,6 +81,7 @@ public class TransactionServiceImpl implements TransactionService {
     public OrderResponseDto initializePayment(final InitPaymentOrderRequestDTO request) {
         final var primary = request.getPrimary();
         final var secondary = request.getSecondary();
+        final var eventSeatSectionMap = new HashMap<UUID, EventSeatSection>();
         final var paymentRequest = InitPayStackPaymentRequestDTO.builder()
                 .email(primary.getEmail())
                 .amount(primary.getAmount())
@@ -96,29 +96,28 @@ public class TransactionServiceImpl implements TransactionService {
             final var event = eventService.getById(primary.getEventId());
             if (eventService.getEventStats(event.getId()).getTotalAvailableTickets() == 0) {
                 throw new ApplicationException(403, "forbidden", "Oops! No tickets are available for this event again!");
-            } else if (event.isFreeEvent()) {
-                request.setFree(true);
-                return processFreeEvent(request);
             } else {
-                if (!secondary.isEmpty()) {
-                    final var seatSectionsIds = new java.util.ArrayList<>(secondary.stream()
-                            .map(BasePaymentOrderRequestDTO::getSeatSectionId).toList());
-                    seatSectionsIds.add(primary.getSeatSectionId());
-                    final var eventSeatSection = eventSeatSectionService.getAllByIds(seatSectionsIds);
-                    if (eventSeatSection.size() != seatSectionsIds.size()) {
-                        throw new ApplicationException(400, "not_allowed", "Some seat sections does not exists!");
-                    }
-                    final var secondaryMap = eventSeatSection.stream().collect(Collectors.toMap(EventSeatSection::getId, sec -> sec));
-                    secondary.forEach(sec -> {
-                        sec.setAmount(secondaryMap.get(sec.getSeatSectionId()).getPrice());
-                    });
-                    final var totalPrice = eventSeatSection.stream()
-                            .map(EventSeatSection::getPrice)
-                            .mapToDouble(Double::doubleValue).sum();
-                    paymentRequest.setAmount(totalPrice);
+                final var seatSectionsIds = new java.util.ArrayList<>(secondary.stream()
+                        .map(BasePaymentOrderRequestDTO::getSeatSectionId).toList());
+                seatSectionsIds.add(primary.getSeatSectionId());
+                final var eventSeatSection = seatSectionsIds.stream().map(eventSeatSectionService::getById).toList();
+                if (eventSeatSection.size() != seatSectionsIds.size()) {
+                    throw new ApplicationException(400, "not_allowed", "Some seat sections does not exists!");
+                }
+                eventSeatSection.forEach(eventSeatSection1 -> eventSeatSectionMap.put(eventSeatSection1.getId(), eventSeatSection1));
+                if (event.isFreeEvent()) {
+                    request.setFree(true);
+                    return processFreeEvent(eventSeatSectionMap, request);
                 } else {
-                    final var eventSeatSection = eventSeatSectionService.getById(primary.getSeatSectionId());
-                    paymentRequest.setAmount(eventSeatSection.getPrice());
+                    if (!secondary.isEmpty()) {
+                        final var totalPrice = eventSeatSection.stream()
+                                .map(EventSeatSection::getPrice)
+                                .mapToDouble(Double::doubleValue).sum();
+                        paymentRequest.setAmount(totalPrice);
+                    } else {
+                        final var primaryEventSeatSection = eventSeatSectionService.getById(primary.getSeatSectionId());
+                        paymentRequest.setAmount(primaryEventSeatSection.getPrice());
+                    }
                 }
             }
         }
@@ -132,18 +131,21 @@ public class TransactionServiceImpl implements TransactionService {
             if (response.getStatusCode().isError()) {
                 throw new ApplicationException(400, "init_payment_failed", "Failed to init payment");
             }
-            return getOrders(request, paymentRequest.getAmount(), Objects.requireNonNull(response.getBody()));
+            return getOrders(eventSeatSectionMap, request, paymentRequest.getAmount(), Objects.requireNonNull(response.getBody()));
         } catch (Throwable e) {
             log.error(">>> Error Occurred while initiating transaction", e);
         }
         throw new ApplicationException(400, "init_payment_failed", "Failed to init payment with checkout link!");
     }
 
-    private OrderResponseDto getOrders(final InitPaymentOrderRequestDTO initRequest, final double amount, final PaymentInitResponseDTO response) {
+    private OrderResponseDto getOrders(final Map<UUID, EventSeatSection> eventSeatSectionMap,
+                                       final InitPaymentOrderRequestDTO initRequest,
+                                       final double totalAmountPaid, final PaymentInitResponseDTO response) {
         final var quantity = !initRequest.getSecondary().isEmpty() ? initRequest.getSecondary().size() + 1 : 1;
         final var primary = initRequest.getPrimary();
         final var secondary = initRequest.getSecondary();
         final var eventId = initRequest.getPrimary().getEventId();
+        final var primaryOrderAmount = eventSeatSectionMap.get(primary.getSeatSectionId()).getPrice();
         final var secondaryOrders = new ArrayList<Order>();
         final var order = new Order();
         final var data = Objects.isNull(response) ? new PaymentInitResponseDTO.Data() : response.getData();
@@ -151,7 +153,9 @@ public class TransactionServiceImpl implements TransactionService {
         order.setEventId(eventId);
         order.setQuantity(quantity);
         order.setUserId(jwtTokenUtil.getUser().getUserId());
-        order.setAmount(new BigDecimal(String.valueOf(amount)));
+        order.setAmount(new BigDecimal(String.valueOf(primaryOrderAmount)));
+        order.setTotalBatchAmount(secondary.isEmpty() ? null : new BigDecimal(String.valueOf(totalAmountPaid)));
+        order.setTotalFee(null);//update here for fee processing
         order.setStatus(initRequest.isFree() ? OrderStatus.SUCCESSFUL : OrderStatus.PENDING);
         order.setPaymentLink(data.getAuthorizationUrl());
         order.setCode(data.getAccessCode());
@@ -162,6 +166,7 @@ public class TransactionServiceImpl implements TransactionService {
         order.setTenantId(primaryUserDto.getTenantId());
         order.setSeatSectionId(primary.getSeatSectionId());
         orderService.save(order);
+        order.setBatchOrderId(order.getId());
 
         order.setFirstName(primaryUserDto.getFirstName());
         order.setLastName(primaryUserDto.getLastName());
@@ -172,16 +177,18 @@ public class TransactionServiceImpl implements TransactionService {
         if (!secondary.isEmpty()) {
             secondary.forEach(sec -> {
                 final var userDto = getOrCreateNewUser(sec);
+                final var secOrderAmount = new BigDecimal(String.valueOf(
+                        eventSeatSectionMap.get(sec.getSeatSectionId()).getPrice()));
                 final var secOrder = Order.builder()
                         .eventId(eventId)
                         .quantity(1)
-                        .amount(new BigDecimal(String.valueOf(sec.getAmount())))
+                        .amount(secOrderAmount)
                         .status(order.getStatus())
                         .paymentLink(data.getAuthorizationUrl())
                         .reference(data.getReference())
                         .orderDate(LocalDateTime.now())
                         .seatSectionId(sec.getSeatSectionId())
-                        .batchId(order.getBatchId())
+                        .batchId(order.getBatchOrderId())
                         .build();
                 secOrder.setTenantId(userDto.getTenantId());
                 secOrder.setUserId(userDto.getUserId());
@@ -348,7 +355,7 @@ public class TransactionServiceImpl implements TransactionService {
             final var trx = Transaction.builder()
                     .userId(order.getUserId())
                     .reference(order.getReference())
-                    .amount(order.getAmount())
+                    .amount(ObjectUtils.defaultIfNull(order.getTotalBatchAmount(), order.getAmount()))
                     .orderId(order.getId())
                     .status(Objects.isNull(meta.getPaidAt()) ? Status.PENDING : Status.PAID)
                     .gateWayMeta(meta)
@@ -360,8 +367,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Transactional
-    public OrderResponseDto processFreeEvent(final InitPaymentOrderRequestDTO request) {
-        final var orders = getOrders(request, 0.0, null);
+    public OrderResponseDto processFreeEvent(final Map<UUID, EventSeatSection> eventSeatSectionMap, final InitPaymentOrderRequestDTO request) {
+        final var orders = getOrders(eventSeatSectionMap, request, 0.0, null);
         final var primaryOrder = orders.getPrimary();
         final var secondaryOrders = orders.getSecondary();
         final var ticketDto = new TicketCreateRequestDTO(
@@ -386,16 +393,23 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public void processCreateTicketAndQrCode(final Transaction transaction, final Order order) throws JsonProcessingException {
         processQrCodeAndTicketHelper(order, transaction);
-        if (Objects.nonNull(order.getBatchId())) {
-            final var orders = orderService.getByBatchId(order.getBatchId());
+        if (Objects.nonNull(order.getBatchOrderId())) {
+            final var orders = orderService.getByBatchId(order.getBatchOrderId());
             if (orders.isEmpty()) {
                 log.info(">>> Could not find batch orders with batchId : {} ", orders);
             }
             orders.forEach(_order -> {
-                final var _transaction = modelMapper.map(transaction, Transaction.class);
+                final var _transaction = new Transaction();
                 _transaction.setId(UUID.randomUUID());
                 _transaction.setAmount(order.getAmount());
-                _transaction.setUserId(order.getUserId());
+                _transaction.setUserId(_order.getUserId());
+                _transaction.setDateCreated(LocalDateTime.now());
+                _transaction.setComment(transaction.getComment());
+                _transaction.setTenantId(transaction.getTenantId());
+                _transaction.setOrderId(order.getBatchId());
+                _transaction.setGateWayMeta(transaction.getGateWayMeta());
+                _transaction.setStatus(Status.COMPLETED);
+                _transaction.setReference(String.format("%s_%s", System.currentTimeMillis(), transaction.getReference()));
                 _transaction.setDateCreated(LocalDateTime.now());
                 transactionRepository.save(_transaction);
                 processQrCodeAndTicketHelper(_order, _transaction);

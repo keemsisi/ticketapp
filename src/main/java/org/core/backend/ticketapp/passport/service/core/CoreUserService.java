@@ -265,7 +265,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
             }
         }
         BeanUtils.copyProperties(userDto, user);
-        user.setId(UUID.randomUUID());
+        user.setId(org.apache.commons.lang3.ObjectUtils.defaultIfNull(userDto.getId(), UUID.randomUUID()));
         user.setCreatedOn(new Date());
         user.setCreatedBy(loggedInUser.getUserId());
         user.setFirstTimeLogin(true);

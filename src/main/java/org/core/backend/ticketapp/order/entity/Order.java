@@ -36,6 +36,17 @@ public class Order extends AbstractBaseEntity {
     @Column(name = "amount")
     private BigDecimal amount;
 
+    @Column(name = "total_batch_amount")
+    private BigDecimal totalBatchAmount;
+
+    @JsonIgnore
+    @Column(name = "batch_order_id")
+    private UUID batchOrderId;
+
+
+    @Column(name = "total_fee")
+    private BigDecimal totalFee;
+
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
