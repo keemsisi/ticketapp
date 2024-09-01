@@ -208,6 +208,7 @@ public class TransactionServiceImpl implements TransactionService {
             createUserRequestDto.setPassword(PasswordUtil.generatePassword());
             createUserRequestDto.setTenantId(appConfigs.defaultTenantId);
             createUserRequestDto.setPhone(requestDTO.getPhoneNumber());
+            createUserRequestDto.setEmail(requestDTO.getEmail());
             CompletableFuture.runAsync(() -> {
                 try {
                     log.info(">>> Creating new buyer account for none existing user {} ", requestDTO);
