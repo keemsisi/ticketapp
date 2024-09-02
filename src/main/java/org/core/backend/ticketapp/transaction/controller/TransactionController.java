@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/v1/transaction")
+@RequestMapping("/api/v1/transactions")
 public class TransactionController implements ICrudController {
     TransactionService transactionService;
 
