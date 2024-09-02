@@ -7,6 +7,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.Gender;
 import org.core.backend.ticketapp.common.enums.OrderStatus;
+import org.core.backend.ticketapp.common.enums.OrderType;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -27,6 +28,10 @@ import java.util.UUID;
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class Order extends AbstractBaseEntity {
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", columnDefinition = "varchar(255) default 'TICKET'")
+    private OrderType type;
+
     @Column(name = "event_id")
     private UUID eventId;
 
@@ -42,7 +47,6 @@ public class Order extends AbstractBaseEntity {
     @JsonIgnore
     @Column(name = "batch_order_id")
     private UUID batchOrderId;
-
 
     @Column(name = "total_fee")
     private BigDecimal totalFee;
@@ -75,6 +79,9 @@ public class Order extends AbstractBaseEntity {
 
     @Column(name = "ticket_id", columnDefinition = "uuid default null")
     private UUID ticketId;
+
+    @Column(name = "is_primary", columnDefinition = "boolean default false")
+    private boolean isPrimary;
 
     @JsonIgnore
     @Transient

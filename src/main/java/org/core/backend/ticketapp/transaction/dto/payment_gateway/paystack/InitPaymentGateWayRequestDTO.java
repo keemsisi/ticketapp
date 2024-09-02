@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InitPayStackPaymentRequestDTO {
+public class InitPaymentGateWayRequestDTO {
     @NotNull(message = "Amount cannot be null")
     private double amount;
     @NotNull(message = "Email cannot be null")
