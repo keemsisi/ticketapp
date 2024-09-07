@@ -18,4 +18,6 @@ public interface EventSeatSectionService {
     EventSeatSection update(final EventSeatSectionUpdateRequestDTO requestDTO);
 
     List<EventSeatSection> getAllByIds(List<UUID> seatSectionsIds);
+
+    List<EventSeatSection> getByEventId(UUID eventId);
 }

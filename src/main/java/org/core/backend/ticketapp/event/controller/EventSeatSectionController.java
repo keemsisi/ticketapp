@@ -31,6 +31,12 @@ public record EventSeatSectionController(EventSeatSectionService service) implem
         return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully", data));
     }
 
+    @RequestMapping(value = "/event/{eventId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<List<EventSeatSection>>> getByEventId(@PathVariable UUID eventId) {
+        final var data = service.getByEventId(eventId);
+        return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully", data));
+    }
+
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<EventSeatSection>> update(@RequestBody @Valid EventSeatSectionUpdateRequestDTO request) {
         final var data = service.update(request);
@@ -42,4 +48,5 @@ public record EventSeatSectionController(EventSeatSectionService service) implem
         service.delete(id);
         return ResponseEntity.ok(new GenericResponse<>("00", "Deleted successfully", null));
     }
+
 }
