@@ -99,6 +99,8 @@ public class EventServiceImpl implements EventService {
 
     public Event getById(UUID id) {
         final var event = eventRepository.findById(id).orElseThrow(() -> new ApplicationException(404, "not_found", "Event not found!"));
+        final var seatSections = eventSeatSectionsRepository.getAllByEventId(event.getId());
+        event.setSeatSections(seatSections);
         return event;
     }
 
