@@ -1,17 +1,18 @@
-package org.core.backend.ticketapp.event.dto;
+package org.core.backend.ticketapp.passport.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 
 import javax.validation.constraints.NotBlank;
 
-@Builder
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BankDetails {
+public class BankAccountDetails extends AbstractBaseEntity {
     private String bankCode;
     @NotBlank(message = "bank name can't be blank")
     private String bankName;
