@@ -96,6 +96,9 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "type")
     private String type;
 
+    @Column(name = "is_public", columnDefinition = "boolean not null default true")
+    private boolean isPublic;
+
     @PrePersist
     public void onCreate() {
         if (approvalStatus == null) approvalStatus = ApprovalStatus.APPROVED;

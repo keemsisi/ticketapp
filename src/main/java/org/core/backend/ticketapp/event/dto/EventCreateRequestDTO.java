@@ -54,6 +54,6 @@ public class EventCreateRequestDTO {
     private EventTicketType ticketType;
     @NotBlank(message = "eventType is required")
     private String eventType;
-    private BankAccountDetails bankAccountDetails;
+    private BankAccountDetailsDTO bankAccountDetails;
     private boolean isPublic = true;
 }

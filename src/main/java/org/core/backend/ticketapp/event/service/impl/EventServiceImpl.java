@@ -15,10 +15,12 @@ import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.entity.EventCategory;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
+import org.core.backend.ticketapp.event.repository.BankAccountDetailsRepository;
 import org.core.backend.ticketapp.event.repository.EventCategoryRepository;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
+import org.core.backend.ticketapp.passport.entity.BankAccountDetails;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.modelmapper.ModelMapper;
@@ -42,6 +44,7 @@ public class EventServiceImpl implements EventService {
     private JwtTokenUtil jwtTokenUtil;
     private EventSeatSectionRepository eventSeatSectionsRepository;
     private EventCategoryRepository eventCategoryRepository;
+    private BankAccountDetailsRepository bankAccountDetailsRepository;
 
     public List<Event> getAll() {
         List<Event> events = eventRepository.findAll();
@@ -83,6 +86,10 @@ public class EventServiceImpl implements EventService {
         event.setDateCreated(LocalDateTime.now());
         event.setType(eventDTO.getEventType());
 
+        final var bankDetails = modelMapper.map(eventDTO.getBankAccountDetails(), BankAccountDetails.class);
+        bankDetails.setUserId(userId);
+        bankDetails.setId(UUID.randomUUID());
+
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {
             final var seatSectionsVal = new EventSeatSection(event.getId(), userId, seatSection.getType(),
@@ -93,6 +100,7 @@ public class EventServiceImpl implements EventService {
         });
         eventRepository.saveAndFlush(event);
         eventSeatSectionsRepository.saveAll(seatSections);
+        bankAccountDetailsRepository.save(bankDetails);
         event.setSeatSections(seatSections);
         return event;
     }

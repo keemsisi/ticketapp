@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BankAccountDetails {
+public class BankAccountDetailsDTO {
     private String bankCode;
     @NotBlank(message = "bank name can't be blank")
     private String bankName;
@@ -19,4 +19,5 @@ public class BankAccountDetails {
     private String accountName;
     @NotBlank(message = "account number can't be blank")
     private String accountNumber;
+    private boolean isDefault;
 }
