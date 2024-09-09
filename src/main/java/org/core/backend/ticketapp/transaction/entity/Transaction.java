@@ -39,6 +39,12 @@ public class Transaction extends AbstractBaseEntity {
     @Column(name = "gateway_meta", columnDefinition = "JSON DEFAULT NULL")
     private PaymentGatewayMeta gateWayMeta;
 
+    @Column(name = "created_by", columnDefinition = "UUID DEFAULT NULL")
+    private UUID createdBy;
+
+    @Column(name = "modified_by", columnDefinition = "UUID DEFAULT NULL")
+    private UUID modifiedBy;
+
     @Column(name = "status")
     @Enumerated(value = EnumType.STRING)
     private Status status;
