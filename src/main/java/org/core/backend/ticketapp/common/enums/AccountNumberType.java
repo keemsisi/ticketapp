@@ -1,5 +1,8 @@
 package org.core.backend.ticketapp.common.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum AccountNumberType {
     NUBAN("nuban"),
     GHIPSS("ghipss"),
@@ -7,12 +10,7 @@ public enum AccountNumberType {
     BASA("basa");
     private final String type;
 
-
     AccountNumberType(String type) {
         this.type = type;
-    }
-
-    public String getType() {
-        return type;
     }
 }
