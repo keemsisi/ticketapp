@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
+import org.core.backend.ticketapp.transaction.dto.BankResponse;
 import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
 import org.core.backend.ticketapp.transaction.service.client.PayStackApiServiceProxy;
 import org.core.backend.ticketapp.transaction.service.payment.PaymentProcessorService;
@@ -31,6 +32,11 @@ public class PayStackPaymentProcessorImpl implements PaymentProcessorService {
         };
     }
 
+    @Override
+    public BankResponse getBanks() {
+        return payStackApiServiceProxy.getBanks(getToken()).getBody();
+    }
+
     private ProcessorPaymentResponseDTO initPaymentWithPayStack(final ProcessorPaymentRequestDTO request, final BankAccountDetails bankAccountDetails) {
         final var transactionRequest = (TransferRequestDTO) request;
         final var recipient = transactionRequest.getRecipient();
@@ -39,6 +45,8 @@ public class PayStackPaymentProcessorImpl implements PaymentProcessorService {
             transactionRecipientRequest.setType("customer");
             transactionRecipientRequest.setName(bankAccountDetails.getAccountName());
             transactionRecipientRequest.setCurrency(bankAccountDetails.getCurrency());
+            transactionRecipientRequest.setAccountNumber(bankAccountDetails.getAccountNumber());
+            transactionRecipientRequest.setBankCode(bankAccountDetails.getBankCode());
             final var createdRecipientResponse = payStackApiServiceProxy.createTransferRecipient(transactionRecipientRequest, getToken());
             final var responseBody = Objects.requireNonNull(createdRecipientResponse.getBody());
             if (!responseBody.isStatus()) {

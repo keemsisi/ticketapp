@@ -9,8 +9,9 @@ import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.order.service.OrderService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
+import org.core.backend.ticketapp.passport.service.core.PaymentProcessorType;
 import org.core.backend.ticketapp.ticket.service.TicketService;
-import org.core.backend.ticketapp.transaction.dto.TransferRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.SettlementRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
 import org.core.backend.ticketapp.transaction.entity.PaymentGatewayMeta;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
@@ -32,27 +33,28 @@ public class SettlementServiceImpl implements SettlementService {
     private final CoreUserService coreUserService;
     private final OrderService orderService;
     private final TransactionService transactionService;
-    private final BankAccountDetailsService bankAccountDetailsService;
+    private final BankService bankService;
     private final PaymentProcessorService paymentProcessorService;
     private final ObjectMapper objectMapper;
     private final String PAYSTACK_SOURCE = "balance";
     private final AppConfigs appConfigs;
 
     @Override
-    public Transaction transfer(final TransferRequestDTO request) throws JsonProcessingException {
-        final var bankAccountDetails = bankAccountDetailsService.getByUserId(request.getUserId());
+    public Transaction transfer(final SettlementRequestDTO request) throws JsonProcessingException {
+        final var bankAccountDetails = bankService.getByUserId(request.getUserId());
         return switch (appConfigs.defaultPaymentProcessor) {
             case PAYSTACK -> processAndBuildPayStackTransaction(bankAccountDetails, request);
         };
     }
 
-    private Transaction processAndBuildPayStackTransaction(final BankAccountDetails bankAccountDetails, TransferRequestDTO request) throws JsonProcessingException {
+    private Transaction processAndBuildPayStackTransaction(final BankAccountDetails bankAccountDetails, SettlementRequestDTO request) throws JsonProcessingException {
         final var transferRequest = new org.core.backend.ticketapp.transaction.service.payment.paystack.dto
                 .TransferRequestDTO();
         transferRequest.setAmount(request.getAmount());
         transferRequest.setRecipient(bankAccountDetails.getReference());
         transferRequest.setSource(PAYSTACK_SOURCE);
         transferRequest.setReason(String.format("Event settlement payment to %s", bankAccountDetails.getAccountName()));
+        transferRequest.setPaymentProcessorType(PaymentProcessorType.PAYSTACK);
         final var processorResponse = paymentProcessorService.transfer(transferRequest, bankAccountDetails);
         final var jsonResponse = objectMapper.writeValueAsString(processorResponse);
         final var transaction = new Transaction();

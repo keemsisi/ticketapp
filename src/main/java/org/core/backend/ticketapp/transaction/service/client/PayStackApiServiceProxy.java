@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.transaction.service.client;
 
 import org.core.backend.ticketapp.plan.dto.PlanCreateRequestDTO;
 import org.core.backend.ticketapp.plan.dto.PlanCreateResponseDTO;
+import org.core.backend.ticketapp.transaction.dto.BankResponse;
 import org.core.backend.ticketapp.transaction.dto.PaymentInitResponseDTO;
 import org.core.backend.ticketapp.transaction.dto.PaymentVerificationResponseDTO;
 import org.core.backend.ticketapp.transaction.dto.payment_gateway.paystack.InitPaymentGateWayRequestDTO;
@@ -43,4 +44,7 @@ public interface PayStackApiServiceProxy {
     @RequestMapping(value = "/transaction/initialize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<PaymentInitResponseDTO> initTransaction(@Valid @RequestBody InitPaymentGateWayRequestDTO request,
                                                            @RequestHeader("Authorization") String token);
+
+    @RequestMapping(value = "/bank", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<BankResponse> getBanks(@RequestHeader("Authorization") String token);
 }

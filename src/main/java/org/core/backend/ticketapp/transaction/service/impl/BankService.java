@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.transaction.service.impl;
 
+import org.core.backend.ticketapp.transaction.dto.BankResponse;
 import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 
-public interface BankAccountDetailsService {
+public interface BankService {
     BankAccountDetails getById(final UUID id);
 
     BankAccountDetails getByUserId(final UUID id);
@@ -15,4 +16,6 @@ public interface BankAccountDetailsService {
     Page<BankAccountDetails> getAll(final Pageable pageable);
 
     BankAccountDetails delete(final UUID id);
+
+    BankResponse getBanks();
 }
