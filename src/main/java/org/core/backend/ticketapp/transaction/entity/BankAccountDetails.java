@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
+import org.core.backend.ticketapp.common.enums.AccountNumberType;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -33,10 +34,14 @@ public class BankAccountDetails extends AbstractBaseEntity {
     @NotBlank(message = "account number can't be blank")
     @Column(name = "account_number", columnDefinition = "varchar(10) not null")
     private String accountNumber;
+    @Column(name = "currency", columnDefinition = "varchar(10) not null default 'NGN'")
+    private String currency;
     @Column(name = "event_id")
     private UUID eventId;
     @Column(name = "reference")
     private String reference;
+    @Column(name = "account_number_type", columnDefinition = "varchar(255) not null default 'NUBAN'")
+    private AccountNumberType accountNumberType;
 
     @PrePersist
     public void onCreate() {

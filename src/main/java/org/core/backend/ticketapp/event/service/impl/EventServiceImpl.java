@@ -62,20 +62,20 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public Event create(@NotNull final EventCreateRequestDTO eventDTO) {
-        final var event = convertToEntity(eventDTO);
+    public Event create(@NotNull final EventCreateRequestDTO request) {
+        final var event = convertToEntity(request);
         final var userId = jwtTokenUtil.getUser().getUserId();
         final var tenantId = jwtTokenUtil.getUser().getTenantId();
 
         Set<EventCategory> existingCategories = new HashSet<>();
-        if (Objects.nonNull(eventDTO.getCategories()) && !eventDTO.getCategories().isEmpty()) {
-            final var eventCategories = eventDTO.getCategories().stream().map(String::toUpperCase).toList();
+        if (Objects.nonNull(request.getCategories()) && !request.getCategories().isEmpty()) {
+            final var eventCategories = request.getCategories().stream().map(String::toUpperCase).toList();
             existingCategories = eventCategoryRepository.findAllByName(eventCategories);
             if (existingCategories.size() != eventCategories.size()) {
                 throw new ApplicationException(400, "missing_categories", "Some categories does not exist!");
             }
         }
-        final var totalCapacity = eventDTO.getSeatSections().stream().map(EventSeatSection::getCapacity).mapToInt(Long::intValue).sum();
+        final var totalCapacity = request.getSeatSections().stream().map(EventSeatSection::getCapacity).mapToInt(Long::intValue).sum();
         final var newCategory = existingCategories.stream().map(EventCategory::getName)
                 .map(String::toUpperCase).collect(Collectors.toSet());
         event.setCategories(newCategory);
@@ -84,15 +84,16 @@ public class EventServiceImpl implements EventService {
         event.setUserId(userId);
         event.setTenantId(tenantId);
         event.setDateCreated(LocalDateTime.now());
-        event.setType(eventDTO.getEventType());
+        event.setType(request.getEventType());
 
-        final var bankDetails = modelMapper.map(eventDTO.getBankAccountDetails(), BankAccountDetails.class);
+        final var bankDetails = modelMapper.map(request.getBankAccountDetails(), BankAccountDetails.class);
         bankDetails.setUserId(userId);
         bankDetails.setId(UUID.randomUUID());
         bankDetails.setTenantId(tenantId);
+        bankDetails.setAccountNumberType(request.getBankAccountDetails().getType());
 
         final var seatSections = new ArrayList<EventSeatSection>();
-        eventDTO.getSeatSections().forEach(seatSection -> {
+        request.getSeatSections().forEach(seatSection -> {
             final var seatSectionsVal = new EventSeatSection(event.getId(), userId, seatSection.getType(),
                     seatSection.getCapacity(), seatSection.getPrice(), 0L, ApprovalStatus.APPROVED);
             seatSectionsVal.setTenantId(tenantId);

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.Status;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.order.service.OrderService;
@@ -48,17 +47,13 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     private Transaction processAndBuildPayStackTransaction(final BankAccountDetails bankAccountDetails, TransferRequestDTO request) throws JsonProcessingException {
-        final var reference = bankAccountDetails.getReference();
-        if (StringUtils.isBlank(reference)) {
-            //create transaction recipient
-        }
         final var transferRequest = new org.core.backend.ticketapp.transaction.service.payment.paystack.dto
                 .TransferRequestDTO();
         transferRequest.setAmount(request.getAmount());
         transferRequest.setRecipient(bankAccountDetails.getReference());
         transferRequest.setSource(PAYSTACK_SOURCE);
         transferRequest.setReason(String.format("Event settlement payment to %s", bankAccountDetails.getAccountName()));
-        final var processorResponse = paymentProcessorService.transfer(transferRequest);
+        final var processorResponse = paymentProcessorService.transfer(transferRequest, bankAccountDetails);
         final var jsonResponse = objectMapper.writeValueAsString(processorResponse);
         final var transaction = new Transaction();
         transaction.setDateCreated(LocalDateTime.now());
