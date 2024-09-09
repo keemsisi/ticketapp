@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.transaction.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.enums.AccountType;
@@ -27,7 +28,7 @@ public class SettlementController {
 
     @PreAuthorize("hasAuthority('SCOPE_transfer')")
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/transfer")
-    public ResponseEntity<GenericResponse<Transaction>> transfer(@RequestBody TransferRequestDTO request) {
+    public ResponseEntity<GenericResponse<Transaction>> transfer(@RequestBody TransferRequestDTO request) throws JsonProcessingException {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var verified = settlementService.transfer(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Transfer was done successfully!", verified), HttpStatus.OK);
