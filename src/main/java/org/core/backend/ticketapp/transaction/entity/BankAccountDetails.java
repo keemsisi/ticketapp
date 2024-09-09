@@ -40,12 +40,14 @@ public class BankAccountDetails extends AbstractBaseEntity {
     private UUID eventId;
     @Column(name = "reference")
     private String reference;
-    @Column(name = "account_number_type", columnDefinition = "varchar(255) not null default 'NUBAN'")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_number_type", columnDefinition = "varchar(100) not null default 'NUBAN'")
     private AccountNumberType accountNumberType;
 
     @PrePersist
     public void onCreate() {
         id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
+        currency = ObjectUtils.defaultIfNull(currency, "NGN");
         dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
     }
 

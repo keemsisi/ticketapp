@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.event.controller;
 
+import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.PagedMapperUtil;
 import org.core.backend.ticketapp.common.PagedResponse;
@@ -11,19 +12,22 @@ import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.EventService;
-import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/events")
-public record EventController(EventService eventService, JwtTokenUtil jwtTokenUtil) implements ICrudController {
+@AllArgsConstructor
+public class EventController implements ICrudController {
+    private final EventService eventService;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<Event>> create(@Valid @RequestBody EventCreateRequestDTO request) {

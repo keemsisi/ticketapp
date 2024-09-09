@@ -85,6 +85,7 @@ public class EventServiceImpl implements EventService {
         event.setTenantId(tenantId);
         event.setDateCreated(LocalDateTime.now());
         event.setType(request.getEventType());
+        event.setPublic(request.isPublic());
 
         final var bankDetails = modelMapper.map(request.getBankAccountDetails(), BankAccountDetails.class);
         bankDetails.setUserId(userId);
