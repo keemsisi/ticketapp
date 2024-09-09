@@ -1,12 +1,13 @@
 package org.core.backend.ticketapp.transaction.service.client;
 
-import org.core.backend.ticketapp.event.dto.EventCategoryCreateRequestDTO;
 import org.core.backend.ticketapp.plan.dto.PlanCreateRequestDTO;
 import org.core.backend.ticketapp.plan.dto.PlanCreateResponseDTO;
 import org.core.backend.ticketapp.transaction.dto.PaymentInitResponseDTO;
 import org.core.backend.ticketapp.transaction.dto.PaymentVerificationResponseDTO;
+import org.core.backend.ticketapp.transaction.dto.payment_gateway.paystack.InitPaymentGateWayRequestDTO;
 import org.core.backend.ticketapp.transaction.service.client.paystack.PayStackApiServiceProxyFallback;
 import org.core.backend.ticketapp.transaction.service.payment.paystack.dto.*;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import javax.validation.Valid;
 
 
 @Component
+@EnableFeignClients
 @FeignClient(name = "payStackApiServiceProxy", url = "${system.payment.vendor.paystack.baseUrl}", fallback = PayStackApiServiceProxyFallback.class)
 public interface PayStackApiServiceProxy {
 
@@ -24,7 +26,7 @@ public interface PayStackApiServiceProxy {
     ResponseEntity<PlanCreateResponseDTO> createPlan(@Valid @RequestBody PlanCreateRequestDTO request, @RequestHeader("Authorization") String token);
 
     @RequestMapping(value = "/transaction/verify/:reference", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<PaymentVerificationResponseDTO> verifyPayment(final @PathVariable String reference, @RequestHeader("Authorization") String token);
+    ResponseEntity<PaymentVerificationResponseDTO> verifyPayment(@PathVariable String reference, @RequestHeader("Authorization") String token);
 
     @RequestMapping(value = "/transfer", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<TransferResponseDTO> transfer(@Valid @RequestBody TransferRequestDTO request, @RequestHeader("Authorization") String token);
@@ -36,11 +38,9 @@ public interface PayStackApiServiceProxy {
     ResponseEntity<TransferRecipientResponseDTO> createTransferRecipient(@Valid @RequestBody TransferRecipientRequestDTO request, @RequestHeader("Authorization") String token);
 
     @RequestMapping(value = "/subscription", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    default ResponseEntity<?> createSubscription(@Valid @RequestBody Object request, @RequestHeader("Authorization") String token) {
-        throw new UnsupportedOperationException();
-    }
+    ResponseEntity<?> createSubscription(@Valid @RequestBody Object request, @RequestHeader("Authorization") String token);
 
     @RequestMapping(value = "/transaction/initialize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<PaymentInitResponseDTO> initTransaction(@Valid @RequestBody EventCategoryCreateRequestDTO request,
+    ResponseEntity<PaymentInitResponseDTO> initTransaction(@Valid @RequestBody InitPaymentGateWayRequestDTO request,
                                                            @RequestHeader("Authorization") String token);
 }
