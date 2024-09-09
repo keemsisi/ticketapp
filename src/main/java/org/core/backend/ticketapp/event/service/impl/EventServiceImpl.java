@@ -87,11 +87,14 @@ public class EventServiceImpl implements EventService {
         event.setType(request.getEventType());
         event.setPublic(request.isPublic());
 
-        final var bankDetails = modelMapper.map(request.getBankAccountDetails(), BankAccountDetails.class);
-        bankDetails.setUserId(userId);
-        bankDetails.setId(UUID.randomUUID());
-        bankDetails.setTenantId(tenantId);
-        bankDetails.setAccountNumberType(request.getBankAccountDetails().getType());
+        if (request.getBankAccountDetails() != null) {
+            final var bankDetails = modelMapper.map(request.getBankAccountDetails(), BankAccountDetails.class);
+            bankDetails.setUserId(userId);
+            bankDetails.setId(UUID.randomUUID());
+            bankDetails.setTenantId(tenantId);
+            bankDetails.setAccountNumberType(request.getBankAccountDetails().getType());
+            bankAccountDetailsRepository.save(bankDetails);
+        }
 
         final var seatSections = new ArrayList<EventSeatSection>();
         request.getSeatSections().forEach(seatSection -> {
@@ -103,7 +106,6 @@ public class EventServiceImpl implements EventService {
         });
         eventRepository.saveAndFlush(event);
         eventSeatSectionsRepository.saveAll(seatSections);
-        bankAccountDetailsRepository.save(bankDetails);
         event.setSeatSections(seatSections);
         return event;
     }
