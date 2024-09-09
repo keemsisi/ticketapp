@@ -20,9 +20,9 @@ import org.core.backend.ticketapp.event.repository.EventCategoryRepository;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
-import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
+import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -89,6 +89,7 @@ public class EventServiceImpl implements EventService {
         final var bankDetails = modelMapper.map(eventDTO.getBankAccountDetails(), BankAccountDetails.class);
         bankDetails.setUserId(userId);
         bankDetails.setId(UUID.randomUUID());
+        bankDetails.setTenantId(tenantId);
 
         final var seatSections = new ArrayList<EventSeatSection>();
         eventDTO.getSeatSections().forEach(seatSection -> {

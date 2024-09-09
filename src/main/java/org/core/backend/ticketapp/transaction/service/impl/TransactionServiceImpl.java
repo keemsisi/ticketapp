@@ -313,6 +313,11 @@ public class TransactionServiceImpl implements TransactionService {
         return null;
     }
 
+    @Override
+    public Transaction save(Transaction transaction) {
+        return transactionRepository.save(transaction);
+    }
+
     @Transactional
     public void updateUserSubscriptionPlan(final Transaction transaction, final Order order, final PaymentVerificationResponseDTO.Data data) {
         try {

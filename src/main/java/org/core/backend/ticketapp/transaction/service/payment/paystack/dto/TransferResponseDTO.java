@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.core.backend.ticketapp.transaction.service.payment.dto.ProcessorPaymentRequestDTO;
+import org.core.backend.ticketapp.transaction.service.payment.dto.ProcessorPaymentResponseDTO;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransferResponseDTO implements ProcessorPaymentRequestDTO {
+public class TransferResponseDTO implements ProcessorPaymentResponseDTO {
     private boolean status;
     private String message;
     private Data data;
@@ -31,4 +32,6 @@ public class TransferResponseDTO implements ProcessorPaymentRequestDTO {
         private String createdAt;
         private String updatedAt;
     }
+
+
 }

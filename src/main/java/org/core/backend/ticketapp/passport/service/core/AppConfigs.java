@@ -55,4 +55,6 @@ public class AppConfigs {
     UUID organizationMerchantOwnerRole;
     @Value("${system.default.role.organization_merchant_user_role}")
     UUID organizationMerchantUserRole;
+    @Value("${system.default.payment.processor}")
+    public PaymentProcessorType defaultPaymentProcessor;
 }

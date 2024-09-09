@@ -18,4 +18,6 @@ public interface TransactionService {
     Transaction verifyPayment(TransactionVerifyRequestDTO verifyRequestDTO) throws Exception;
 
     Transaction transfer(TransferRequestDTO request);
+
+    Transaction save(Transaction transaction);
 }
