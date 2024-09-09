@@ -1,4 +1,4 @@
-package org.core.backend.ticketapp.passport.entity;
+package org.core.backend.ticketapp.transaction.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

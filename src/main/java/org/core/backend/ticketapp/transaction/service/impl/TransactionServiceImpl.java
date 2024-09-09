@@ -308,6 +308,11 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
+    @Override
+    public Transaction transfer(TransferRequestDTO request) {
+        return null;
+    }
+
     @Transactional
     public void updateUserSubscriptionPlan(final Transaction transaction, final Order order, final PaymentVerificationResponseDTO.Data data) {
         try {

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.TransferRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.core.backend.ticketapp.transaction.service.TransactionService;
 import org.springframework.data.domain.Page;
