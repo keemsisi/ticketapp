@@ -15,4 +15,6 @@ public interface Constants {
     String PAYSTACK_SUBSCRIPTION_BASE_URL = "https://api.paystack.co/subscription";
     String PAYSTACK_INITIALIZE_PAY = "https://api.paystack.co/transaction/initialize";
     String PAYSTACK_VERIFY = "https://api.paystack.co/transaction/verify/%s";
+    String PAYSTACK_TRANSFER = "https://api.paystack.co/transfer";
+    String PAYSTACK_RECIPIENT_TRANSFER = "https://api.paystack.co/transferrecipient";
 }
