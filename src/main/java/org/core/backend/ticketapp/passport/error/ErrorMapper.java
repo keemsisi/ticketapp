@@ -277,8 +277,11 @@ public class ErrorMapper {
         }
         String resource = StringUtils.isNotBlank(tableName) ? tableName : "resource";
         var _message = String.format("%s with the given id does not exist", resource);
+        assert message != null;
         if (message.contains("update or delete on table")) {
-            _message = String.format("The resource can not be deleted has it is still been used by other resources.", resource);
+            _message = String.format("The resource(%s) can not be deleted has it is still been used by other resources.", resource);
+        } else if (message.contains("duplicate key value violates unique constraint")) {
+            _message = "Duplicate resource found!";
         }
         return new ErrorResponse(400, "400", _message);
     }
