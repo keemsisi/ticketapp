@@ -5,23 +5,15 @@ import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInsta
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
-import com.google.apps.meet.v2.CreateSpaceRequest;
-import com.google.apps.meet.v2.Space;
-import com.google.apps.meet.v2.SpacesServiceClient;
-import com.google.apps.meet.v2.SpacesServiceSettings;
-import com.google.auth.Credentials;
 import com.google.auth.oauth2.ClientId;
 import com.google.auth.oauth2.DefaultPKCEProvider;
 import com.google.auth.oauth2.TokenStore;
@@ -35,13 +27,11 @@ import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,14 +42,11 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class VirtualEventServiceImpl implements VirtualEventService {
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
-    private static final List<String> SCOPES = Collections
-            .singletonList("https://www.googleapis.com/auth/meetings.space.created");
-    private static final List<String> CALENDAR_SCOPES = Collections
-            .singletonList(CalendarScopes.CALENDAR_READONLY);
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
-    private static final String USER = "default";
+    private static final String TOKENS_DIRECTORY_PATH = "tokens";
+    private static final List<String> CALENDAR_SCOPES =
+            Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
     private static final TokenStore TOKEN_STORE = new TokenStore() {
         private Path pathFor(String id) {
             return Paths.get(".", TOKENS_DIRECTORY_PATH, id + ".json");
@@ -89,11 +76,9 @@ public class VirtualEventServiceImpl implements VirtualEventService {
     };
     private final AppConfigs appConfigs;
     private final Calendar calendar;
-    private final Credentials credentials;
 
     @Autowired
     public VirtualEventServiceImpl(final AppConfigs appConfigs) throws Exception {
-        this.credentials = getCredentials(SCOPES);
         final HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         this.calendar = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCalendarCredential(HTTP_TRANSPORT))
                 .setApplicationName(appConfigs.appName)
@@ -102,7 +87,7 @@ public class VirtualEventServiceImpl implements VirtualEventService {
     }
 
     private static Credential getCalendarCredential(final HttpTransport HTTP_TRANSPORT) throws IOException {
-        final var  in = VirtualEventServiceImpl.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        final var in = VirtualEventServiceImpl.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
@@ -136,77 +121,45 @@ public class VirtualEventServiceImpl implements VirtualEventService {
         }
     }
 
-    private static Credentials getCredentials(final List<String> scopes) throws Exception {
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().build();
-        try {
-            final var callbackUri = URI.create(receiver.getRedirectUri());
-            final var authorizer = getAuthorizer(callbackUri, scopes);
-            var credentials = authorizer.getCredentials(USER);
-            if (credentials != null) {
-                return credentials;
-            }
-            URL authorizationUrl = authorizer.getAuthorizationUrl(USER, "", null);
-            if (Desktop.isDesktopSupported() &&
-                    Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(authorizationUrl.toURI());
-            } else {
-                System.out.printf("Open the following URL to authorize access: %s\n",
-                        authorizationUrl.toExternalForm());
-            }
-            String code = receiver.waitForCode();
-            credentials = authorizer.getAndStoreCredentialsFromCode(USER, code, callbackUri);
-            return credentials;
-        } finally {
-            receiver.stop();
-        }
-    }
-
-    @Override
-    public String createLink(final Event event, final LoggedInUserDto user) throws Exception {
-        final SpacesServiceSettings settings = SpacesServiceSettings.newBuilder()
-                .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
-                .build();
-        try (final SpacesServiceClient spacesServiceClient = SpacesServiceClient.create(settings)) {
-            final var request = CreateSpaceRequest.newBuilder()
-                    .setSpace(Space.newBuilder().build())
-                    .build();
-            final var response = spacesServiceClient.createSpace(request);
-            return response.getMeetingUri();
-        } catch (final IOException e) {
-            final var errorCode = System.currentTimeMillis();
-            log.error(">>> [{}]Error occurred while creating meeting link", errorCode);
-            throw new ApplicationException(400, "failed",
-                    String.format("Failed to create virtual event link, " +
-                            "please try again later or contact support with code[%s]!", errorCode));
-        }
-    }
-
     @Override
     public String createLinkWithCalendar(final Event userEvent, final LoggedInUserDto user) throws Exception {
-        final var eventDate = userEvent.getEventDate();
-        final var timeZone = userEvent.getTimeZone();
-        final var event = new com.google.api.services.calendar.model.Event()
-                .setSummary(userEvent.getTitle())
-                .setLocation("Virtual")
-                .setDescription(userEvent.getDescription())
-                .setStart(new EventDateTime()
-                        .setDateTime(DateTime.parseRfc3339(eventDate.toString()))
-                        .setTimeZone(timeZone))
-                .setEnd(userEvent.isRecurring() ? null : new EventDateTime()
-                        .setDateTime(DateTime.parseRfc3339(eventDate.plusDays(1).toString()))
-                        .setTimeZone(timeZone))
-                .setAttendees(Collections.singletonList(new EventAttendee().setEmail(user.getEmail())));
-        final var conferenceData = new ConferenceData()
-                .setCreateRequest(new CreateConferenceRequest()
-                        .setRequestId(UUID.randomUUID().toString())
-                        .setConferenceSolutionKey(new ConferenceSolutionKey().setType("hangoutsMeet")));
-        event.setConferenceData(conferenceData);
-        com.google.api.services.calendar.model.Event createdEvent = calendar.events()
-                .insert("primary", event)
-                .setConferenceDataVersion(1)
-                .execute();
-        final var htmlLLink = createdEvent.getHtmlLink();
-        final var link = createdEvent.getConferenceData().getEntryPoints().get(0).getUri();
-        return link;
+        try {
+            final var eventDate = userEvent.getEventDate();
+            final var timeZone = userEvent.getTimeZone();
+            final var event = new com.google.api.services.calendar.model.Event()
+                    .setSummary(userEvent.getTitle())
+                    .setLocation("Virtual")
+                    .setDescription(userEvent.getDescription())
+                    .setStart(new EventDateTime()
+                            .setDateTime(DateTime.parseRfc3339(eventDate.toString()))
+                            .setTimeZone(timeZone))
+                    .setEnd(userEvent.isRecurring() ? null : new EventDateTime()
+                            .setDateTime(DateTime.parseRfc3339(eventDate.plusDays(1).toString()))
+                            .setTimeZone(timeZone))
+                    .setAttendees(Collections.singletonList(new EventAttendee().setEmail(user.getEmail())));
+            final var conferenceData = new ConferenceData()
+                    .setCreateRequest(new CreateConferenceRequest()
+                            .setRequestId(UUID.randomUUID().toString())
+                            .setConferenceSolutionKey(new ConferenceSolutionKey().setType("hangoutsMeet")));
+            event.setConferenceData(conferenceData);
+            com.google.api.services.calendar.model.Event createdEvent = calendar.events()
+                    .insert("primary", event)
+                    .setConferenceDataVersion(1)
+                    .execute();
+            final var htmlLLink = createdEvent.getHtmlLink();
+            final var link = createdEvent.getConferenceData().getEntryPoints().get(0).getUri();
+            return link;
+        } catch (final Exception e) {
+            handException(e);
+            return null;
+        }
+    }
+
+    private void handException(final Exception e) {
+        final var errorCode = System.currentTimeMillis();
+        log.error(">>> [{}]Error occurred while creating meeting link", errorCode);
+        throw new ApplicationException(400, "failed",
+                String.format("Failed to create virtual event link, " +
+                        "please try again later or contact support with code[%s]!", errorCode));
     }
 }
