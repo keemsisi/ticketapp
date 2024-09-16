@@ -13,6 +13,7 @@ import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -43,10 +44,9 @@ public class EventCreateRequestDTO {
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime eventDate;
+    private String timeZone = "Africa/Lagos";
     private boolean approvalRequired;
     private boolean recurring = false;
-    @NotNull
-    private TimeZoneEnum timeZone;
     @NotNull
     private List<EventSeatSection> seatSections;
     private Set<String> categories;
@@ -56,4 +56,5 @@ public class EventCreateRequestDTO {
     private String eventType;
     private BankAccountDetailsDTO bankAccountDetails;
     private boolean isPublic = true;
+    private String link;
 }

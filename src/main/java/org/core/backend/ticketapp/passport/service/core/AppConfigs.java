@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.passport.service.core;
 
+import org.core.backend.ticketapp.passport.service.core.mail.EmailProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,6 +26,10 @@ public class AppConfigs {
     public String[] channels;
     @Value("${system.default.order.max.order}")
     public Long maxOrder;
+    @Value("${system.default.payment.processor}")
+    public PaymentProcessorType defaultPaymentProcessor;
+    @Value("${system.default.email.provider}")
+    public EmailProvider emailProvider;
     @Value("${ticketapp.password-reset-url}")
     String resetPasswordUrl;
     @Value("${user.failed.login.threshold}")
@@ -55,6 +60,6 @@ public class AppConfigs {
     UUID organizationMerchantOwnerRole;
     @Value("${system.default.role.organization_merchant_user_role}")
     UUID organizationMerchantUserRole;
-    @Value("${system.default.payment.processor}")
-    public PaymentProcessorType defaultPaymentProcessor;
+    @Value("${app.fine-name}")
+    public String appName;
 }

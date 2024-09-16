@@ -30,7 +30,7 @@ public class EventController implements ICrudController {
     private final EventService eventService;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Event>> create(@Valid @RequestBody EventCreateRequestDTO request) {
+    public ResponseEntity<GenericResponse<Event>> create(@Valid @RequestBody EventCreateRequestDTO request) throws Exception {
         final var event = eventService.create(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Created successfully", event), HttpStatus.CREATED);
     }

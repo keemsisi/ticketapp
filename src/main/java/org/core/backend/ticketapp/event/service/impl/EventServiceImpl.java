@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.event.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.enums.UserType;
@@ -20,6 +21,7 @@ import org.core.backend.ticketapp.event.repository.EventCategoryRepository;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
+import org.core.backend.ticketapp.event.service.VirtualEventService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
@@ -45,6 +47,7 @@ public class EventServiceImpl implements EventService {
     private EventSeatSectionRepository eventSeatSectionsRepository;
     private EventCategoryRepository eventCategoryRepository;
     private BankAccountDetailsRepository bankAccountDetailsRepository;
+    private VirtualEventService virtualEventService;
 
     public List<Event> getAll() {
         List<Event> events = eventRepository.findAll();
@@ -62,9 +65,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public Event create(@NotNull final EventCreateRequestDTO request) {
+    public Event create(@NotNull final EventCreateRequestDTO request) throws Exception {
         final var event = convertToEntity(request);
-        final var userId = jwtTokenUtil.getUser().getUserId();
+        final var user = jwtTokenUtil.getUser();
+        final var userId = user.getUserId();
         final var tenantId = jwtTokenUtil.getUser().getTenantId();
 
         Set<EventCategory> existingCategories = new HashSet<>();
@@ -74,6 +78,10 @@ public class EventServiceImpl implements EventService {
             if (existingCategories.size() != eventCategories.size()) {
                 throw new ApplicationException(400, "missing_categories", "Some categories does not exist!");
             }
+        }
+        if (!request.isPhysicalEvent() && StringUtils.isBlank(request.getLink())) {
+            final var eventLink =  virtualEventService.createLinkWithCalendar(event, user);
+            event.setLink(eventLink);
         }
         final var totalCapacity = request.getSeatSections().stream().map(EventSeatSection::getCapacity).mapToInt(Long::intValue).sum();
         final var newCategory = existingCategories.stream().map(EventCategory::getName)

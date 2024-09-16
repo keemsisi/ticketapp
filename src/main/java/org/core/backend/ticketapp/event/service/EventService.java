@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EventService {
-    Event create(final EventCreateRequestDTO requestDTO);
+    Event create(final EventCreateRequestDTO requestDTO) throws Exception;
 
     List<Event> getAll();
 

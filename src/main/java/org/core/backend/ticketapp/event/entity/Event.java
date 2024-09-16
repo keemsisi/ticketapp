@@ -7,7 +7,6 @@ import lombok.*;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
-import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -16,6 +15,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -68,11 +68,10 @@ public class Event extends AbstractBaseEntity {
     @Column(columnDefinition = "bool default false")
     private boolean recurring = false;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "time_zone")
-    private TimeZoneEnum timeZone = TimeZoneEnum.WAT;
+    @Column(name = "time_zone", columnDefinition = "varchar(65) not null default 'Africa/Lagos'")
+    private String timeZone = "Africa/Lagos";
 
-    @Column(name = "event_date", nullable = false)
+    @Column(name = "event_date", columnDefinition = "timestamptz", nullable = false)
     private LocalDateTime eventDate;
 
     @Column(name = "user_id", nullable = false)
@@ -98,6 +97,9 @@ public class Event extends AbstractBaseEntity {
 
     @Column(name = "is_public", columnDefinition = "boolean not null default true")
     private boolean isPublic;
+
+    @Column(name = "link", columnDefinition = "varchar(1024)")
+    private String link;
 
     @PrePersist
     public void onCreate() {

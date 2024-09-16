@@ -301,9 +301,8 @@ public class ErrorMapper {
     }
 
     private String log(Throwable throwable) {
-        String logKey = String.format("ERR-%s",
-                RandomStringUtils.randomAlphanumeric(6).toUpperCase(Locale.ROOT));
-        log.error(logKey, throwable);
+        String logKey = String.valueOf(System.currentTimeMillis());
+        log.error(">>> ERROR OCCURRED: {}", logKey, throwable);
         return logKey;
     }
 }
