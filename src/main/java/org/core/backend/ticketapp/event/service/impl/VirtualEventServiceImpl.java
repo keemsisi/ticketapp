@@ -46,7 +46,7 @@ public class VirtualEventServiceImpl implements VirtualEventService {
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final List<String> CALENDAR_SCOPES =
-            Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
+            Collections.singletonList(CalendarScopes.CALENDAR);
     private static final TokenStore TOKEN_STORE = new TokenStore() {
         private Path pathFor(String id) {
             return Paths.get(".", TOKENS_DIRECTORY_PATH, id + ".json");
@@ -122,7 +122,7 @@ public class VirtualEventServiceImpl implements VirtualEventService {
     }
 
     @Override
-    public String createLinkWithCalendar(final Event userEvent, final LoggedInUserDto user) throws Exception {
+    public String createLinkWithCalendar(final Event userEvent, final LoggedInUserDto user) {
         try {
             final var eventDate = userEvent.getEventDate();
             final var timeZone = userEvent.getTimeZone();
@@ -144,8 +144,7 @@ public class VirtualEventServiceImpl implements VirtualEventService {
             event.setConferenceData(conferenceData);
             com.google.api.services.calendar.model.Event createdEvent = calendar.events()
                     .insert("primary", event)
-                    .setConferenceDataVersion(1)
-                    .execute();
+                    .setConferenceDataVersion(1).execute();
             final var htmlLLink = createdEvent.getHtmlLink();
             final var link = createdEvent.getConferenceData().getEntryPoints().get(0).getUri();
             return link;
@@ -157,7 +156,7 @@ public class VirtualEventServiceImpl implements VirtualEventService {
 
     private void handException(final Exception e) {
         final var errorCode = System.currentTimeMillis();
-        log.error(">>> [{}]Error occurred while creating meeting link", errorCode);
+        log.error(">>> [{}]Error occurred while creating meeting link", errorCode, e);
         throw new ApplicationException(400, "failed",
                 String.format("Failed to create virtual event link, " +
                         "please try again later or contact support with code[%s]!", errorCode));
