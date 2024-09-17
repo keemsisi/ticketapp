@@ -1,7 +1,6 @@
 package org.core.backend.ticketapp.passport.service.core.notification;
 
 
-
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,6 +13,7 @@ import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.NotificationProcessorStatus;
 import org.core.backend.ticketapp.common.enums.NotificationType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.event.service.VirtualEventService;
 import org.core.backend.ticketapp.passport.dao.INotificationDao;
 import org.core.backend.ticketapp.passport.dtos.PageRequestParam;
 import org.core.backend.ticketapp.passport.dtos.core.ApprovalLevel;
@@ -37,7 +37,6 @@ import org.core.backend.ticketapp.passport.socketio.dto.MessageDto;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
 import org.core.backend.ticketapp.passport.util.CommonUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -62,6 +61,7 @@ public class NotificationService extends BaseRepoService<Notification> implement
     private final SocketIOServer socketIOServer;
     private final ActivityLogProcessorUtils activityLogProcessorUtils;
     private final WebSocketInAppNotificationRepository webSocketInAppNotificationRepository;
+    private final VirtualEventService virtualEventService;
 
     @Override
     public Page<Notification> getAllByActionNameStatusAndModuleIdPaged(String actionName, ApprovalStatus status, UUID moduleId, Date startDate, Date endDate, Pageable pageable) {
@@ -165,7 +165,8 @@ public class NotificationService extends BaseRepoService<Notification> implement
                     messageSent = true;
                 } else messageSent = false;
             }
-            if (!messageSent) log.info("-----|||| FAILED TO RETRIEVE CLIENT WITH SESSION_ID {} FROM REDIS", sessionUUID);
+            if (!messageSent)
+                log.info("-----|||| FAILED TO RETRIEVE CLIENT WITH SESSION_ID {} FROM REDIS", sessionUUID);
             if (inApp) createInAppNotificationForUser(message.getData(), ns, messageSent);
         });
     }
