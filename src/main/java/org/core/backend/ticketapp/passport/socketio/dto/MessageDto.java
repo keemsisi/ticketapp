@@ -7,6 +7,7 @@ import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.NotificationProcessorStatus;
 import org.core.backend.ticketapp.common.enums.NotificationType;
 
+import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import java.util.Date;
@@ -33,4 +34,5 @@ public class MessageDto {
     private String description;
     private NotificationProcessorStatus processorStatus;
     private String processorRemark;
+    private UUID tenantId;
 }

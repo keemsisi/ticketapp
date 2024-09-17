@@ -11,6 +11,7 @@ import org.core.backend.ticketapp.passport.entity.WebSocketPushNotification;
 import org.core.backend.ticketapp.passport.repository.NotificationRepository;
 import org.core.backend.ticketapp.passport.repository.WebSocketInAppNotificationRepository;
 import org.core.backend.ticketapp.passport.service.core.ReminderNotificationService;
+import org.core.backend.ticketapp.passport.service.core.messagebroker.NotificationMessageConsumerService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class SchedulerService {
     private final NotificationRepository notificationRepository;
     private final INotificationDao iNotificationDao;
     private final WebSocketInAppNotificationRepository webSocketInAppNotificationRepository;
+    private final NotificationMessageConsumerService messageConsumer;
 
     //    @Scheduled(cron = "0 */5 * * * *")
     @SchedulerLock(name = "account_processing", lockAtLeastFor = "4m", lockAtMostFor = "10m")
@@ -89,7 +91,7 @@ public class SchedulerService {
         if (pendingInAppNotifications.size() > 0) {
             log.info("---|||PENDING UN-PROCESSED {} IN_APP NOTIFICATIONS|||---", pendingInAppNotifications.size());
             pendingInAppNotifications.stream().parallel().forEach(dtoMap -> {
-//                messageConsumer.sendWebSocketNotificationToUsers(dtoMap.getNotificationId().toString());
+                messageConsumer.sendWebSocketNotificationToUsers(dtoMap.getNotificationId().toString());
                 notificationRepository.updateProcessedPushNotificationStatusUpdate(dtoMap.getNotificationId());
             });
         }

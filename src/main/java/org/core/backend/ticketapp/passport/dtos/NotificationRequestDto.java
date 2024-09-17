@@ -48,4 +48,5 @@ public class NotificationRequestDto {
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType; // RELIEF_REQUEST, SUBSCRIPTION
     private String subAction;
+    private String tenantId;
 }

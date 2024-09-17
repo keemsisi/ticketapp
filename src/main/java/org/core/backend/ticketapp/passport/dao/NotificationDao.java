@@ -8,16 +8,13 @@ import org.core.backend.ticketapp.passport.dtos.PageRequestParam;
 import org.core.backend.ticketapp.passport.dtos.notification.NotificationIdDTOMap;
 import org.core.backend.ticketapp.passport.entity.Notification;
 import org.core.backend.ticketapp.passport.entity.NotificationSubscriber;
-import org.core.backend.ticketapp.passport.entity.User;
 import org.core.backend.ticketapp.passport.entity.WebSocketPushNotification;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
 import org.core.backend.ticketapp.passport.mapper.UserNotificationGroupByDateCreatedWrapper;
+import org.core.backend.ticketapp.passport.mapper.UserNotificationModuleStatsWrapper;
+import org.core.backend.ticketapp.passport.mapper.UserUnreadNotificationStatsByModuleId;
 import org.core.backend.ticketapp.passport.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,37 +33,22 @@ public class NotificationDao implements INotificationDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Deprecated
-    public List<User> filterAllowedUsers(String actionName, UUID moduleId) {
-        String sql = "SELECT u.* FROM \"users\" u INNER JOIN (SELECT ua.user_id FROM \"action\" a\n" +
-                "INNER JOIN user_action ua \n" +
-                "\tON ua.action_id=a.id \n" +
-                "\tWHERE exists ( \n" +
-                "\t\tSELECT ns.user_id FROM notification_subscriber ns \n" +
-                "\t\t\tWHERE ua.user_id=ns.user_id \n" +
-                "\t\t\tAND ns.active=true \n" +
-                "\t\t\tAND ns.unsubscribed=false\n" +
-                "\t) AND a.code=? ) AS t ON t.user_id=u.id;";
-        var rowMapper = BeanPropertyRowMapper.newInstance(User.class);
-        return jdbcTemplate.query(sql, rowMapper, actionName);
-    }
-
     @Override
-    public List<NotificationSubscriber> getAllMatchingSubscriberCurrentSessionIds(String actionName) {
+    public List<NotificationSubscriber> getAllMatchingSubscriberCurrentSessionIds(String actionName, UUID tenantId) {
         String sql = "SELECT current_session_id FROM notification_subscriber \n" +
                 "WHERE subscriber_scope @> ARRAY[?]::text[] \n" +
-                "AND unsubscribed=false AND active=true \n";
+                "AND unsubscribed=false AND active=true AND tenant_id=? \n";
         var rowMapper = BeanPropertyRowMapper.newInstance(NotificationSubscriber.class);
-        return jdbcTemplate.query(sql, rowMapper, actionName);
+        return jdbcTemplate.query(sql, rowMapper, actionName, tenantId);
     }
 
     @Override
-    public Map<String, Object> getUserNotificationStats(List<String> actionNames, List<String> roles, UUID userId) {
+    public Map<String, Object> getUserNotificationStats(List<String> actionNames, List<String> roles, UUID userId, UUID tenantId) {
         String actions = CommonUtils.getDelimitedActionNamesWithSingleQuotes(actionNames);
         String roles_ = CommonUtils.getDelimitedActionNamesWithSingleQuotes(roles);
         StringBuilder sqlQueryBuilder = new StringBuilder();
         var sent = String.format("SELECT COUNT(requested_by) FROM notification n \n" +
-                "WHERE n.action_name IN (%s) AND requested_by='%s' GROUP BY requested_by;", actions, userId);
+                "WHERE n.action_name IN (%s) AND n.tenant_id='%s' AND requested_by='%s' GROUP BY requested_by;", actions, tenantId, userId);
         var sql = String.format("SELECT COUNT(items.\"approvalStatus\") from notification n , jsonb_to_recordset(n.workflow) AS items(\"approvalStatus\" workflow_approval_status_enum, \"roleCode\" text) WHERE items.\"approvalStatus\"='PENDING' AND items.\"roleCode\" IN (%s);", roles_) +
                 String.format("SELECT COUNT(n.approval_status) FROM notification n WHERE workflow is NULL AND approval_status = 'PENDING' AND n.action_name IN (%s);", actions) +
                 String.format("SELECT COUNT(items.\"approvedBy\") from notification n , jsonb_to_recordset(n.workflow) \n" +
@@ -90,52 +72,45 @@ public class NotificationDao implements INotificationDao {
         return jdbcTemplate.call(csc, returnedParams);
     }
 
+    @Override
+    public List<UserNotificationModuleStatsWrapper> getUserModuleStats(List<String> actionNames, UUID tenantId) {
+        var rowMapper = BeanPropertyRowMapper.newInstance(UserNotificationModuleStatsWrapper.class);
+        String actions = CommonUtils.getDelimitedActionNamesWithSingleQuotes(actionNames);
+        var moduleStatsSql = String.format("SELECT m.name, COUNT(m.name) FROM notification n " +
+                "LEFT JOIN module m ON m.id=n.module_id WHERE n.action_name IN (%s) AND n.tenant_id='%s' GROUP BY m.name;", actions, tenantId);
+        return jdbcTemplate.query(moduleStatsSql, rowMapper);
+    }
 
     @Override
-    public List<UserNotificationGroupByDateCreatedWrapper> getUserNotificationsReceivedByDateRange(List<String> actionNames, Date startDate, Date endDate) {
+    public List<UserNotificationGroupByDateCreatedWrapper> getUserNotificationsReceivedByDateRange(List<String> actionNames, Date startDate, Date endDate, UUID tenantId) {
         var rowMapper = BeanPropertyRowMapper.newInstance(UserNotificationGroupByDateCreatedWrapper.class);
         String actions = CommonUtils.getDelimitedActionNamesWithSingleQuotes(actionNames);
         var moduleStatsSql = String.format("SELECT date_created::TIMESTAMPTZ::DATE, COUNT(date_created::TIMESTAMPTZ::DATE) FROM notification n " +
-                "WHERE n.action_name IN (%s) " +
+                "WHERE n.action_name IN (%s) AND n.tenant_id=? " +
                 "AND date_created::TIMESTAMPTZ::DATE >= CAST(? AS DATE) AND date_created::TIMESTAMPTZ::DATE <= CAST(? AS DATE) GROUP BY date_created::TIMESTAMPTZ::DATE;", actions);
-        return jdbcTemplate.query(moduleStatsSql, rowMapper, startDate, endDate);
+        return jdbcTemplate.query(moduleStatsSql, rowMapper, tenantId, startDate, endDate);
     }
 
 
-    /*TODO : Get user read and unread notification */
-    /*TODO : Get user read and unread notification paginated*/
-    /*TODO : Get user read notification paginated*/
-    /*TODO : Get user unread notification paginated --- ongoing*/
     @Override
-    @Deprecated
-    public Page<Notification> getUserUnreadNotificationPaged(UUID userId, Pageable pageable, Sort.Direction direction) {
-        int limit = pageable.getPageSize();
-        Long offSet = pageable.getOffset();
-        String orderDirection = direction.name();
-        String sql = String.format("SELECT n.*, CONCAT(u.first_name,u.last_name) AS requested_by_name FROM notification n\n" +
-                "LEFT JOIN users u ON u.id = n.requested_by\n" +
-                "INNER JOIN user_module um ON um.module_id = n.module_id WHERE um.user_id='%s' \n" +
-                "AND NOT EXISTS (SELECT 1 FROM read_notification rn WHERE rn.user_id='%s' AND n.id =rn.notification_id) ORDER BY date_created %s LIMIT %s OFFSET %s;", userId, userId, orderDirection, limit, offSet) + String.format("SELECT COUNT(*) FROM (SELECT n.* FROM notification n " +
-                "INNER JOIN user_module um ON um.module_id = n.module_id WHERE um.user_id='%s' " +
-                "AND NOT exists (SELECT 1 FROM read_notification rn WHERE rn.user_id='%s' AND n.id =rn.notification_id)) as t", userId, userId);
-
-        var cscFactory = new CallableStatementCreatorFactory(sql);
-        var returnedParams = Arrays.<SqlParameter>asList(
-                new SqlReturnResultSet("user_unread_notifications", BeanPropertyRowMapper.newInstance(Notification.class)),
-                new SqlReturnResultSet("count", BeanPropertyRowMapper.newInstance(LongWrapper.class)));
-        CallableStatementCreator csc = cscFactory.newCallableStatementCreator(new HashMap<>());
-        Map<String, Object> results = jdbcTemplate.call(csc, returnedParams);
-        return PageableExecutionUtils.getPage((List<Notification>) results.get("user_unread_notifications"), pageable, () -> ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount());
+    public List<UserUnreadNotificationStatsByModuleId> getUserNotificationStatsByModuleId(UUID userId, List<String> actionNames, UUID tenantId, UUID moduleId) {
+        var rowMapper = BeanPropertyRowMapper.newInstance(UserUnreadNotificationStatsByModuleId.class);
+        String actions = CommonUtils.getDelimitedActionNamesWithSingleQuotes(actionNames);
+        var moduleStatsSql = String.format("SELECT n.action_name, COUNT(n.action_name) FROM notification n " +
+                "WHERE NOT EXISTS (SELECT 1 FROM read_notification rn WHERE rn.user_id='%s' AND n.id =rn.notification_id) " +
+                "AND n.action_name IN (%s) AND n.tenant_id='%s' AND n.module_id='%s' GROUP BY n.action_name", userId, actions, tenantId, moduleId);
+        return jdbcTemplate.query(moduleStatsSql, rowMapper);
     }
 
     @Deprecated
-    public List<Notification> getUserUnreadNotificationUnPaged(UUID userId) {
+    public List<Notification> getUserUnreadNotificationUnPaged(UUID userId, UUID tenantId) {
         var rowMapper = BeanPropertyRowMapper.newInstance(Notification.class);
         String sql = "SELECT n.*, CONCAT(u.first_name,u.last_name) AS requested_by_name FROM notification n\n" +
                 "LEFT JOIN users u ON u.id = n.requested_by\n" +
                 "INNER JOIN user_module um ON um.module_id = n.module_id WHERE um.user_id=? \n" +
+                "AND n.tenant_id=? \n" +
                 "AND NOT EXISTS (SELECT 1 FROM read_notification rn WHERE rn.user_id=? AND n.id =rn.notification_id);";
-        return jdbcTemplate.query(sql, rowMapper, userId, userId);
+        return jdbcTemplate.query(sql, rowMapper, userId, tenantId, userId);
     }
 
     @Override
@@ -149,7 +124,7 @@ public class NotificationDao implements INotificationDao {
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<Notification> getAllNotifications(UUID userId, List<String> userRoles, PageRequestParam prp) throws ParseException {
+    public List<Notification> getAllNotifications(UUID userId, List<String> userRoles, UUID tenantId, PageRequestParam prp) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         List<NotificationType> notificationTypes = List.of(NotificationType.IN_APP, NotificationType.REMINDER, NotificationType.RELIEF_REQUEST);
         @NotNull final String ORDER_BY = ObjectUtils.isEmpty(prp.getSortBy()) ? "index DESC" : Arrays.stream(prp.getSortBy())
@@ -157,7 +132,9 @@ public class NotificationDao implements INotificationDao {
                 .collect(Collectors.joining(" ,"));
         @NotNull Integer SIZE = ObjectUtils.isEmpty(prp.getSize()) ? 50 : prp.getSize();
 
-        var query = new StringBuilder("SELECT u.first_name, u.middle_name ,u.last_name WHERE 1=1 ");
+        var query = new StringBuilder("SELECT u.first_name, u.middle_name ,u.last_name , sa.sms_alert " +
+                " AS should_send_sms_alert, sa.email_alert AS should_send_email_alert, n.* FROM notification n " +
+                String.format(" LEFT JOIN users u ON u.id = n.requested_by LEFT JOIN system_alert sa ON n.tenant_id=sa.tenant_id WHERE n.tenant_id='%s' ", tenantId));
 
         if (ObjectUtils.isNotEmpty(prp.getActionName()))
             query.append(String.format("AND n.action_name='%s' ", prp.getActionName().toLowerCase()));

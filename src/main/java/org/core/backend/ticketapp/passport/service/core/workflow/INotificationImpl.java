@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.passport.service.core.workflow;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.passport.dtos.notification.BulkRequestApprovalDto;
@@ -23,7 +24,8 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-public record INotificationImpl() implements INotification {
+@AllArgsConstructor
+public class INotificationImpl implements INotification {
     @Override
     public Page<Notification> getWorkflowNotificationWithStatus(ApprovalStatus status, UUID uuid, Pageable pageable) {
         return null;

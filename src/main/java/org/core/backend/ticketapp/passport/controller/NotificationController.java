@@ -10,7 +10,7 @@ import org.core.backend.ticketapp.passport.dtos.notification.*;
 import org.core.backend.ticketapp.passport.entity.Notification;
 import org.core.backend.ticketapp.passport.mapper.UserNotificationGroupByDateCreatedWrapper;
 import org.core.backend.ticketapp.passport.mapper.UserNotificationModuleStatsWrapper;
-import org.core.backend.ticketapp.passport.service.core.messagebroker.IMessageConsumer;
+import org.core.backend.ticketapp.passport.service.core.messagebroker.NotificationMessageConsumerService;
 import org.core.backend.ticketapp.passport.service.core.workflow.INotification;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.ResponsePageRequest;
@@ -34,7 +34,7 @@ import java.util.UUID;
 public class NotificationController {
     private final INotification iNotification;
     private final JwtTokenUtil jwtTokenUtil;
-    private final IMessageConsumer iMessageConsumer;
+    private final NotificationMessageConsumerService iMessageConsumer;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<?>> getAll(@RequestParam(required = false, defaultValue = "v1") String version, PageRequestParam prp) throws ParseException {
