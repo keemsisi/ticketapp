@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 @Transactional
-public class NotificationDao implements INotificationDao {
+public class NotificationServiceDaoImpl implements NotificationServiceDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

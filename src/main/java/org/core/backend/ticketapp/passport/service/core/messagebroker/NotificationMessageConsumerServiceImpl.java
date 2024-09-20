@@ -14,6 +14,7 @@ import org.core.backend.ticketapp.passport.entity.Notification;
 import org.core.backend.ticketapp.passport.repository.NotificationRepository;
 import org.core.backend.ticketapp.passport.repository.NotificationSubscriberRepository;
 import org.core.backend.ticketapp.passport.service.core.notification.NotificationService;
+import org.core.backend.ticketapp.passport.service.core.notification.NotificationServiceServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

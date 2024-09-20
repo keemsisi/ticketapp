@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @EnableAutoConfiguration
-@EnableAsync
+@EnableAsync(proxyTargetClass = true)
 @EnableFeignClients
 public class TicketApp {
 

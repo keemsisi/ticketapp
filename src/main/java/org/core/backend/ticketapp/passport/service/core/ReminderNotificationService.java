@@ -16,6 +16,7 @@ import org.core.backend.ticketapp.passport.entity.ReminderNotification;
 import org.core.backend.ticketapp.passport.repository.ReminderNotificationRepository;
 import org.core.backend.ticketapp.passport.service.core.mail.mailchimp.MailChimpService;
 import org.core.backend.ticketapp.passport.service.core.notification.NotificationService;
+import org.core.backend.ticketapp.passport.service.core.notification.NotificationServiceServiceImpl;
 import org.core.backend.ticketapp.passport.service.core.remindernotification.IReminderNotification;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -51,7 +52,7 @@ public class ReminderNotificationService implements IReminderNotification {
     @Autowired
     private MailChimpService mailChimpService;
     @Autowired
-    private NotificationService notificationService;
+    private NotificationService notificationServiceImpl;
     @Value("${baseFrontEndUrl}")
     private String baseFrontEndUrl;
 
@@ -210,6 +211,6 @@ public class ReminderNotificationService implements IReminderNotification {
                 .notificationType(NotificationType.REMINDER)
                 .title(reminderNotification.getTitle())
                 .build();
-        notificationService.sendNotificationToSingleUser(userId, notification);
+        notificationServiceImpl.sendNotificationToSingleUser(userId, notification);
     }
 }

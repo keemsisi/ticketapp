@@ -22,7 +22,7 @@ import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.event.service.VirtualEventService;
 import org.core.backend.ticketapp.passport.dtos.NotificationRequestDto;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
-import org.core.backend.ticketapp.passport.service.core.notification.NotificationService;
+import org.core.backend.ticketapp.passport.service.core.notification.NotificationServiceServiceImpl;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
@@ -54,7 +54,7 @@ public class EventServiceImpl implements EventService {
     private BankAccountDetailsRepository bankAccountDetailsRepository;
     private VirtualEventService virtualEventService;
     private AppConfigs appConfigs;
-    private NotificationService notificationService;
+    private NotificationServiceServiceImpl notificationServiceImpl;
     private ObjectMapper objectMapper;
 
     public List<Event> getAll() {
@@ -134,7 +134,7 @@ public class EventServiceImpl implements EventService {
                         .moduleId(appConfigs.eventModuleId.toString())
                         .dateRequested(event.getDateCreated())
                         .newData(objectMapper.writeValueAsString(event)).build();
-                notificationService.processNotification(notificationRequest, ModuleAction.CREATE_EVENT.getModule());
+                notificationServiceImpl.processNotification(notificationRequest, ModuleAction.CREATE_EVENT.getModule());
             } catch (Exception e) {
                 log.error(">>> Error Occurred while creating notification for approval", e);
                 throw new RuntimeException(e);

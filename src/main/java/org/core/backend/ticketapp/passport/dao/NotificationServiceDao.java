@@ -9,9 +9,6 @@ import org.core.backend.ticketapp.passport.entity.WebSocketPushNotification;
 import org.core.backend.ticketapp.passport.mapper.UserNotificationGroupByDateCreatedWrapper;
 import org.core.backend.ticketapp.passport.mapper.UserNotificationModuleStatsWrapper;
 import org.core.backend.ticketapp.passport.mapper.UserUnreadNotificationStatsByModuleId;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -20,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public interface INotificationDao {
+public interface NotificationServiceDao {
     List<NotificationSubscriber> getAllMatchingSubscriberCurrentSessionIds(String actionName, UUID tenantId);
     Map<String, Object> getUserNotificationStats(List<String> actionNames, List<String> roles, UUID userId, UUID tenantId);
 

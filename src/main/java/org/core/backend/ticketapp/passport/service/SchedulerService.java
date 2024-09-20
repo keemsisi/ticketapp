@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import org.core.backend.ticketapp.passport.dao.INotificationDao;
+import org.core.backend.ticketapp.passport.dao.NotificationServiceDao;
 import org.core.backend.ticketapp.passport.dao.IReliefRequestDao;
 import org.core.backend.ticketapp.passport.dtos.notification.NotificationIdDTOMap;
 import org.core.backend.ticketapp.passport.entity.WebSocketPushNotification;
@@ -24,7 +24,7 @@ public class SchedulerService {
     private final IReliefRequestDao iReliefRequestDao;
     private final ReminderNotificationService reminderNotificationService;
     private final NotificationRepository notificationRepository;
-    private final INotificationDao iNotificationDao;
+    private final NotificationServiceDao iNotificationDao;
     private final WebSocketInAppNotificationRepository webSocketInAppNotificationRepository;
     private final NotificationMessageConsumerService messageConsumer;
 
