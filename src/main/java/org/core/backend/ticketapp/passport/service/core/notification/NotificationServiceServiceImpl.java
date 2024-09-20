@@ -510,14 +510,18 @@ public class NotificationServiceServiceImpl extends BaseRepoService<Notification
                         final var user = coreUserService.getUserById(mappedEvent.getUserId())
                                 .orElseThrow(() -> new ApplicationException(404, "not_found", "User not found!"));
                         event.setApprovalStatus(notification.getApprovalStatus());
+                        notification.setProcessorRemark("Event was successful approved!");
                         if (event.getApprovalStatus() == ApprovalStatus.APPROVED) {
                             final var ownerEmail = user.getEmail();
                             if (!event.isPhysicalEvent() && StringUtils.isBlank(event.getLink())) {
                                 final var eventLink = virtualEventService.createLinkWithCalendar(event, ownerEmail);
                                 event.setLink(eventLink);
+                                notification.setProcessorRemark("Event was successful approved and meeting link created!!");
                                 log.info(">>> Created meeting link for virtual event {} with owner: {} ", eventLink, ownerEmail);
                             }
                             eventRepository.save(event);
+                            notification.setProcessorStatus(NotificationProcessorStatus.COMPLETED_SUCCESSFULLY);
+                            notificationRepository.save(notification);
                             log.info(">>> Successfully updated event with status: {} ", notification.getApprovalStatus());
                         } else {
                             //do something else here!
