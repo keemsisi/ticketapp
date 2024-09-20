@@ -93,7 +93,7 @@ public class SocketIOClientConnectionHandler implements ISocketIOClientEventHand
                             notification.getRequestedBy(), notification.getRequestedByName(), notification.getActionName(),
                             java.sql.Timestamp.valueOf(notification.getDateCreated()),
                             notification.getModuleId(), new Date(), notification.getApprovalStatus(),
-                            NotificationType.SUBSCRIPTION, null,
+                            NotificationType.EVENT, null,
                             notification.getDescription(), notification.getProcessorStatus(),
                             notification.getProcessorRemark(), notification.getTenantId());
                     message.setMessage("Unread notification");

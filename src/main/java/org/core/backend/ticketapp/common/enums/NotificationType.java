@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.common.enums;
 
 public enum  NotificationType {
     RELIEF_REQUEST,
-    SUBSCRIPTION,
+    EVENT,
     REMINDER,
     IN_APP
 }

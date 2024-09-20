@@ -61,10 +61,10 @@ public class NotificationMessageConsumerServiceImpl implements NotificationMessa
     }
 
     @Override
-    public Notification processNotification(final NotificationRequestDto notificationRequestDto, String messageId) throws Exception {
+    public Notification processNotification(final NotificationRequestDto notificationRequestDto,final String messageId) throws Exception {
         List<NotificationType> notificationTypes = List.of(
                 NotificationType.IN_APP, NotificationType.REMINDER, NotificationType.RELIEF_REQUEST,
-                NotificationType.SUBSCRIPTION);
+                NotificationType.EVENT);
         log.info("------------|||||||CONSUMING MESSAGE FROM SERVICE BUS|||||------------");
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         Notification notification = new Notification();
