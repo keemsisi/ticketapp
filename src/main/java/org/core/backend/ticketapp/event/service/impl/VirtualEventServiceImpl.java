@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.VirtualEventService;
-import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +37,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -75,14 +75,20 @@ public class VirtualEventServiceImpl implements VirtualEventService {
         }
     };
     private final AppConfigs appConfigs;
-    private final Calendar calendar;
+    private Calendar calendar;
 
     @Autowired
     public VirtualEventServiceImpl(final AppConfigs appConfigs) throws Exception {
         final HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        this.calendar = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCalendarCredential(HTTP_TRANSPORT))
-                .setApplicationName(appConfigs.appName)
-                .build();
+        CompletableFuture.runAsync(() -> {
+            try {
+                this.calendar = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCalendarCredential(HTTP_TRANSPORT))
+                        .setApplicationName(appConfigs.appName)
+                        .build();
+            } catch (IOException e) {
+                log.error(">>>>Failed to get Authentication token for calendar", e);
+            }
+        });
         this.appConfigs = appConfigs;
     }
 
