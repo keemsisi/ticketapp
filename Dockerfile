@@ -5,8 +5,6 @@ FROM maven:3.8.4-openjdk-17 AS MAVEN_BUILD
 # Copy the pom.xml and source code
 COPY pom.xml /build/
 COPY src /build/src/
-COPY tokens /build/src/main/resources/tokens
-
 # Set the working directory for Maven build
 WORKDIR /build/
 
