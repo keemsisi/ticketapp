@@ -34,4 +34,6 @@ public interface EventService {
     Event assignCategory(AssignCategoryToEventRequestDTO request);
 
     EventStatsDTO getEventStats(UUID eventId);
+
+    Event save(Event event);
 }

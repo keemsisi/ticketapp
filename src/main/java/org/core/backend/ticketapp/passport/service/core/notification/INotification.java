@@ -4,6 +4,7 @@ package org.core.backend.ticketapp.passport.service.core.notification;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
+import org.core.backend.ticketapp.passport.dtos.NotificationRequestDto;
 import org.core.backend.ticketapp.passport.dtos.PageRequestParam;
 import org.core.backend.ticketapp.passport.dtos.notification.BulkRequestApprovalDto;
 import org.core.backend.ticketapp.passport.dtos.notification.NotificationReadDTO;
@@ -47,10 +48,10 @@ public interface INotification {
 
     Notification getNotificationById(UUID id);
 
-    void approveRequest(SingleRequestApprovalDto singleRequestApprovalDto) throws JsonProcessingException;
+    void approveRequest(SingleRequestApprovalDto singleRequestApprovalDto) throws Exception;
 
     void notificationBulkApproval(BulkRequestApprovalDto bulkRequestApprovalDto) throws
-            JsonProcessingException;
+            Exception;
 
     @SuppressWarnings("unchecked")
     UserNotificationApprovalStatusStats getUserNotificationApprovalStatusStats();
@@ -62,4 +63,6 @@ public interface INotification {
     List<UserUnreadNotificationStatsByModuleId> getUserUnreadNotificationsStatsByModuleId(UUID moduleId);
 
     List<Notification> getAllNotifications(@NotNull PageRequestParam prp) throws ParseException;
+
+    void processNotification(NotificationRequestDto notificationRequest, String module) throws Exception;
 }

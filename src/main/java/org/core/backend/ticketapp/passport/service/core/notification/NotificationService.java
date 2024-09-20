@@ -9,12 +9,17 @@ import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.core.backend.ticketapp.common.ApplicationContextProvider;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.NotificationProcessorStatus;
 import org.core.backend.ticketapp.common.enums.NotificationType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.event.entity.Event;
+import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.service.VirtualEventService;
 import org.core.backend.ticketapp.passport.dao.INotificationDao;
+import org.core.backend.ticketapp.passport.dtos.NotificationRequestDto;
 import org.core.backend.ticketapp.passport.dtos.PageRequestParam;
 import org.core.backend.ticketapp.passport.dtos.core.ApprovalLevel;
 import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
@@ -32,6 +37,8 @@ import org.core.backend.ticketapp.passport.repository.NotificationSubscriberRepo
 import org.core.backend.ticketapp.passport.repository.ReadNotificationRepository;
 import org.core.backend.ticketapp.passport.repository.WebSocketInAppNotificationRepository;
 import org.core.backend.ticketapp.passport.service.core.BaseRepoService;
+import org.core.backend.ticketapp.passport.service.core.CoreUserService;
+import org.core.backend.ticketapp.passport.service.core.messagebroker.NotificationMessageConsumerService;
 import org.core.backend.ticketapp.passport.socketio.dto.Message;
 import org.core.backend.ticketapp.passport.socketio.dto.MessageDto;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
@@ -40,9 +47,11 @@ import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -62,6 +71,8 @@ public class NotificationService extends BaseRepoService<Notification> implement
     private final ActivityLogProcessorUtils activityLogProcessorUtils;
     private final WebSocketInAppNotificationRepository webSocketInAppNotificationRepository;
     private final VirtualEventService virtualEventService;
+    private final EventRepository eventRepository;
+    private final CoreUserService coreUserService;
 
     @Override
     public Page<Notification> getAllByActionNameStatusAndModuleIdPaged(String actionName, ApprovalStatus status, UUID moduleId, Date startDate, Date endDate, Pageable pageable) {
@@ -212,7 +223,7 @@ public class NotificationService extends BaseRepoService<Notification> implement
                 .createdBy(notification.getRequestedBy())
                 .requestedByName(notification.getRequestedByName())
                 .actionName(notification.getActionName())
-                .dateCreated(java.sql.Timestamp.valueOf(notification.getDateCreated()))
+                .dateCreated(Timestamp.valueOf(notification.getDateCreated()))
                 .moduleId(notification.getModuleId())
                 .dateReceived(new Date())
                 .status(notification.getApprovalStatus())
@@ -304,7 +315,8 @@ public class NotificationService extends BaseRepoService<Notification> implement
     }
 
     @Override
-    public void approveRequest(SingleRequestApprovalDto singleRequestApprovalDto) throws JsonProcessingException {
+    @SneakyThrows({JsonProcessingException.class})
+    public void approveRequest(SingleRequestApprovalDto singleRequestApprovalDto) throws Exception {
         Optional<Notification> optionalNotification = notificationRepository.findByUUID(UUID.fromString(singleRequestApprovalDto.getNotificationId()));
         if (optionalNotification.isPresent()) {
             LoggedInUserDto loggedInUserDto = jwtTokenUtil.getUser();
@@ -346,11 +358,11 @@ public class NotificationService extends BaseRepoService<Notification> implement
                                         break;
                                     }
                                     if (i + 1 != approvalLevels.size())
-                                        notification.setProcessorRemark(String.format("Notification level approval has now moved to level (%s/%s)", i + 2, approvalLevels.size()));
+                                        notification.setProcessorRemark(String.format("Workflow level approval has now moved to level (%s/%s)", i + 2, approvalLevels.size()));
                                     if (i + 2 == approvalLevels.size())
-                                        notification.setProcessorRemark(String.format("Waiting for final notification level approval (%s/%s) to be completed...", approvalLevels.size(), approvalLevels.size()));
+                                        notification.setProcessorRemark(String.format("Waiting for final workflow level approval (%s/%s) to be completed...", approvalLevels.size(), approvalLevels.size()));
                                     if (i == approvalLevels.size() - 1) {
-                                        notification.setProcessorRemark(String.format("All level approvals (%s/%s) completed successfully...", i + 1, approvalLevels.size()));
+                                        notification.setProcessorRemark(String.format("All workflow level approvals (%s/%s) completed successfully...", i + 1, approvalLevels.size()));
                                         notification.setFinalApprovalByName(CommonUtils.getFullName(loggedInUserDto));
                                         completeApprovalAndPublish(notification, singleRequestApprovalDto);
                                     }
@@ -385,7 +397,7 @@ public class NotificationService extends BaseRepoService<Notification> implement
 
     @SneakyThrows({JsonProcessingException.class})
     private void approveAndPublishNotificationWithoutWorkflow(Notification notification, SingleRequestApprovalDto
-            approval, LoggedInUserDto userDto) {
+            approval, LoggedInUserDto userDto) throws Exception {
         var approvalLevel = ApprovalLevel.builder()
                 .approvalDate(LocalDateTime.now())
                 .approvalStatus(approval.getApprovalStatus())
@@ -396,13 +408,15 @@ public class NotificationService extends BaseRepoService<Notification> implement
         notification.setApprovalStatus(approval.getApprovalStatus());
         notification.setDateApproved(LocalDateTime.now());
         notificationRepository.save(notification);
+        processApprovedNotification(notification);
         log.info("----||||Publishing Request with no workflow----||||");
     }
 
-    private void completeApprovalAndPublish(Notification notification, SingleRequestApprovalDto approval) throws JsonProcessingException {
+    private void completeApprovalAndPublish(final Notification notification, final SingleRequestApprovalDto approval) throws Exception {
         notification.setApprovalStatus(approval.getApprovalStatus());
         notification.setDateApproved(LocalDateTime.now());
         notificationRepository.save(notification);
+        processApprovedNotification(notification);
         log.info("----||||Publishing Request with no workflow----||||");
     }
 
@@ -414,7 +428,7 @@ public class NotificationService extends BaseRepoService<Notification> implement
 
     @Override
     public void notificationBulkApproval(BulkRequestApprovalDto bulkRequestApprovalDto) throws
-            JsonProcessingException {
+            Exception {
         SingleRequestApprovalDto singleRequestApprovalDto = new SingleRequestApprovalDto();
         if (validateActionNames(getActionNamesByNotificationIds(bulkRequestApprovalDto.getNotificationId()))) {
             for (UUID uuid : bulkRequestApprovalDto.getNotificationId()) {
@@ -464,6 +478,11 @@ public class NotificationService extends BaseRepoService<Notification> implement
                 jwtTokenUtil.getUser().getTenantId(), prp);
     }
 
+    @Override
+    public void processNotification(NotificationRequestDto notificationRequest, String module) throws Exception {
+        getNotificationConsumerService().processNotification(notificationRequest, module);
+    }
+
     private boolean validateActionNames(List<String> notificationsActionNames) {
         if (notificationsActionNames.isEmpty())
             throw new ApplicationException(400, "notifications_not_found", "No matching notification found for the Ids provided");
@@ -473,5 +492,49 @@ public class NotificationService extends BaseRepoService<Notification> implement
 
     private List<String> getActionNamesByNotificationIds(@NotNull List<UUID> notificationIds) {
         return notificationRepository.getActionNamesByNotificationIds(notificationIds, jwtTokenUtil.getUser().getTenantId());
+    }
+
+
+    @Async
+    private void processApprovedNotification(final Notification notification) throws Exception {
+        //TODO: This can be later moved to pub/sub
+        // Once notification is approved there should be a pub/sub that will push
+        // the message to each service that create the notification
+        switch (notification.getNotificationType()) {
+            case APPROVAL -> {
+                switch (notification.getMessageId()) {
+                    case "event": {
+                        final var mappedEvent = objectMapper.convertValue(notification.getNewData(), Event.class);
+                        final var event = eventRepository.getById(mappedEvent.getId());
+                        final var user = coreUserService.getUserById(mappedEvent.getUserId())
+                                .orElseThrow(() -> new ApplicationException(404, "not_found", "User not found!"));
+                        event.setApprovalStatus(notification.getApprovalStatus());
+                        if (event.getApprovalStatus() == ApprovalStatus.APPROVED) {
+                            final var ownerEmail = user.getEmail();
+                            if (!event.isPhysicalEvent() && StringUtils.isBlank(event.getLink())) {
+                                final var eventLink = virtualEventService.createLinkWithCalendar(event, ownerEmail);
+                                event.setLink(eventLink);
+                                log.info(">>> Created meeting link for virtual event {} with owner: {} ", eventLink, ownerEmail);
+                            }
+                            eventRepository.save(event);
+                            log.info(">>> Successfully updated event with status: {} ", notification.getApprovalStatus());
+                        } else {
+                            //do something else here!
+                        }
+                        //send notification to the owner of the event created about the status!
+                    }
+                    default: {
+                        //do nothing!
+                    }
+                }
+            }
+            case IN_APP -> {
+                //do nothing!
+            }
+        }
+    }
+
+    private NotificationMessageConsumerService getNotificationConsumerService() {
+        return ApplicationContextProvider.getBean(NotificationMessageConsumerService.class);
     }
 }

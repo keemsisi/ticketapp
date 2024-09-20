@@ -2,7 +2,6 @@ package org.core.backend.ticketapp.event.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.*;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
@@ -23,7 +22,7 @@ import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.event.service.VirtualEventService;
 import org.core.backend.ticketapp.passport.dtos.NotificationRequestDto;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
-import org.core.backend.ticketapp.passport.service.core.messagebroker.NotificationMessageConsumerServiceImpl;
+import org.core.backend.ticketapp.passport.service.core.notification.NotificationService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
@@ -55,7 +54,7 @@ public class EventServiceImpl implements EventService {
     private BankAccountDetailsRepository bankAccountDetailsRepository;
     private VirtualEventService virtualEventService;
     private AppConfigs appConfigs;
-    private NotificationMessageConsumerServiceImpl notificationMessageConsumerService;
+    private NotificationService notificationService;
     private ObjectMapper objectMapper;
 
     public List<Event> getAll() {
@@ -88,10 +87,7 @@ public class EventServiceImpl implements EventService {
                 throw new ApplicationException(400, "missing_categories", "Some categories does not exist!");
             }
         }
-        if (!request.isPhysicalEvent() && StringUtils.isBlank(request.getLink())) {
-            final var eventLink = virtualEventService.createLinkWithCalendar(event, user);
-            event.setLink(eventLink);
-        }
+
         final var totalCapacity = request.getSeatSections().stream().map(EventSeatSection::getCapacity).mapToInt(Long::intValue).sum();
         final var newCategory = existingCategories.stream().map(EventCategory::getName)
                 .map(String::toUpperCase).collect(Collectors.toSet());
@@ -138,7 +134,7 @@ public class EventServiceImpl implements EventService {
                         .moduleId(appConfigs.eventModuleId.toString())
                         .dateRequested(event.getDateCreated())
                         .newData(objectMapper.writeValueAsString(event)).build();
-                notificationMessageConsumerService.processNotification(notificationRequest, ModuleAction.CREATE_EVENT.getModule());
+                notificationService.processNotification(notificationRequest, ModuleAction.CREATE_EVENT.getModule());
             } catch (Exception e) {
                 log.error(">>> Error Occurred while creating notification for approval", e);
                 throw new RuntimeException(e);
@@ -228,5 +224,10 @@ public class EventServiceImpl implements EventService {
 
     private Event validateEventExists(final UUID eventId) {
         return eventRepository.findById(eventId).orElseThrow(this::notFoundException);
+    }
+
+    @Override
+    public Event save(final Event event) {
+        return eventRepository.save(event);
     }
 }

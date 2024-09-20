@@ -24,10 +24,10 @@ import java.util.*;
 @AllArgsConstructor
 public class NotificationMessageConsumerServiceImpl implements NotificationMessageConsumerService {
     private final ObjectMapper objectMapper;
-    private NotificationRepository notificationRepository;
-    private NotificationSubscriberRepository notificationSubscriberRepository;
-    private WorkflowDao workflowRepository;
-    private NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
+    private final NotificationSubscriberRepository notificationSubscriberRepository;
+    private final WorkflowDao workflowRepository;
+    private final NotificationService notificationService;
 
     @Override
     public Object processMessages(byte[] bytes, String messageId) {

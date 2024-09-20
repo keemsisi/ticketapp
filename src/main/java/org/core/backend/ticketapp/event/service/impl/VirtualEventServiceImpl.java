@@ -122,7 +122,7 @@ public class VirtualEventServiceImpl implements VirtualEventService {
     }
 
     @Override
-    public String createLinkWithCalendar(final Event userEvent, final LoggedInUserDto user) {
+    public String createLinkWithCalendar(final Event userEvent, String ownerEmail) {
         try {
             final var eventDate = userEvent.getEventDate();
             final var timeZone = userEvent.getTimeZone();
@@ -136,7 +136,7 @@ public class VirtualEventServiceImpl implements VirtualEventService {
                     .setEnd(userEvent.isRecurring() ? null : new EventDateTime()
                             .setDateTime(DateTime.parseRfc3339(eventDate.plusDays(1).toString()))
                             .setTimeZone(timeZone))
-                    .setAttendees(Collections.singletonList(new EventAttendee().setEmail(user.getEmail())));
+                    .setAttendees(Collections.singletonList(new EventAttendee().setEmail(ownerEmail)));
             final var conferenceData = new ConferenceData()
                     .setCreateRequest(new CreateConferenceRequest()
                             .setRequestId(UUID.randomUUID().toString())
