@@ -47,8 +47,8 @@ import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
@@ -395,8 +395,9 @@ public class NotificationServiceServiceImpl extends BaseRepoService<Notification
             throw new ApplicationException(403, "Forbidden", String.format("Oops! You don't have authority to perform approval on this notification(%s)", notification.getActionName()));
     }
 
+    @Transactional
     @SneakyThrows({JsonProcessingException.class})
-    private void approveAndPublishNotificationWithoutWorkflow(Notification notification, SingleRequestApprovalDto
+    public void approveAndPublishNotificationWithoutWorkflow(Notification notification, SingleRequestApprovalDto
             approval, LoggedInUserDto userDto) throws Exception {
         var approvalLevel = ApprovalLevel.builder()
                 .approvalDate(LocalDateTime.now())
@@ -495,7 +496,7 @@ public class NotificationServiceServiceImpl extends BaseRepoService<Notification
     }
 
 
-    @Async
+    //    @Async
     private void processApprovedNotification(final Notification notification) throws Exception {
         //TODO: This can be later moved to pub/sub
         // Once notification is approved there should be a pub/sub that will push
@@ -504,7 +505,7 @@ public class NotificationServiceServiceImpl extends BaseRepoService<Notification
             case APPROVAL -> {
                 switch (notification.getMessageId()) {
                     case "event": {
-                        final var mappedEvent = objectMapper.convertValue(notification.getNewData(), Event.class);
+                        final var mappedEvent = objectMapper.readValue(notification.getNewData(), Event.class);
                         final var event = eventRepository.getById(mappedEvent.getId());
                         final var user = coreUserService.getUserById(mappedEvent.getUserId())
                                 .orElseThrow(() -> new ApplicationException(404, "not_found", "User not found!"));
