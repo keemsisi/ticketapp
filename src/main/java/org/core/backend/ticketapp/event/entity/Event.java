@@ -101,6 +101,9 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "link", columnDefinition = "varchar(1024)")
     private String link;
 
+    @Column(name = "calendar_id", columnDefinition = "varchar(250)")
+    private String calendarId;
+
     @PrePersist
     public void onCreate() {
         if (approvalStatus == null) approvalStatus = ApprovalStatus.APPROVED;

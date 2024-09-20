@@ -5,6 +5,7 @@ import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInsta
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -24,6 +25,7 @@ import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.VirtualEventService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
@@ -34,9 +36,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.security.GeneralSecurityException;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -44,9 +45,8 @@ import java.util.concurrent.CompletableFuture;
 public class VirtualEventServiceImpl implements VirtualEventService {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
-    private static final List<String> CALENDAR_SCOPES =
-            Collections.singletonList(CalendarScopes.CALENDAR);
+    private static final String TOKENS_DIRECTORY_PATH = "tokens.json";
+    private static final List<String> CALENDAR_SCOPES = List.of(CalendarScopes.CALENDAR);
     private static final TokenStore TOKEN_STORE = new TokenStore() {
         private Path pathFor(String id) {
             return Paths.get(".", TOKENS_DIRECTORY_PATH, id + ".json");
@@ -75,6 +75,14 @@ public class VirtualEventServiceImpl implements VirtualEventService {
         }
     };
     private final AppConfigs appConfigs;
+    @Value("${system.google.api.credential.client_id}")
+    private String clientId;
+    @Value("${system.google.api.credential.client_secret}")
+    private String clientSecret;
+    @Value("${system.google.api.credential.refresh_token}")
+    private String refreshToken;
+    @Value("${system.google.api.credential.auth_code}")
+    private String authCode;
     private Calendar calendar;
 
     @Autowired
@@ -85,26 +93,11 @@ public class VirtualEventServiceImpl implements VirtualEventService {
                 this.calendar = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCalendarCredential(HTTP_TRANSPORT))
                         .setApplicationName(appConfigs.appName)
                         .build();
-            } catch (IOException e) {
+            } catch (final Exception e) {
                 log.error(">>>>Failed to get Authentication token for calendar", e);
             }
         });
         this.appConfigs = appConfigs;
-    }
-
-    private static Credential getCalendarCredential(final HttpTransport HTTP_TRANSPORT) throws IOException {
-        final var in = VirtualEventServiceImpl.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-        if (in == null) {
-            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
-        }
-        final var clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-        final var flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, CALENDAR_SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                .setAccessType("offline")
-                .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
     private static UserAuthorizer getAuthorizer(URI callbackUri, List<String> scopes) throws IOException {
@@ -125,6 +118,10 @@ public class VirtualEventServiceImpl implements VirtualEventService {
                     })
                     .setTokenStore(TOKEN_STORE).build();
         }
+    }
+
+    private Credential getCalendarCredential(final HttpTransport HTTP_TRANSPORT) throws IOException, GeneralSecurityException {
+        return getCredentials();
     }
 
     @Override
@@ -153,11 +150,60 @@ public class VirtualEventServiceImpl implements VirtualEventService {
                     .setConferenceDataVersion(1).execute();
             final var htmlLLink = createdEvent.getHtmlLink();
             final var link = createdEvent.getConferenceData().getEntryPoints().get(0).getUri();
+            userEvent.setCalendarId(createdEvent.getId());
             return link;
         } catch (final Exception e) {
             handException(e);
             return null;
         }
+    }
+
+    @Override
+    public void updateCalendarEvent(final String calendarId, final Event request, final List<String> attendees) throws IOException {
+        final String calendarIdKey = "calendar-id";
+        final var event = calendar.events().get(calendarIdKey, calendarId).execute();
+        final var eventDate = request.getEventDate();
+        final var timeZone = request.getTimeZone();
+        if (event != null) {
+            final var updatedEvent = new com.google.api.services.calendar.model.Event()
+                    .setSummary(request.getTitle())
+                    .setLocation(request.getLocation())
+                    .setDescription(request.getDescription());
+            final var startDateTime = new DateTime(eventDate.toString());
+            final var start = new EventDateTime().setDateTime(startDateTime).setTimeZone(timeZone);
+            updatedEvent.setStart(start);
+            final var endDateTime = request.isRecurring() ? null : new EventDateTime()
+                    .setDateTime(DateTime.parseRfc3339(eventDate.plusDays(1).toString()))
+                    .setTimeZone(timeZone);
+            updatedEvent.setEnd(endDateTime);
+            final var eventAttendeeList = new ArrayList<EventAttendee>();
+            attendees.forEach(eventAttendee -> eventAttendeeList.add(new EventAttendee().setEmail(eventAttendee)));
+            final var eventAttendeeArray = eventAttendeeList.toArray(new EventAttendee[0]);
+            updatedEvent.setAttendees(Arrays.asList(eventAttendeeArray));
+            final var reminderOverrides =
+                    new EventReminder[]{new EventReminder().setMethod("popup").setMinutes(2),};
+            final var reminders = new com.google.api.services.calendar.model.Event.Reminders().setUseDefault(false).setOverrides(Arrays.asList(reminderOverrides));
+            updatedEvent.setReminders(reminders);
+            final var conferenceSolutionKey = new ConferenceSolutionKey().setType("hangoutsMeet");
+            final var createConferenceRequest = new CreateConferenceRequest()
+                    .setRequestId(request.getId().toString()).setConferenceSolutionKey(conferenceSolutionKey);
+            final var conferenceData = new ConferenceData().setCreateRequest(createConferenceRequest);
+            updatedEvent.setConferenceData(conferenceData);
+            calendar.events().update(calendarIdKey, calendarId, updatedEvent).setSendNotifications(true).execute();
+            log.info(">>> Event Calendar[{}] updated successfully!", calendarId);
+        }
+    }
+
+
+    @Override
+    public void deleteCalendarEvent(String eventId) throws Exception {
+        final String calendarId = "calendar-id";
+        final com.google.api.services.calendar.model.Event event = calendar.events()
+                .get(calendarId, eventId).execute();
+        if (event != null) {
+            calendar.events().delete("calendar-id", eventId).setSendNotifications(true).execute();
+        }
+        log.info(">>> Successfully deleted event with calendarId : {} ", eventId);
     }
 
     private void handException(final Exception e) {
@@ -166,5 +212,39 @@ public class VirtualEventServiceImpl implements VirtualEventService {
         throw new ApplicationException(400, "failed",
                 String.format("Failed to create virtual event link, " +
                         "please try again later or contact support with code[%s]!", errorCode));
+    }
+
+    private Credential getCredentials() throws IOException, GeneralSecurityException {
+        final var decryptedRefreshToken = new String(Base64.getDecoder().decode(refreshToken));
+        final var decryptedClientId = new String(Base64.getDecoder().decode(clientId));
+        final var decryptedClientSecret = new String(Base64.getDecoder().decode(clientSecret));
+        final HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        final var credential = new GoogleCredential.Builder()
+                .setClientSecrets(decryptedClientId, decryptedClientSecret)
+                .setTransport(HTTP_TRANSPORT)
+                .setJsonFactory(JSON_FACTORY)
+                .build();
+        credential.setRefreshToken(decryptedRefreshToken);
+        credential.refreshToken(); // Automatically refreshes the access token
+        return credential;
+    }
+
+    private Credential getCredentialsInit() throws IOException, GeneralSecurityException {
+        final var in = VirtualEventServiceImpl.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        if (in == null) {
+            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+        }
+        final HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        final var clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+        final var flow = new GoogleAuthorizationCodeFlow.Builder(
+                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, CALENDAR_SCOPES)
+                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+                .setAccessType("offline")
+                .build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        final var credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        log.info(">>> ACCESS TOKEN: [{}] REFRESH_TOKEN: [{}] EXPIRY: [{}] ", credential.getAccessToken(),
+                credential.getRefreshToken(), credential.getExpiresInSeconds());
+        return credential;
     }
 }

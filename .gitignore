@@ -40,3 +40,5 @@ build/
 log
 out
 /bin/
+
+src/main/resources/credentials.json
