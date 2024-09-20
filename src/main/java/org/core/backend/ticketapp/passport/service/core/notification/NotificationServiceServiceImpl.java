@@ -165,7 +165,7 @@ public class NotificationServiceServiceImpl extends BaseRepoService<Notification
                     try {
                         Thread.sleep(3000);
                     } catch (InterruptedException e) {
-                        log.error("Error Occurred : ->", e);
+                        log.error("Error Occurred ::: ->", e);
                     }
                 }
                 ++count;
