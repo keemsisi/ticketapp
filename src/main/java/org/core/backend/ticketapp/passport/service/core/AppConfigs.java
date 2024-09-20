@@ -60,6 +60,8 @@ public class AppConfigs {
     UUID organizationMerchantOwnerRole;
     @Value("${system.default.role.organization_merchant_user_role}")
     UUID organizationMerchantUserRole;
+    @Value("${system.default.module.event.id}")
+    public UUID eventModuleId;
     @Value("${app.fine-name}")
     public String appName;
 }

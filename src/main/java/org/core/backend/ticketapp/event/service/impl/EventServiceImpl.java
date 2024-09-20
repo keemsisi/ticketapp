@@ -1,10 +1,9 @@
 package org.core.backend.ticketapp.event.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.core.backend.ticketapp.common.enums.ApprovalStatus;
-import org.core.backend.ticketapp.common.enums.EventTicketType;
-import org.core.backend.ticketapp.common.enums.UserType;
+import org.core.backend.ticketapp.common.enums.*;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsDTO;
@@ -22,10 +21,15 @@ import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.event.service.VirtualEventService;
+import org.core.backend.ticketapp.passport.dtos.NotificationRequestDto;
+import org.core.backend.ticketapp.passport.service.core.AppConfigs;
+import org.core.backend.ticketapp.passport.service.core.messagebroker.NotificationMessageConsumerServiceImpl;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,12 +38,14 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class EventServiceImpl implements EventService {
 
+    private static final Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
     private EventRepository eventRepository;
     private EventDao eventDao;
     private ModelMapper modelMapper;
@@ -48,6 +54,9 @@ public class EventServiceImpl implements EventService {
     private EventCategoryRepository eventCategoryRepository;
     private BankAccountDetailsRepository bankAccountDetailsRepository;
     private VirtualEventService virtualEventService;
+    private AppConfigs appConfigs;
+    private NotificationMessageConsumerServiceImpl notificationMessageConsumerService;
+    private ObjectMapper objectMapper;
 
     public List<Event> getAll() {
         List<Event> events = eventRepository.findAll();
@@ -80,7 +89,7 @@ public class EventServiceImpl implements EventService {
             }
         }
         if (!request.isPhysicalEvent() && StringUtils.isBlank(request.getLink())) {
-            final var eventLink =  virtualEventService.createLinkWithCalendar(event, user);
+            final var eventLink = virtualEventService.createLinkWithCalendar(event, user);
             event.setLink(eventLink);
         }
         final var totalCapacity = request.getSeatSections().stream().map(EventSeatSection::getCapacity).mapToInt(Long::intValue).sum();
@@ -115,6 +124,26 @@ public class EventServiceImpl implements EventService {
         eventRepository.saveAndFlush(event);
         eventSeatSectionsRepository.saveAll(seatSections);
         event.setSeatSections(seatSections);
+        CompletableFuture.runAsync(() -> {
+            try {
+                final var notificationRequest = NotificationRequestDto
+                        .builder()
+                        .actionName(ModuleAction.CREATE_EVENT.getAction())
+                        .dateCreated(event.getDateCreated())
+                        .approvalStatus(ApprovalStatus.PENDING)
+                        .requestedBy(user.getUserId().toString())
+                        .tenantId(user.getTenantId().toString())
+                        .notificationType(NotificationType.APPROVAL)
+                        .description(String.format("This event is created by %s and requires and admin approval", user.getFullName()))
+                        .moduleId(appConfigs.eventModuleId.toString())
+                        .dateRequested(event.getDateCreated())
+                        .newData(objectMapper.writeValueAsString(event)).build();
+                notificationMessageConsumerService.processNotification(notificationRequest, ModuleAction.CREATE_EVENT.getModule());
+            } catch (Exception e) {
+                log.error(">>> Error Occurred while creating notification for approval", e);
+                throw new RuntimeException(e);
+            }
+        });
         return event;
     }
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.thecarisma.ExcelColumn;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.Gender;
 import org.core.backend.ticketapp.common.enums.UserType;
@@ -74,6 +75,10 @@ public class LoggedInUserDto {
             return defaultUserId;
         }
         return userId;
+    }
+
+    public String getFullName() {
+        return String.format("%s %s %s", firstName, StringUtils.defaultIfBlank(middleName, ""), lastName);
     }
 
     public boolean isAdmin() {

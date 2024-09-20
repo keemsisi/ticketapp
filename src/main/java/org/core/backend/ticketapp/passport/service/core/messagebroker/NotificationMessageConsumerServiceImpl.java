@@ -64,9 +64,9 @@ public class NotificationMessageConsumerServiceImpl implements NotificationMessa
     public Notification processNotification(final NotificationRequestDto notificationRequestDto,final String messageId) throws Exception {
         List<NotificationType> notificationTypes = List.of(
                 NotificationType.IN_APP, NotificationType.REMINDER, NotificationType.RELIEF_REQUEST,
-                NotificationType.EVENT);
+                NotificationType.APPROVAL);
         log.info("------------|||||||CONSUMING MESSAGE FROM SERVICE BUS|||||------------");
-        ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
+        final ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         Notification notification = new Notification();
 
         var approvalLevels = workflowRepository.getWorkflowApprovalLevelByActionCode(notificationRequestDto.getActionName());

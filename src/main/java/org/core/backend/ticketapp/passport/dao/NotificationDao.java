@@ -184,7 +184,7 @@ public class NotificationDao implements INotificationDao {
                 query.append(String.format("  AND n.notification_type='%s' ", prp.getType()));
             else if (ObjectUtils.isNotEmpty(prp.getType()) && notificationTypes.contains(prp.getType()))
                 query.append(String.format("  AND n.notification_type='%s' AND n.notification_for_user_id='%s' ", prp.getType(), userId));
-            else query.append(String.format(" AND n.notification_type='%s' ", NotificationType.EVENT.name()));
+            else query.append(String.format(" AND n.notification_type='%s' ", NotificationType.APPROVAL.name()));
         } else if (userRoles.contains("super_admin")) {
             if (ObjectUtils.isNotEmpty(prp.getNotificationForUserId()))
                 query.append(String.format(" AND n.notification_for_user_id='%s' ", prp.getNotificationForUserId()));

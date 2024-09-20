@@ -80,7 +80,7 @@ public class NotificationService extends BaseRepoService<Notification> implement
             return notificationRepository.getAllStatusAndModuleIdAndStartDateAndEndDatePaged(status.name(), moduleId, startDate, endDate, tenantId, pageable);
         } else if (ObjectUtils.isNotEmpty(startDate) && ObjectUtils.isNotEmpty(endDate)) {
             if (ObjectUtils.isEmpty(moduleId))
-                return notificationRepository.getAllStartDateAndEndDatePaged(startDate, endDate, tenantId, NotificationType.EVENT.name(), pageable);
+                return notificationRepository.getAllStartDateAndEndDatePaged(startDate, endDate, tenantId, NotificationType.APPROVAL.name(), pageable);
             return notificationRepository.getAllModuleIdAndStartDateAndEndDatePaged(moduleId, startDate, endDate, tenantId, pageable);
         } else if (ObjectUtils.isNotEmpty(actionName) && ObjectUtils.isNotEmpty(status)) {
             if (ObjectUtils.isEmpty(moduleId))
@@ -92,7 +92,7 @@ public class NotificationService extends BaseRepoService<Notification> implement
             return notificationRepository.getAllByActionNameAndModuleId(actionName, moduleId, tenantId, pageable);
         } else if (status != null) {
             if (ObjectUtils.isEmpty(moduleId))
-                return notificationRepository.getAllByStatus(status.name(), tenantId, NotificationType.EVENT.name(), pageable);
+                return notificationRepository.getAllByStatus(status.name(), tenantId, NotificationType.APPROVAL.name(), pageable);
             return notificationRepository.getAllByStatusAndModuleId(status.name(), moduleId, tenantId, pageable);
         } else {
             if (ObjectUtils.isEmpty(moduleId))
@@ -121,7 +121,7 @@ public class NotificationService extends BaseRepoService<Notification> implement
             return notificationRepository.getAllByStatusAndModuleIdAndStartDateAndEndDateUnPaged(status.name(), moduleId, startDate, endDate, tenantId);
         } else if (ObjectUtils.isNotEmpty(startDate) && ObjectUtils.isNotEmpty(endDate)) {
             if (ObjectUtils.isEmpty(moduleId))
-                return notificationRepository.getAllStartDateAndEndDateUnPaged(startDate, endDate, tenantId, NotificationType.EVENT.name());
+                return notificationRepository.getAllStartDateAndEndDateUnPaged(startDate, endDate, tenantId, NotificationType.APPROVAL.name());
             return notificationRepository.getAllModuleIdAndStartDateAndEndDateUnPaged(moduleId, startDate, endDate, tenantId);
         } else if (ObjectUtils.isNotEmpty(actionName) && ObjectUtils.isNotEmpty(status)) {
             if (ObjectUtils.isEmpty(moduleId))
@@ -132,7 +132,7 @@ public class NotificationService extends BaseRepoService<Notification> implement
             return notificationRepository.getAllByActionNameAndModuleId(actionName, moduleId, tenantId);
         } else if (status != null) {
             if (ObjectUtils.isEmpty(moduleId))
-                return notificationRepository.getAllByStatus(status.name(), tenantId, NotificationType.EVENT.name());
+                return notificationRepository.getAllByStatus(status.name(), tenantId, NotificationType.APPROVAL.name());
             return notificationRepository.getAllByStatusAndModuleId(status.name(), moduleId, tenantId);
         } else {
             if (ObjectUtils.isEmpty(moduleId))
@@ -320,7 +320,7 @@ public class NotificationService extends BaseRepoService<Notification> implement
                         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Notification.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(notification), singleRequestApprovalDto.getApprovalStatus().name() + " a leave request notification");
                     } else
                         throw new ApplicationException(403, "Forbidden", "Oops! This relief request notification is not for you and approval is forbidden");
-                } else if (notification.getNotificationType() == NotificationType.EVENT) {
+                } else if (notification.getNotificationType() == NotificationType.APPROVAL) {
                     validaUserAccessToNotification(notification, loggedInUserDto);
                     if (notification.getWorkflow() == null) {
                         notification.setFinalApprovalByName(CommonUtils.getFullName(loggedInUserDto));
