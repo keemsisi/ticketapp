@@ -229,6 +229,7 @@ public class VirtualEventServiceImpl implements VirtualEventService {
         return credential;
     }
 
+
     private Credential getCredentialsInit() throws IOException, GeneralSecurityException {
         final var in = VirtualEventServiceImpl.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
