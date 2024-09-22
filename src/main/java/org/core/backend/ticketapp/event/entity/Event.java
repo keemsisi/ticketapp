@@ -15,7 +15,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -50,6 +49,12 @@ public class Event extends AbstractBaseEntity {
 
     @Column(name = "max_per_user")
     private int maxPerUser;
+
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
+
+    @Column(name = "theme")
+    private String theme;
 
     @NotNull
     private String location;

@@ -31,6 +31,9 @@ public class Transaction extends AbstractBaseEntity {
     @Column(name = "order_id")
     private UUID orderId;
 
+    @Column(name = "event_id")
+    private UUID eventId;
+
     @Column(name = "reference", unique = true)
     private String reference;
 

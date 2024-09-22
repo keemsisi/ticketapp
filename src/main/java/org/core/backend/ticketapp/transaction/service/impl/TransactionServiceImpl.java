@@ -380,6 +380,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .reference(order.getReference())
                     .amount(ObjectUtils.defaultIfNull(order.getTotalBatchAmount(), order.getAmount()))
                     .orderId(order.getId())
+                    .eventId(order.getEventId())
                     .status(Objects.isNull(meta.getPaidAt()) ? Status.PENDING : Status.PAID)
                     .gateWayMeta(meta)
                     .build();
@@ -431,6 +432,7 @@ public class TransactionServiceImpl implements TransactionService {
                 secTransaction.setComment(transaction.getComment());
                 secTransaction.setTenantId(transaction.getTenantId());
                 secTransaction.setOrderId(secOrder.getId());
+                secTransaction.setEventId(secOrder.getEventId());
                 secTransaction.setGateWayMeta(transaction.getGateWayMeta());
                 secTransaction.setStatus(Status.COMPLETED);
                 secTransaction.setReference(String.format("%s_%s", System.currentTimeMillis(), transaction.getReference()));
