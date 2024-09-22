@@ -30,6 +30,10 @@ public class AppConfigs {
     public PaymentProcessorType defaultPaymentProcessor;
     @Value("${system.default.email.provider}")
     public EmailProvider emailProvider;
+    @Value("${system.default.module.event.id}")
+    public UUID eventModuleId;
+    @Value("${app.fine-name}")
+    public String appName;
     @Value("${ticketapp.password-reset-url}")
     String resetPasswordUrl;
     @Value("${user.failed.login.threshold}")
@@ -60,8 +64,12 @@ public class AppConfigs {
     UUID organizationMerchantOwnerRole;
     @Value("${system.default.role.organization_merchant_user_role}")
     UUID organizationMerchantUserRole;
-    @Value("${system.default.module.event.id}")
-    public UUID eventModuleId;
-    @Value("${app.fine-name}")
-    public String appName;
+    @Value("${system.google.api.credential.client_id}")
+    public String clientId;
+    @Value("${system.google.api.credential.client_secret}")
+    public String clientSecret;
+    @Value("${system.google.api.credential.refresh_token}")
+    public String refreshToken;
+    @Value("${system.google.api.credential.auth_code}")
+    public String authCode;
 }

@@ -25,7 +25,6 @@ import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.VirtualEventService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
@@ -75,14 +74,6 @@ public class VirtualEventServiceImpl implements VirtualEventService {
         }
     };
     private final AppConfigs appConfigs;
-    @Value("${system.google.api.credential.client_id}")
-    private String clientId;
-    @Value("${system.google.api.credential.client_secret}")
-    private String clientSecret;
-    @Value("${system.google.api.credential.refresh_token}")
-    private String refreshToken;
-    @Value("${system.google.api.credential.auth_code}")
-    private String authCode;
     private Calendar calendar;
 
     @Autowired
@@ -215,9 +206,9 @@ public class VirtualEventServiceImpl implements VirtualEventService {
     }
 
     private Credential getCredentials() throws IOException, GeneralSecurityException {
-        final var decryptedRefreshToken = new String(Base64.getDecoder().decode(refreshToken));
-        final var decryptedClientId = new String(Base64.getDecoder().decode(clientId));
-        final var decryptedClientSecret = new String(Base64.getDecoder().decode(clientSecret));
+        final var decryptedRefreshToken = new String(Base64.getDecoder().decode(appConfigs.refreshToken));
+        final var decryptedClientId = new String(Base64.getDecoder().decode(appConfigs.clientId));
+        final var decryptedClientSecret = new String(Base64.getDecoder().decode(appConfigs.clientSecret));
         final HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         final var credential = new GoogleCredential.Builder()
                 .setClientSecrets(decryptedClientId, decryptedClientSecret)

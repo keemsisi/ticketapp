@@ -6,6 +6,7 @@ import org.core.backend.ticketapp.common.response.EventStatsDTO;
 import org.core.backend.ticketapp.event.dao.EventResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
+import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.springframework.data.domain.Page;
@@ -34,6 +35,8 @@ public interface EventService {
     Event assignCategory(AssignCategoryToEventRequestDTO request);
 
     EventStatsDTO getEventStats(UUID eventId);
+
+    List<EventStatsDTO> getEventStats(EventStatRequestDTO request);
 
     Event save(Event event);
 }

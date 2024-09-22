@@ -9,6 +9,7 @@ import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
+import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.service.EventService;
@@ -83,10 +84,9 @@ public class EventController implements ICrudController {
                 HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/stats/{eventId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<EventStatsDTO>> getTotalAvailableTickets(@PathVariable UUID eventId) {
-        final var totalTickets = eventService.getEventStats(eventId);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully assigned category to event", totalTickets),
-                HttpStatus.OK);
+    @RequestMapping(value = "/stats", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<List<EventStatsDTO>>> getTotalAvailableTickets(@PathVariable EventStatRequestDTO request) {
+        final var totalTickets = eventService.getEventStats(request);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully fetched events stats!", totalTickets), HttpStatus.OK);
     }
 }

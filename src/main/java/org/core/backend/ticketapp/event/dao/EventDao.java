@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsDTO;
+import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.passport.dao.BaseDao;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -117,18 +118,35 @@ public class EventDao extends BaseDao {
                 () -> ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount());
     }
 
-    @SuppressWarnings("unchecked")
     public EventStatsDTO getEventsStats(final UUID eventId, final UUID tenantId) {
-        final var baseSQL = String.format("SELECT SUM(ess.capacity) total_capacity, COUNT(ess) total_ticket_sections, " +
+        final var result = getEventsStats(EventStatRequestDTO.builder().eventId(eventId).tenantId(tenantId).build());
+        return result.isEmpty() ? EventStatsDTO.builder().build() : result.get(0);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<EventStatsDTO> getEventsStats(final EventStatRequestDTO request) {
+        final var baseSQL = new StringBuilder("SELECT SUM(ess.capacity) total_capacity, COUNT(ess) total_ticket_sections, " +
                 " COUNT(tk) total_acquired_tickets, (SUM(ess.capacity) - COUNT(tk)) total_available_tickets " +
                 " FROM event e LEFT JOIN ticket tk ON tk.event_id = e.id " +
                 " INNER JOIN event_seat_sections ess ON ess.event_id = e.id AND ess.deleted=false " +
-                " WHERE e.deleted=false AND e.id = '%s' AND e.tenant_id = '%s';", eventId, tenantId);
-        final var results = executeQuery(baseSQL, EventStatsDTO.class);
+                " WHERE e.deleted=false ");
+        if (Objects.nonNull(request.getEventId())) {
+            baseSQL.append(" AND e.id = '%s' ").append(request.getEventId());
+        }
+        if (Objects.nonNull(request.getTenantId())) {
+            baseSQL.append(" AND e.tenant_id = '%s' ").append(request.getTenantId());
+        }
+        if (Objects.nonNull(request.getStartDate()) && Objects.isNull(request.getEndDate())) {
+            baseSQL.append(String.format(" AND e.date_created >= '%s' ", request.getStartDate()));
+        }
+        if (Objects.nonNull(request.getStartDate()) && Objects.nonNull(request.getEndDate())) {
+            baseSQL.append(String.format(" AND e.date_created BETWEEN '%s' AND '%s' ", request.getStartDate(), request.getEndDate()));
+        }
+        final var results = executeQuery(baseSQL.toString(), EventStatsDTO.class);
         final var result = ((List<EventStatsDTO>) results.get("result"));
         if (ObjectUtils.isNotEmpty(result))
-            return (((List<EventStatsDTO>) results.get("result"))).get(0);
-        return EventStatsDTO.builder().build();
+            return (((List<EventStatsDTO>) results.get("result")));
+        return List.of();
     }
 
     private UUID getUserIdIfNotAdmin() {

@@ -10,6 +10,7 @@ import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.dao.EventResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
+import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.entity.EventCategory;
@@ -196,6 +197,15 @@ public class EventServiceImpl implements EventService {
         final var user = jwtTokenUtil.getUser();
         final var tenantId = user.getTenantId();
         return eventDao.getEventsStats(eventId, tenantId);
+    }
+
+    @Override
+    public List<EventStatsDTO> getEventStats(final EventStatRequestDTO request) {
+        if (Objects.nonNull(request.getEventId())) {
+            validateEventExists(request.getEventId());
+        }
+        request.setTenantId(UserUtils.getTenantId(jwtTokenUtil.getUser(), request.getTenantId()));
+        return eventDao.getEventsStats(request);
     }
 
     @Override

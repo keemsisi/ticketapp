@@ -4,7 +4,9 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import org.apache.commons.lang3.StringUtils;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.springframework.stereotype.Component;
 
 import java.security.InvalidParameterException;
@@ -165,6 +167,17 @@ public class UserUtils {
         if (!(((List<String>) jwtTokenUtil.getClaimByKey("scope")).contains(actionName))) {
             throw new ApplicationException(403, "forbidden", "Oops! You don't have right permission over this resource");
         }
+    }
+
+    public static UUID getTenantId(final LoggedInUserDto user, UUID requestTenantId) {
+        if (user.getUserType().isBuyerOrSeller()
+                && (Objects.nonNull(requestTenantId) && !user.getTenantId().equals(requestTenantId))
+                && !UserUtils.userHasAnyRole(user.getRoles(), AccountType.getAllowedSystemAdminAccountType())) {
+            throw new ApplicationException(403, "forbidden", "Oops! you can't access this resource!");
+        } else if (user.getUserType().isBuyerOrSeller()) {
+            return user.getTenantId();
+        }
+        return requestTenantId;
     }
 
 //    public static void canAccessResource(final UUID userId) {

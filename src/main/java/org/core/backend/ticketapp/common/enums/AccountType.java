@@ -29,8 +29,8 @@ public enum AccountType {
         );
     }
 
-    public String getType() {
-        return type;
+    public static List<String> getAllowedSystemAdminAccountType() {
+        return List.of(SUPER_ADMIN.name(), SYSTEM_ADMIN_USER.name());
     }
 
     public static List<AccountType> allowedForUserOnboarding() {
@@ -40,5 +40,9 @@ public enum AccountType {
                 ORGANIZATION_MERCHANT_OWNER,
                 INDIVIDUAL
         );
+    }
+
+    public String getType() {
+        return type;
     }
 }
