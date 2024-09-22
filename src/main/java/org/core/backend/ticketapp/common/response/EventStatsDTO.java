@@ -12,4 +12,7 @@ public class EventStatsDTO {
     private long totalTicketSections;
     private long totalAcquiredTickets;
     private long totalAvailableTickets;
+    private double totalSettledAmount;
+    private long totalSettlements;
+    private long totalSales;
 }

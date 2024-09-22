@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.core.backend.ticketapp.common.enums.OrderType;
 import org.core.backend.ticketapp.common.enums.Status;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.order.service.OrderService;
@@ -58,6 +59,7 @@ public class SettlementServiceImpl implements SettlementService {
         final var jsonResponse = objectMapper.writeValueAsString(processorResponse);
         final var transaction = new Transaction();
         transaction.setDateCreated(LocalDateTime.now());
+        transaction.setType(OrderType.EVENT_SETTLEMENT);
         transaction.setStatus(Status.PENDING);
         transaction.setComment(transferRequest.getReason());
         final var timestamp = System.currentTimeMillis();

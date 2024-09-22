@@ -170,11 +170,11 @@ public class UserUtils {
     }
 
     public static UUID getTenantId(final LoggedInUserDto user, UUID requestTenantId) {
-        if (user.getUserType().isBuyerOrSeller()
+        if (Objects.nonNull(user.getUserType()) && user.getUserType().isBuyerOrSeller()
                 && (Objects.nonNull(requestTenantId) && !user.getTenantId().equals(requestTenantId))
                 && !UserUtils.userHasAnyRole(user.getRoles(), AccountType.getAllowedSystemAdminAccountType())) {
             throw new ApplicationException(403, "forbidden", "Oops! you can't access this resource!");
-        } else if (user.getUserType().isBuyerOrSeller()) {
+        } else if (Objects.nonNull(user.getUserType()) && user.getUserType().isBuyerOrSeller()) {
             return user.getTenantId();
         }
         return requestTenantId;

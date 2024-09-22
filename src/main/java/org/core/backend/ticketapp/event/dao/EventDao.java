@@ -129,15 +129,25 @@ public class EventDao extends BaseDao {
     @SuppressWarnings("unchecked")
     public List<EventStatsDTO> getEventsStats(final EventStatRequestDTO request) {
         final var baseSQL = new StringBuilder("SELECT SUM(ess.capacity) total_capacity, COUNT(ess) total_ticket_sections, " +
-                " COUNT(tk) total_acquired_tickets, (SUM(ess.capacity) - COUNT(tk)) total_available_tickets " +
-                " FROM event e LEFT JOIN ticket tk ON tk.event_id = e.id " +
-                " INNER JOIN event_seat_sections ess ON ess.event_id = e.id AND ess.deleted=false " +
+                " COUNT(tk) total_acquired_tickets, (SUM(ess.capacity) - COUNT(tk)) total_available_tickets, " +
+                " SUM(CASE WHEN t.type = 'EVENT_TICKET' THEN t.amount ELSE 0 END) total_sales, " +
+                " COUNT(CASE WHEN o.type = 'EVENT_SETTLEMENT' AND o.event_id = e.id THEN 1 ELSE 0 END) total_settlements, " +
+                " COUNT(CASE WHEN o.type = 'EVENT_SETTLEMENT' AND o.event_id = e.id AND o.status = 'PENDING' THEN 1 ELSE 0 END) total_pending_settlements, " +
+                " COUNT(CASE WHEN o.type = 'EVENT_SETTLEMENT' AND o.event_id = e.id AND o.status = 'SUCCESSFUL' THEN 1 ELSE 0 END) total_successful_settlements, " +
+                " COUNT(CASE WHEN o.type = 'EVENT_SETTLEMENT' AND o.event_id = e.id AND o.status = 'CANCELLED' THEN 1 ELSE 0 END) total_cancelled_settlements, " +
+                " COUNT(CASE WHEN o.type = 'EVENT_SETTLEMENT' AND o.event_id = e.id AND o.status = 'FAILED' THEN 1 ELSE 0 END) total_failed_settlements, " +
+                " SUM(CASE   WHEN t.type = 'EVENT_SETTLEMENT' AND t.order_id = o.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_settled_amount " +
+                " FROM   event e " +
+                " INNER  JOIN orders o      ON o.event_id      = e.id AND o.deleted=false " +
+                " INNER  JOIN transaction t ON t.order_id      = o.id AND o.deleted=false " +
+                " INNER  JOIN event_seat_sections ess ON ess.event_id = e.id AND ess.deleted=false " +
+                " LEFT   JOIN ticket tk     ON tk.event_id     = e.id " +
                 " WHERE e.deleted=false ");
         if (Objects.nonNull(request.getEventId())) {
-            baseSQL.append(" AND e.id = '%s' ").append(request.getEventId());
+            baseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
         }
         if (Objects.nonNull(request.getTenantId())) {
-            baseSQL.append(" AND e.tenant_id = '%s' ").append(request.getTenantId());
+            baseSQL.append(String.format(" AND e.tenant_id = '%s' ", request.getTenantId()));
         }
         if (Objects.nonNull(request.getStartDate()) && Objects.isNull(request.getEndDate())) {
             baseSQL.append(String.format(" AND e.date_created >= '%s' ", request.getStartDate()));

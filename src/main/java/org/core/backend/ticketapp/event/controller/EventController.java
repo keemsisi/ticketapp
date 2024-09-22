@@ -85,7 +85,7 @@ public class EventController implements ICrudController {
     }
 
     @RequestMapping(value = "/stats", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<List<EventStatsDTO>>> getTotalAvailableTickets(@PathVariable EventStatRequestDTO request) {
+    public ResponseEntity<GenericResponse<List<EventStatsDTO>>> getTotalAvailableTickets(final EventStatRequestDTO request) {
         final var totalTickets = eventService.getEventStats(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Successfully fetched events stats!", totalTickets), HttpStatus.OK);
     }

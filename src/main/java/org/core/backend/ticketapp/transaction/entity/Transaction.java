@@ -4,7 +4,9 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
+import org.core.backend.ticketapp.common.enums.OrderType;
 import org.core.backend.ticketapp.common.enums.Status;
+import org.core.backend.ticketapp.common.enums.TransactionType;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -51,6 +53,9 @@ public class Transaction extends AbstractBaseEntity {
 
     @Column(name = "comment")
     private String comment;
+
+    @Enumerated(EnumType.STRING)
+    private OrderType type;
 
     @PrePersist
     public void onCreate() {

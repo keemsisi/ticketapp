@@ -1,5 +1,5 @@
 package org.core.backend.ticketapp.common.enums;
 
 public enum OrderType {
-    TICKET, PLAN_SUBSCRIPTION, PAYMENT
+    EVENT_TICKET, PLAN_SUBSCRIPTION, EVENT_SETTLEMENT
 }

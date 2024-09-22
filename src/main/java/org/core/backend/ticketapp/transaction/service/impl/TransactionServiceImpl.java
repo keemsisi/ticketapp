@@ -157,7 +157,7 @@ public class TransactionServiceImpl implements TransactionService {
         final var order = new Order();
         final var data = Objects.isNull(response) ? new PaymentInitResponseDTO.Data() : response.getData();
         final var primaryUserDto = getOrCreateNewUser(primary);
-        final var orderType = isPlanTransaction ? OrderType.PLAN_SUBSCRIPTION : OrderType.TICKET;
+        final var orderType = isPlanTransaction ? OrderType.PLAN_SUBSCRIPTION : OrderType.EVENT_TICKET;
         order.setEventId(eventId);
         order.setQuantity(quantity);
         order.setUserId(jwtTokenUtil.getUser().getUserId());
@@ -376,6 +376,7 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findByReference(reference).or(() -> {
             final var trx = Transaction.builder()
                     .userId(order.getUserId())
+                    .type(order.getType())
                     .reference(order.getReference())
                     .amount(ObjectUtils.defaultIfNull(order.getTotalBatchAmount(), order.getAmount()))
                     .orderId(order.getId())
@@ -423,6 +424,7 @@ public class TransactionServiceImpl implements TransactionService {
             orders.forEach(secOrder -> {
                 final var secTransaction = new Transaction();
                 secTransaction.setId(UUID.randomUUID());
+                secTransaction.setType(order.getType());
                 secTransaction.setAmount(secOrder.getAmount());
                 secTransaction.setUserId(secOrder.getUserId());
                 secTransaction.setDateCreated(LocalDateTime.now());
