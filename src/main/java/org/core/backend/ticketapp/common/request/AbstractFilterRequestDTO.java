@@ -24,11 +24,11 @@ public abstract class AbstractFilterRequestDTO {
     private Date endDateApproved;
     private UUID requestedById;
     private boolean userId;
-    private Long index;
-    private Integer size = 20;
+    private long index;
+    private int size = 20;
     private Sort.Direction order = Sort.Direction.DESC;
     private String[] sortBy;
-    private Integer page;
+    private int page;
     private boolean paged;
     private String search;
 }

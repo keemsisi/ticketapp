@@ -43,11 +43,14 @@ public class EventDao extends BaseDao {
     }
 
     @SuppressWarnings("unchecked")
-    public Page<EventResponseDTO> filterSearch(EventFilterRequestDTO filterRequest) {
+    public Page<EventResponseDTO> filterSearch(final EventFilterRequestDTO filterRequest) {
+        final var skip = filterRequest.getPage() * filterRequest.getSize();
+        final var limit = filterRequest.getSize();
         assert getJdbcTemplate() != null;
         final var baseSQL = " SELECT %s FROM event e :innerQuery " +
                 " INNER JOIN users u ON u.id = e.user_id AND u.deleted=false WHERE e.deleted=false %s ";
         final var seatSectionInnerQuery = " INNER JOIN event_seat_sections ss ON ss.event_id = e.id ";
+        final var paginationQuery = String.format(" OFFSET %s LIMIT %s ", skip, limit);
         final var order = ObjectUtils.defaultIfNull(filterRequest.getOrder(), Sort.Direction.DESC);
         final var subQuery = new StringBuilder();
         if (Objects.nonNull(filterRequest.getIsPaidEvent())) {
@@ -103,17 +106,17 @@ public class EventDao extends BaseDao {
                 baseSQL.replace(":innerQuery", "");
         final var pageable = ResponsePageRequest.createPageRequest(filterRequest.getPage(),
                 filterRequest.getSize(), order, new String[]{"dateCreated"}, true, "dateCreated");
-        final var eventsQuery = String.format(finalBaseQuery, "e.*", subQuery);
+        final var eventsQuery = String.format(finalBaseQuery, "e.*", subQuery) + paginationQuery;
         final var countQuery = String.format(finalBaseQuery, "count(*) as count", subQuery);
         final var finalQuery = ":eventsQuery;:countQuery;"
                 .replaceAll(":eventsQuery", eventsQuery)
                 .replaceAll(":countQuery", countQuery);
-        var cscFactory = new CallableStatementCreatorFactory(finalQuery);
-        var returnedParams = Arrays.<SqlParameter>asList(
+        final var cscFactory = new CallableStatementCreatorFactory(finalQuery);
+        final var returnedParams = Arrays.<SqlParameter>asList(
                 new SqlReturnResultSet("events", new EventResponseRowMapper(objectMapper)),
                 new SqlReturnResultSet("count", BeanPropertyRowMapper.newInstance(LongWrapper.class)));
-        CallableStatementCreator csc = cscFactory.newCallableStatementCreator(new HashMap<>());
-        Map<String, Object> results = getJdbcTemplate().call(csc, returnedParams);
+        final var csc = cscFactory.newCallableStatementCreator(new HashMap<>());
+        final var results = getJdbcTemplate().call(csc, returnedParams);
         return PageableExecutionUtils.getPage((List<EventResponseDTO>) results.get("events"), pageable,
                 () -> ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount());
     }
