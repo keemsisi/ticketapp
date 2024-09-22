@@ -141,8 +141,8 @@ public class EventDao extends BaseDao {
                 " INNER  JOIN orders o      ON o.event_id      = e.id AND o.deleted=false " +
                 " INNER  JOIN transaction t ON t.order_id      = o.id AND o.deleted=false " +
                 " INNER  JOIN event_seat_sections ess ON ess.event_id = e.id AND ess.deleted=false " +
-                " LEFT   JOIN ticket tk     ON tk.event_id     = e.id " +
-                " WHERE e.deleted=false ");
+                " INNER  JOIN ticket tk     ON tk.event_id     = o.id " +
+                " WHERE  e.deleted=false ");
         if (Objects.nonNull(request.getEventId())) {
             baseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
         }
