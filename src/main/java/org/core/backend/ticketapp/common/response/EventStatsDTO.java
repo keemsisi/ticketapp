@@ -10,36 +10,18 @@ import org.apache.commons.lang3.ObjectUtils;
 @Setter
 @Builder
 public class EventStatsDTO {
-    private Long totalCapacity;
-    private Long totalTicketSections;
-    private Long totalAcquiredTickets;
-    private Long totalAvailableTickets;
+    private Long totalOrders;
+    private Long totalPending;
+    private Long totalSuccessful;
+    private Long totalCancelled;
+    private Long totalFailed;
     private Long totalSettlements;
-    private Long totalPendingSettlements;
-    private Long totalSuccessfulSettlements;
-    private Long totalCancelledSettlements;
-    private Long totalFailedSettlements;
-    private Long totalSales;
+    private Long totalSalesAmount;
     private Double totalSettledAmount;
 
-    @JsonGetter(value = "totalCapacity")
-    public Long getTotalCapacity() {
-        return ObjectUtils.defaultIfNull(totalCapacity, 0L);
-    }
-
-    @JsonGetter(value = "totalTicketSections")
-    public Long getTotalTicketSections() {
-        return ObjectUtils.defaultIfNull(totalTicketSections, 0L);
-    }
-
-    @JsonGetter(value = "totalAcquiredTickets")
-    public Long getTotalAcquiredTickets() {
-        return ObjectUtils.defaultIfNull(totalAcquiredTickets, 0L);
-    }
-
-    @JsonGetter(value = "totalAvailableTickets")
-    public Long getTotalAvailableTickets() {
-        return ObjectUtils.defaultIfNull(totalAvailableTickets, 0L);
+    @JsonGetter(value = "totalOrders")
+    public Long getTotalOrders() {
+        return ObjectUtils.defaultIfNull(totalOrders, 0L);
     }
 
     @JsonGetter(value = "totalSettlements")
@@ -47,29 +29,29 @@ public class EventStatsDTO {
         return ObjectUtils.defaultIfNull(totalSettlements, 0L);
     }
 
-    @JsonGetter(value = "totalPendingSettlements")
-    public Long getTotalPendingSettlements() {
-        return ObjectUtils.defaultIfNull(totalPendingSettlements, 0L);
+    @JsonGetter(value = "totalPending")
+    public Long getTotalPending() {
+        return ObjectUtils.defaultIfNull(totalPending, 0L);
     }
 
-    @JsonGetter(value = "totalSuccessfulSettlements")
-    public Long getTotalSuccessfulSettlements() {
-        return ObjectUtils.defaultIfNull(totalSuccessfulSettlements, 0L);
+    @JsonGetter(value = "totalSuccessful")
+    public Long getTotalSuccessful() {
+        return ObjectUtils.defaultIfNull(totalSuccessful, 0L);
     }
 
-    @JsonGetter(value = "totalCancelledSettlements")
-    public Long getTotalCancelledSettlements() {
-        return ObjectUtils.defaultIfNull(totalCancelledSettlements, 0L);
+    @JsonGetter(value = "totalCancelled")
+    public Long getTotalCancelled() {
+        return ObjectUtils.defaultIfNull(totalCancelled, 0L);
     }
 
-    @JsonGetter(value = "totalFailedSettlements")
-    public Long getTotalFailedSettlements() {
-        return ObjectUtils.defaultIfNull(totalFailedSettlements, 0L);
+    @JsonGetter(value = "totalFailed")
+    public Long getTotalFailed() {
+        return ObjectUtils.defaultIfNull(totalFailed, 0L);
     }
 
-    @JsonGetter(value = "totalSales")
-    public Long getTotalSales() {
-        return ObjectUtils.defaultIfNull(totalSales, 0L);
+    @JsonGetter(value = "totalSalesAmount")
+    public Long getTotalSalesAmount() {
+        return ObjectUtils.defaultIfNull(totalSalesAmount, 0L);
     }
 
     @JsonGetter(value = "totalSettledAmount")

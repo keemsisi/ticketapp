@@ -1,14 +1,12 @@
 package org.core.backend.ticketapp.ticket.service;
 
 import lombok.AllArgsConstructor;
-import org.apache.poi.ss.formula.functions.Even;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.Status;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.event.dao.EventDao;
-import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.repository.EventRepository;
 import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
@@ -66,8 +64,8 @@ public class TicketServiceImpl implements TicketService {
         }
         final var event = eventRepository.findById(ticketRequestDTO.getEventId())
                 .orElseThrow(() -> new ApplicationException(400, "not_found", "Event does not exists!"));
-        final var eventStats = eventDao.getEventsStats(event.getId(), event.getTenantId());
-        if (eventStats.getTotalAvailableTickets() > 0) {
+        final var eventTicketStats = eventDao.getEventTicketStats(order.getSeatSectionId());
+        if (eventTicketStats.getTotalAvailableTickets() > 0) {
             EventSeatSection seatSection = null;
 
             if (Objects.nonNull(ticketRequestDTO.getSeatSectionId())) {
@@ -125,7 +123,7 @@ public class TicketServiceImpl implements TicketService {
                 throw new ApplicationException(500, "server_error", e.getMessage());
             }
         }
-        throw new ApplicationException(400, "bad_request", "Ticket not available for event");
+        throw new ApplicationException(403, "forbidden", "Oops! No tickets are available for this event again!");
     }
 
     @Override

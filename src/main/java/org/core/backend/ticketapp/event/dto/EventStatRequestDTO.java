@@ -11,6 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class EventStatRequestDTO {
     private UUID eventId;
+    private UUID userId;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private UUID tenantId;

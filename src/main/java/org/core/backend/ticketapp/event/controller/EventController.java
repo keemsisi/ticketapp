@@ -6,7 +6,7 @@ import org.core.backend.ticketapp.common.PagedMapperUtil;
 import org.core.backend.ticketapp.common.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
-import org.core.backend.ticketapp.common.response.EventStatsDTO;
+import org.core.backend.ticketapp.common.response.EventStatsResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
@@ -85,7 +85,7 @@ public class EventController implements ICrudController {
     }
 
     @RequestMapping(value = "/stats", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<List<EventStatsDTO>>> getTotalAvailableTickets(final EventStatRequestDTO request) {
+    public ResponseEntity<GenericResponse<EventStatsResponseDTO>> getTotalAvailableTickets(final EventStatRequestDTO request) {
         final var totalTickets = eventService.getEventStats(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Successfully fetched events stats!", totalTickets), HttpStatus.OK);
     }

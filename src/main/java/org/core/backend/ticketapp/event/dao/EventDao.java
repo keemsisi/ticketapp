@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsDTO;
+import org.core.backend.ticketapp.common.response.EventStatsResponseDTO;
+import org.core.backend.ticketapp.common.response.EventTicketStatsDTO;
 import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.passport.dao.BaseDao;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
@@ -121,45 +123,72 @@ public class EventDao extends BaseDao {
                 () -> ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount());
     }
 
-    public EventStatsDTO getEventsStats(final UUID eventId, final UUID tenantId) {
-        final var result = getEventsStats(EventStatRequestDTO.builder().eventId(eventId).tenantId(tenantId).build());
-        return result.isEmpty() ? EventStatsDTO.builder().build() : result.get(0);
+
+    @SuppressWarnings("unchecked")
+    public EventTicketStatsDTO getEventTicketStats(final UUID seatSectionId) {
+        final var baseSQL = "SELECT " +
+                " (SELECT ess2.capacity FROM event_seat_sections ess2 WHERE ess2.id = ':seatSectionId') AS total_capacity, " +
+                " COUNT(tk) AS total_acquired_tickets,  " +
+                " ((SELECT ess2.capacity FROM event_seat_sections ess2 WHERE ess2.id = ':seatSectionId') - COUNT(tk)) AS total_available_tickets " +
+                " FROM ticket tk INNER JOIN event_seat_sections ess ON ess.id = ':seatSectionId' WHERE ess.deleted = false;";
+        final var results = executeQuery(baseSQL.replace("seatSectionId",
+                seatSectionId.toString()), EventTicketStatsDTO.class);
+        final var result = ((List<EventTicketStatsDTO>) results.get("result"));
+        if (ObjectUtils.isNotEmpty(result)) return ((List<EventTicketStatsDTO>) results.get("result")).get(0);
+        return EventTicketStatsDTO.builder().build();
     }
 
     @SuppressWarnings("unchecked")
-    public List<EventStatsDTO> getEventsStats(final EventStatRequestDTO request) {
-        final var baseSQL = new StringBuilder("SELECT SUM(ess.capacity) total_capacity, COUNT(ess) total_ticket_sections, " +
-                " COUNT(tk) total_acquired_tickets, (SUM(ess.capacity) - COUNT(tk)) total_available_tickets, " +
-                " SUM(CASE WHEN t.type = 'EVENT_TICKET' THEN t.amount ELSE 0 END) total_sales, " +
-                " COUNT(CASE WHEN o.type = 'EVENT_SETTLEMENT' AND o.event_id = e.id THEN 1 ELSE 0 END) total_settlements, " +
-                " COUNT(CASE WHEN o.type = 'EVENT_SETTLEMENT' AND o.event_id = e.id AND o.status = 'PENDING' THEN 1 ELSE 0 END) total_pending_settlements, " +
-                " COUNT(CASE WHEN o.type = 'EVENT_SETTLEMENT' AND o.event_id = e.id AND o.status = 'SUCCESSFUL' THEN 1 ELSE 0 END) total_successful_settlements, " +
-                " COUNT(CASE WHEN o.type = 'EVENT_SETTLEMENT' AND o.event_id = e.id AND o.status = 'CANCELLED' THEN 1 ELSE 0 END) total_cancelled_settlements, " +
-                " COUNT(CASE WHEN o.type = 'EVENT_SETTLEMENT' AND o.event_id = e.id AND o.status = 'FAILED' THEN 1 ELSE 0 END) total_failed_settlements, " +
-                " SUM(CASE   WHEN t.type = 'EVENT_SETTLEMENT' AND t.order_id = o.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_settled_amount " +
-                " FROM   event e " +
-                " INNER  JOIN orders o      ON o.event_id      = e.id AND o.deleted=false " +
-                " INNER  JOIN transaction t ON t.order_id      = o.id AND o.deleted=false " +
-                " INNER  JOIN event_seat_sections ess ON ess.event_id = e.id AND ess.deleted=false " +
-                " INNER  JOIN ticket tk     ON tk.event_id     = o.id " +
-                " WHERE  e.deleted=false ");
+    public EventStatsResponseDTO getEventsStats(final EventStatRequestDTO request) {
+        final var orderBaseSQL = new StringBuilder("SELECT " +
+                " COUNT(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id THEN 1 ELSE 0 END)                             total_orders, " +
+                " COUNT(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'PENDING' THEN 1 ELSE 0 END)    total_pending, " +
+                " COUNT(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'SUCCESSFUL' THEN 1 ELSE 0 END) total_successful, " +
+                " COUNT(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'CANCELLED' THEN 1 ELSE 0 END)  total_cancelled, " +
+                " COUNT(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'FAILED' THEN 1 ELSE 0 END)     total_failed, " +
+                " FROM event e INNER  JOIN orders o ON o.event_id = e.id AND o.deleted = false WHERE  e.deleted = false ");
+        final var transactionBaseSQL = new StringBuilder("SELECT " +
+                " COUNT(CASE WHEN t.event_id = e.id AND t.type   = 'EVENT_SETTLEMENT' AND o.event_id = e.id THEN 1 ELSE 0 END) total_settlements, " +
+                " COUNT(CASE WHEN t.event_id = e.id AND t.status = 'PENDING' THEN 1 ELSE 0 END)                                total_pending, " +
+                " COUNT(CASE WHEN t.event_id = e.id AND t.status = 'SUCCESSFUL' THEN 1 ELSE 0 END)                             total_successful, " +
+                " COUNT(CASE WHEN t.event_id = e.id AND t.status = 'CANCELLED' THEN 1 ELSE 0 END)                              total_cancelled, " +
+                " COUNT(CASE WHEN t.event_id = e.id AND t.status = 'FAILED' THEN 1 ELSE 0 END)                                 total_failed, " +
+                " SUM(CASE   WHEN t.type = 'EVENT_TICKET' THEN t.amount ELSE 0 END)                                            total_sales_amount, " +
+                " SUM(CASE   WHEN t.type = 'EVENT_SETTLEMENT' AND t.order_id = e.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_settled_amount " +
+                " FROM event e INNER  JOIN transaction t ON t.event_id = e.id AND o.deleted = false WHERE  e.deleted = false ");
         if (Objects.nonNull(request.getEventId())) {
-            baseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
+            orderBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
+            transactionBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
+        }
+        if (Objects.nonNull(request.getUserId())) {
+            orderBaseSQL.append(String.format(" AND o.user_id = '%s' ", request.getUserId()));
+            transactionBaseSQL.append(String.format(" AND t.user_id = '%s' ", request.getUserId()));
         }
         if (Objects.nonNull(request.getTenantId())) {
-            baseSQL.append(String.format(" AND e.tenant_id = '%s' ", request.getTenantId()));
+            orderBaseSQL.append(String.format(" AND e.tenant_id = '%s' ", request.getTenantId()));
+            transactionBaseSQL.append(String.format(" AND e.tenant_id = '%s' ", request.getTenantId()));
         }
         if (Objects.nonNull(request.getStartDate()) && Objects.isNull(request.getEndDate())) {
-            baseSQL.append(String.format(" AND e.date_created >= '%s' ", request.getStartDate()));
+            orderBaseSQL.append(String.format(" AND e.date_created >= '%s' ", request.getStartDate()));
+            transactionBaseSQL.append(String.format(" AND e.date_created >= '%s' ", request.getStartDate()));
         }
         if (Objects.nonNull(request.getStartDate()) && Objects.nonNull(request.getEndDate())) {
-            baseSQL.append(String.format(" AND e.date_created BETWEEN '%s' AND '%s' ", request.getStartDate(), request.getEndDate()));
+            orderBaseSQL.append(String.format(" AND e.date_created BETWEEN '%s' AND '%s' ", request.getStartDate(), request.getEndDate()));
+            transactionBaseSQL.append(String.format(" AND e.date_created BETWEEN '%s' AND '%s' ", request.getStartDate(), request.getEndDate()));
         }
-        final var results = executeQuery(baseSQL.toString(), EventStatsDTO.class);
-        final var result = ((List<EventStatsDTO>) results.get("result"));
-        if (ObjectUtils.isNotEmpty(result))
-            return (((List<EventStatsDTO>) results.get("result")));
-        return List.of();
+        final var finalQuery = String.format("%s;%s", orderBaseSQL, transactionBaseSQL);
+        final var cscFactory = new CallableStatementCreatorFactory(finalQuery);
+        final var returnedParams = List.<SqlParameter>of(
+                new SqlReturnResultSet("order_stats", BeanPropertyRowMapper.newInstance(EventStatsDTO.class)),
+                new SqlReturnResultSet("transaction_stats", BeanPropertyRowMapper.newInstance(EventStatsDTO.class)));
+        final var csc = cscFactory.newCallableStatementCreator(new HashMap<>());
+        assert getJdbcTemplate() != null;
+        final @NotNull Map<String, Object> results = jdbcTemplate.call(csc, returnedParams);
+        final var orderResult = ((List<EventStatsDTO>) results.get("order_stats"));
+        final var orderData = !orderResult.isEmpty() ? ((List<EventStatsDTO>) results.get("order_stats")).get(0) : new EventStatsDTO();
+        final var transactionResult = ((List<EventStatsDTO>) results.get("transaction_stats"));
+        final var transactionData = !transactionResult.isEmpty() ? ((List<EventStatsDTO>) results.get("transaction_stats")).get(0) : new EventStatsDTO();
+        return EventStatsResponseDTO.builder().orderStats(orderData).transactionStats(transactionData).build();
     }
 
     private UUID getUserIdIfNotAdmin() {

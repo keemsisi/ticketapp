@@ -6,4 +6,8 @@ public enum UserType {
     public boolean isBuyerOrSeller() {
         return this == SELLER || this == BUYER;
     }
+
+    public boolean isBuyer() {
+        return this == BUYER;
+    }
 }

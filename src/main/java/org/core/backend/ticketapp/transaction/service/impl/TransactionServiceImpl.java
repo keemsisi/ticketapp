@@ -96,7 +96,7 @@ public class TransactionServiceImpl implements TransactionService {
             paymentRequest.setAmount(plan.getAmount().doubleValue());
         } else {
             final var event = eventService.getById(primary.getEventId());
-            if (eventService.getEventStats(event.getId()).getTotalAvailableTickets() == 0) {
+            if (eventService.getEventTicketStats(primary.getSeatSectionId()).getTotalAvailableTickets() <= 0) {
                 throw new ApplicationException(403, "forbidden", "Oops! No tickets are available for this event again!");
             } else {
                 final var seatSectionsIds = new java.util.ArrayList<>(secondary.stream()

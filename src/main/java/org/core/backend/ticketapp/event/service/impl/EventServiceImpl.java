@@ -5,7 +5,8 @@ import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.*;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
-import org.core.backend.ticketapp.common.response.EventStatsDTO;
+import org.core.backend.ticketapp.common.response.EventStatsResponseDTO;
+import org.core.backend.ticketapp.common.response.EventTicketStatsDTO;
 import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.dao.EventResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
@@ -192,17 +193,18 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventStatsDTO getEventStats(final UUID eventId) {
-        validateEventExists(eventId);
-        final var user = jwtTokenUtil.getUser();
-        final var tenantId = user.getTenantId();
-        return eventDao.getEventsStats(eventId, tenantId);
+    public EventTicketStatsDTO getEventTicketStats(final UUID eventSeatSectionId) {
+        return eventDao.getEventTicketStats(eventSeatSectionId);
     }
 
     @Override
-    public List<EventStatsDTO> getEventStats(final EventStatRequestDTO request) {
+    public EventStatsResponseDTO getEventStats(final EventStatRequestDTO request) {
         if (Objects.nonNull(request.getEventId())) {
             validateEventExists(request.getEventId());
+        }
+        final var user = jwtTokenUtil.getUser();
+        if (user.getUserType().isBuyer()) {
+            request.setUserId(user.getUserId());
         }
         request.setTenantId(UserUtils.getTenantId(jwtTokenUtil.getUser(), request.getTenantId()));
         return eventDao.getEventsStats(request);
