@@ -141,21 +141,21 @@ public class EventDao extends BaseDao {
     @SuppressWarnings("unchecked")
     public EventStatsResponseDTO getEventsStats(final EventStatRequestDTO request) {
         final var orderBaseSQL = new StringBuilder("SELECT " +
-                " COUNT(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id THEN 1 ELSE 0 END)                             total_orders, " +
-                " COUNT(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'PENDING' THEN 1 ELSE 0 END)    total_pending, " +
-                " COUNT(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'SUCCESSFUL' THEN 1 ELSE 0 END) total_successful, " +
-                " COUNT(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'CANCELLED' THEN 1 ELSE 0 END)  total_cancelled, " +
-                " COUNT(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'FAILED' THEN 1 ELSE 0 END)     total_failed, " +
+                " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id THEN 1 ELSE 0 END)                             total_orders, " +
+                " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'PENDING' THEN 1 ELSE 0 END)    total_pending, " +
+                " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'SUCCESSFUL' THEN 1 ELSE 0 END) total_successful, " +
+                " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'CANCELLED' THEN 1 ELSE 0 END)  total_cancelled, " +
+                " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'FAILED' THEN 1 ELSE 0 END)     total_failed " +
                 " FROM event e INNER  JOIN orders o ON o.event_id = e.id AND o.deleted = false WHERE  e.deleted = false ");
         final var transactionBaseSQL = new StringBuilder("SELECT " +
-                " COUNT(CASE WHEN t.event_id = e.id AND t.type   = 'EVENT_SETTLEMENT' AND o.event_id = e.id THEN 1 ELSE 0 END) total_settlements, " +
-                " COUNT(CASE WHEN t.event_id = e.id AND t.status = 'PENDING' THEN 1 ELSE 0 END)                                total_pending, " +
-                " COUNT(CASE WHEN t.event_id = e.id AND t.status = 'SUCCESSFUL' THEN 1 ELSE 0 END)                             total_successful, " +
-                " COUNT(CASE WHEN t.event_id = e.id AND t.status = 'CANCELLED' THEN 1 ELSE 0 END)                              total_cancelled, " +
-                " COUNT(CASE WHEN t.event_id = e.id AND t.status = 'FAILED' THEN 1 ELSE 0 END)                                 total_failed, " +
+                " SUM(CASE   WHEN t.event_id = e.id AND t.type   = 'EVENT_SETTLEMENT' AND t.event_id = e.id THEN 1 ELSE 0 END) total_settlements, " +
+                " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'PENDING' THEN 1 ELSE 0 END)                                total_pending, " +
+                " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'COMPLETED' THEN 1 ELSE 0 END)                             total_successful, " +
+                " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'CANCELLED' THEN 1 ELSE 0 END)                              total_cancelled, " +
+                " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'FAILED' THEN 1 ELSE 0 END)                                 total_failed, " +
                 " SUM(CASE   WHEN t.type = 'EVENT_TICKET' THEN t.amount ELSE 0 END)                                            total_sales_amount, " +
                 " SUM(CASE   WHEN t.type = 'EVENT_SETTLEMENT' AND t.order_id = e.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_settled_amount " +
-                " FROM event e INNER  JOIN transaction t ON t.event_id = e.id AND o.deleted = false WHERE  e.deleted = false ");
+                " FROM event e INNER  JOIN transaction t ON t.event_id = e.id AND t.deleted = false WHERE  e.deleted = false ");
         if (Objects.nonNull(request.getEventId())) {
             orderBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
             transactionBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));

@@ -203,7 +203,7 @@ public class EventServiceImpl implements EventService {
             validateEventExists(request.getEventId());
         }
         final var user = jwtTokenUtil.getUser();
-        if (user.getUserType().isBuyer()) {
+        if (Objects.nonNull(user.getUserType()) && user.getUserType().isBuyer()) {
             request.setUserId(user.getUserId());
         }
         request.setTenantId(UserUtils.getTenantId(jwtTokenUtil.getUser(), request.getTenantId()));
