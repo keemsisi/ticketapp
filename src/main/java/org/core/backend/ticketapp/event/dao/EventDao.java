@@ -150,7 +150,7 @@ public class EventDao extends BaseDao {
         final var transactionBaseSQL = new StringBuilder("SELECT " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.type   = 'EVENT_SETTLEMENT' AND t.event_id = e.id THEN 1 ELSE 0 END) total_settlements, " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'PENDING' THEN 1 ELSE 0 END)                                total_pending, " +
-                " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'COMPLETED' THEN 1 ELSE 0 END)                             total_successful, " +
+                " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'COMPLETED' THEN 1 ELSE 0 END)                              total_successful, " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'CANCELLED' THEN 1 ELSE 0 END)                              total_cancelled, " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'FAILED' THEN 1 ELSE 0 END)                                 total_failed, " +
                 " SUM(CASE   WHEN t.type = 'EVENT_TICKET' THEN t.amount ELSE 0 END)                                            total_sales_amount, " +
