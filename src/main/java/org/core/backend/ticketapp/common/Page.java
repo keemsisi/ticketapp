@@ -12,7 +12,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Page<T> {
-
-    private Long count;
     private List<T> content;
+    private long totalElements;
+    private long numberOfElements;
+    private long pageNumber;
+    private long size;
+    private boolean last;
+    private Long count;
+
+    public Page(final Long count,
+                final List<T> content) {
+        this.count = count;
+        this.content = content;
+    }
 }

@@ -6,12 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.core.backend.ticketapp.common.enums.OrderType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -27,8 +28,8 @@ public abstract class AbstractBaseEntity {
     @Id
     @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4() NOT NULL")
     protected UUID id;
-    @Column(columnDefinition = "timestamptz DEFAULT CURRENT_DATE NOT NULL", updatable = false)
     @CreationTimestamp
+    @Column(name = "date_created", columnDefinition = "timestamptz DEFAULT CURRENT_DATE NOT NULL", updatable = false)
     protected LocalDateTime dateCreated;
     @Column(updatable = false, name = "user_id")
     protected UUID userId;

@@ -2,8 +2,7 @@ package org.core.backend.ticketapp.event.controller;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.GenericResponse;
-import org.core.backend.ticketapp.common.PagedMapperUtil;
-import org.core.backend.ticketapp.common.PagedResponse;
+import org.core.backend.ticketapp.common.Page;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsResponseDTO;
@@ -43,8 +42,9 @@ public class EventController implements ICrudController {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/filter-search")
-    public ResponseEntity<GenericResponse<PagedResponse<?>>> filterSearch(final EventFilterRequestDTO filter) {
-        return new ResponseEntity<>(new GenericResponse<>("00", "All events", PagedMapperUtil.map(eventService.searchEvents(filter))), HttpStatus.OK);
+    public ResponseEntity<GenericResponse<Page<?>>> filterSearch(final EventFilterRequestDTO filter) {
+        final var data = eventService.searchEvents(filter);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Event fetched successfully", data), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/fetch-by-ids")
@@ -64,7 +64,7 @@ public class EventController implements ICrudController {
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
-        List<Event> events = eventService.getAll();
+        final var events = eventService.getAll();
         return new ResponseEntity<>(new GenericResponse<>("00", "All events", events), HttpStatus.OK);
     }
 

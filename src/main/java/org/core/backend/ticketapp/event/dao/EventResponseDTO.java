@@ -45,7 +45,7 @@ public class EventResponseDTO {
     private HashSet<String> categories;
     private String eventBanner;
     private boolean recurring;
-    private TimeZoneEnum timeZone;
+    private String timeZone;
     private LocalDateTime eventDate;
     private ApprovalStatus approvalStatus;
     private EventTicketType ticketType;

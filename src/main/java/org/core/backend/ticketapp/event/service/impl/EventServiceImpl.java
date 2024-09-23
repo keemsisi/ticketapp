@@ -69,7 +69,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<EventResponseDTO> searchEvents(final EventFilterRequestDTO filterRequest) {
+    public org.core.backend.ticketapp.common.Page<EventResponseDTO> searchEvents(final EventFilterRequestDTO filterRequest) {
         return eventDao.filterSearch(filterRequest);
     }
 

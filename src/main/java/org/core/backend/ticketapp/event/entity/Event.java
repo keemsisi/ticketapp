@@ -25,7 +25,18 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Table(name = "event")
+@Table(name = "event", indexes = {
+        @Index(name = "ix_event_title_ix", columnList = "title"),
+        @Index(name = "ix_event_description_ix", columnList = "description"),
+        @Index(name = "ix_event_street_address_ix", columnList = "street_address"),
+        @Index(name = "ix_event_location_ix", columnList = "location"),
+        @Index(name = "ix_event_categories_ix", columnList = "categories"),
+        @Index(name = "ix_event_ticket_type_ix", columnList = "ticket_type"),
+        @Index(name = "ix_event_event_date_ix", columnList = "event_date"),
+        @Index(name = "ix_event_is_public_ix", columnList = "is_public"),
+        @Index(name = "ix_event_end_date_ix", columnList = "end_date"),
+        @Index(name = "ix_event_date_created_ix", columnList = "date_created")
+})
 @Builder
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class Event extends AbstractBaseEntity {

@@ -3,6 +3,7 @@ package org.core.backend.ticketapp.event.dao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.core.backend.ticketapp.common.Page;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsDTO;
@@ -12,12 +13,9 @@ import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.passport.dao.BaseDao;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.core.backend.ticketapp.passport.util.ResponsePageRequest;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.*;
 import org.springframework.stereotype.Component;
 
@@ -52,8 +50,8 @@ public class EventDao extends BaseDao {
         final var baseSQL = " SELECT %s FROM event e :innerQuery " +
                 " INNER JOIN users u ON u.id = e.user_id AND u.deleted=false WHERE e.deleted=false %s ";
         final var seatSectionInnerQuery = " INNER JOIN event_seat_sections ss ON ss.event_id = e.id ";
-        final var paginationQuery = String.format(" OFFSET %s LIMIT %s ", skip, limit);
         final var order = ObjectUtils.defaultIfNull(filterRequest.getOrder(), Sort.Direction.DESC);
+        final var paginationQuery = String.format(" ORDER BY e.date_created %s OFFSET %s LIMIT %s ", order.name(), skip, limit);
         final var subQuery = new StringBuilder();
         if (Objects.nonNull(filterRequest.getIsPaidEvent())) {
             subQuery.append(String.format(" AND e.free_event = '%s' ", filterRequest.getIsPaidEvent()));
@@ -102,12 +100,19 @@ public class EventDao extends BaseDao {
         if (Objects.nonNull(filterRequest.getEventTicketType())) {
             subQuery.append(String.format(" AND e.ticket_type = '%s' ", filterRequest.getEventTicketType()));
         }
+        if (Objects.nonNull(filterRequest.getSearch())) {
+            subQuery.append((" AND " +
+                    "( e.title             iLIKE '%:search%' " +
+                    "  OR e.description    iLIKE '%:search%' " +
+                    "  OR e.location       iLIKE '%:search%' " +
+                    "  OR e.street_address iLIKE '%:search%' " +
+                    ") "
+            ).replaceAll(":search", filterRequest.getSearch()));
+        }
         subQuery.append(getUserSubQuery(filterRequest.getUserId()));
         subQuery.append(determineTenantQuery(filterRequest.getTenantId()));
         var finalBaseQuery = subQuery.toString().contains("ss.") ? baseSQL.replace(":innerQuery", seatSectionInnerQuery) :
                 baseSQL.replace(":innerQuery", "");
-        final var pageable = ResponsePageRequest.createPageRequest(filterRequest.getPage(),
-                filterRequest.getSize(), order, new String[]{"dateCreated"}, true, "dateCreated");
         final var eventsQuery = String.format(finalBaseQuery, "e.*", subQuery) + paginationQuery;
         final var countQuery = String.format(finalBaseQuery, "count(*) as count", subQuery);
         final var finalQuery = ":eventsQuery;:countQuery;"
@@ -119,8 +124,17 @@ public class EventDao extends BaseDao {
                 new SqlReturnResultSet("count", BeanPropertyRowMapper.newInstance(LongWrapper.class)));
         final var csc = cscFactory.newCallableStatementCreator(new HashMap<>());
         final var results = getJdbcTemplate().call(csc, returnedParams);
-        return PageableExecutionUtils.getPage((List<EventResponseDTO>) results.get("events"), pageable,
-                () -> ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount());
+        final var pagedResults = new Page<EventResponseDTO>();
+        final var events = (List<EventResponseDTO>) results.get("events");
+        final var counts = ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount();
+        pagedResults.setContent(events);
+        pagedResults.setCount(counts);
+        pagedResults.setSize(events.size());
+        pagedResults.setPageNumber(filterRequest.getPage());
+        pagedResults.setLast(events.size() >= counts);
+        pagedResults.setNumberOfElements(events.size());
+        pagedResults.setTotalElements(counts);
+        return pagedResults;
     }
 
 
