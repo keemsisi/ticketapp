@@ -143,7 +143,7 @@ public class EventDao extends BaseDao {
         final var orderBaseSQL = new StringBuilder("SELECT " +
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id THEN 1 ELSE 0 END)                             total_orders, " +
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'PENDING' THEN 1 ELSE 0 END)    total_pending, " +
-                " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'SUCCESSFUL' THEN 1 ELSE 0 END) total_successful, " +
+                " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'COMPLETED' THEN 1 ELSE 0 END)  total_successful, " +
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'CANCELLED' THEN 1 ELSE 0 END)  total_cancelled, " +
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'FAILED' THEN 1 ELSE 0 END)     total_failed " +
                 " FROM event e INNER  JOIN orders o ON o.event_id = e.id AND o.deleted = false WHERE  e.deleted = false ");

@@ -164,7 +164,7 @@ public class TransactionServiceImpl implements TransactionService {
         order.setAmount(new BigDecimal(String.valueOf(primaryOrderAmount)));
         order.setTotalBatchAmount(secondary.isEmpty() ? null : new BigDecimal(String.valueOf(totalAmountPaid)));
         order.setTotalFee(null);//update here for fee processing
-        order.setStatus(initRequest.isFree() ? OrderStatus.SUCCESSFUL : OrderStatus.PENDING);
+        order.setStatus(initRequest.isFree() ? OrderStatus.COMPLETED : OrderStatus.PENDING);
         order.setPaymentLink(data.getAuthorizationUrl());
         order.setCode(data.getAccessCode());
         order.setReference(data.getReference());
