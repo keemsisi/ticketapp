@@ -345,6 +345,9 @@ public class TransactionServiceImpl implements TransactionService {
                     transaction.setDateModified(LocalDateTime.now());
                     transaction.setComment(String.format("Tenant subscription was processed and transaction marked as completed on %s", new Date()));
                     transactionRepository.save(transaction);
+                    order.setStatus(OrderStatus.COMPLETED);
+                    order.setDateModified(LocalDateTime.now());
+                    orderService.save(order);
                     //process the new roles and permissions to be added to the user if the new plan is not the same as the old plan
                     //--> if the new plan is > than the old plan, all the roles in the new plan should be skipped and the
                     //tenant owner will need to add the new roles / group
@@ -386,6 +389,9 @@ public class TransactionServiceImpl implements TransactionService {
                     .build();
             trx.setTenantId(order.getTenantId());
             transactionRepository.save(trx);
+            order.setStatus(OrderStatus.COMPLETED);
+            order.setDateModified(LocalDateTime.now());
+            orderService.save(order);
             return Optional.of(trx);
         }).orElseThrow(() -> new ApplicationException(400, "error", "Error while creating transaction"));
     }
