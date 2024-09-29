@@ -42,6 +42,6 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     private UUID userId;
     private UserType userType;
     private UUID tenantId;
-    private boolean myEvent;
+    private boolean isBuyerEvent;
 
 }

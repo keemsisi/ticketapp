@@ -59,7 +59,7 @@ public class EventDao extends BaseDao {
         }
 
         //All inner join query should be here, continue it with if(...){}
-        if (Objects.nonNull(request.getUserType()) && request.getUserType().isBuyer() && request.isMyEvent()) {
+        if (Objects.nonNull(request.getUserType()) && request.getUserType().isBuyer() && request.isBuyerEvent()) {
             innerQuery.append(String.format("""
                     INNER JOIN ticket tk ON tk.event_id = e.id
                     AND tk.deleted=false AND tk.user_id = '%s'
@@ -120,7 +120,7 @@ public class EventDao extends BaseDao {
                     ") "
             ).replaceAll(":search", request.getSearch()));
         }
-        subQuery.append(getUserSubQuery(request.getUserId()));
+        subQuery.append(getUserSubQuery(request));
         subQuery.append(determineTenantQuery(request.getTenantId()));
         var finalBaseQuery = subQuery.toString().contains("ss.") ? baseSQL.replace(":seatSectionInnerQuery", seatSectionInnerQuery) :
                 baseSQL.replace(":seatSectionInnerQuery", "");
@@ -228,8 +228,8 @@ public class EventDao extends BaseDao {
         return user.getRoles().contains("tenant_owner") ? null : user.getUserId();
     }
 
-    private String getUserSubQuery(final UUID userId) {
-        if (Objects.nonNull(userId)) {
+    private String getUserSubQuery(final EventFilterRequestDTO request) {
+        if (!request.isBuyerEvent() && Objects.nonNull(request.getUserId())) {
             return " AND e.user_id = '%s' ";
         }
         return " AND e.user_id IS NOT NULL ";
