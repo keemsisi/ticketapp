@@ -9,6 +9,7 @@ import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsDTO;
 import org.core.backend.ticketapp.common.response.EventStatsResponseDTO;
 import org.core.backend.ticketapp.common.response.EventTicketStatsDTO;
+import org.core.backend.ticketapp.common.response.EventTransactionDateStatsDTO;
 import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.passport.dao.BaseDao;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
@@ -172,7 +173,7 @@ public class EventDao extends BaseDao {
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'COMPLETED' THEN 1 ELSE 0 END)  total_successful, " +
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'CANCELLED' THEN 1 ELSE 0 END)  total_cancelled, " +
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'FAILED' THEN 1 ELSE 0 END)     total_failed " +
-                " FROM event e %s INNER  JOIN orders o ON o.event_id = e.id AND o.deleted = false WHERE  e.deleted = false ");
+                " FROM event e INNER  JOIN orders o ON o.event_id = e.id AND o.deleted = false WHERE  e.deleted = false ");
         final var transactionBaseSQL = new StringBuilder("SELECT " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.type   = 'EVENT_SETTLEMENT' AND t.event_id = e.id THEN 1 ELSE 0 END) total_settlements, " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'PENDING' THEN 1 ELSE 0 END)                                total_pending, " +
@@ -181,38 +182,51 @@ public class EventDao extends BaseDao {
                 " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'FAILED' THEN 1 ELSE 0 END)                                 total_failed, " +
                 " SUM(CASE   WHEN t.type = 'EVENT_TICKET' THEN t.amount ELSE 0 END)                                            total_sales_amount, " +
                 " SUM(CASE   WHEN t.type = 'EVENT_SETTLEMENT' AND t.order_id = e.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_settled_amount " +
-                " FROM event e %s INNER  JOIN transaction t ON t.event_id = e.id AND t.deleted = false WHERE  e.deleted = false ");
+                " FROM event e INNER  JOIN transaction t ON t.event_id = e.id AND t.deleted = false WHERE  e.deleted = false ");
+        final var transactionDateStats = new StringBuilder("SELECT " +
+                " EXTRACT(YEAR FROM t.date_created) AS year, " +
+                " EXTRACT(MONTH FROM t.date_created) AS month, " +
+                " t.status, SUM(t.amount) AS total_amount  " +
+                " FROM event e INNER  JOIN transaction t ON t.event_id = e.id AND t.deleted = false WHERE  e.deleted = false ");
 
         if (Objects.nonNull(request.getEventId())) {
             orderBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
             transactionBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
+            transactionDateStats.append(String.format(" AND e.id = '%s' ", request.getEventId()));
         }
 
         if (Objects.nonNull(request.getEventId())) {
             orderBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
             transactionBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
+            transactionDateStats.append(String.format(" AND e.id = '%s' ", request.getEventId()));
         }
         if (Objects.nonNull(request.getUserId())) {
             orderBaseSQL.append(String.format(" AND o.user_id = '%s' ", request.getUserId()));
             transactionBaseSQL.append(String.format(" AND t.user_id = '%s' ", request.getUserId()));
+            transactionDateStats.append(String.format(" AND t.user_id = '%s' ", request.getUserId()));
         }
         if (Objects.nonNull(request.getTenantId())) {
             orderBaseSQL.append(String.format(" AND e.tenant_id = '%s' ", request.getTenantId()));
             transactionBaseSQL.append(String.format(" AND e.tenant_id = '%s' ", request.getTenantId()));
+            transactionDateStats.append(String.format(" AND e.tenant_id = '%s' ", request.getTenantId()));
         }
         if (Objects.nonNull(request.getStartDate()) && Objects.isNull(request.getEndDate())) {
             orderBaseSQL.append(String.format(" AND e.date_created >= '%s' ", request.getStartDate()));
             transactionBaseSQL.append(String.format(" AND e.date_created >= '%s' ", request.getStartDate()));
+            transactionDateStats.append(String.format(" AND e.date_created >= '%s' ", request.getStartDate()));
         }
         if (Objects.nonNull(request.getStartDate()) && Objects.nonNull(request.getEndDate())) {
             orderBaseSQL.append(String.format(" AND e.date_created BETWEEN '%s' AND '%s' ", request.getStartDate(), request.getEndDate()));
             transactionBaseSQL.append(String.format(" AND e.date_created BETWEEN '%s' AND '%s' ", request.getStartDate(), request.getEndDate()));
+            transactionDateStats.append(String.format(" AND e.date_created BETWEEN '%s' AND '%s' ", request.getStartDate(), request.getEndDate()));
         }
-        final var finalQuery = String.format("%s;%s", orderBaseSQL, transactionBaseSQL);
+        transactionDateStats.append(" GROUP BY year, month, t.status ORDER BY year, month, t.status ");
+        final var finalQuery = String.format("%s;%s;%s", orderBaseSQL, transactionBaseSQL, transactionDateStats);
         final var cscFactory = new CallableStatementCreatorFactory(finalQuery);
         final var returnedParams = List.<SqlParameter>of(
                 new SqlReturnResultSet("order_stats", BeanPropertyRowMapper.newInstance(EventStatsDTO.class)),
-                new SqlReturnResultSet("transaction_stats", BeanPropertyRowMapper.newInstance(EventStatsDTO.class)));
+                new SqlReturnResultSet("transaction_stats", BeanPropertyRowMapper.newInstance(EventStatsDTO.class)),
+                new SqlReturnResultSet("transaction_date_stats", BeanPropertyRowMapper.newInstance(EventTransactionDateStatsDTO.class)));
         final var csc = cscFactory.newCallableStatementCreator(new HashMap<>());
         assert getJdbcTemplate() != null;
         final @NotNull Map<String, Object> results = jdbcTemplate.call(csc, returnedParams);
@@ -220,7 +234,13 @@ public class EventDao extends BaseDao {
         final var orderData = !orderResult.isEmpty() ? ((List<EventStatsDTO>) results.get("order_stats")).get(0) : new EventStatsDTO();
         final var transactionResult = ((List<EventStatsDTO>) results.get("transaction_stats"));
         final var transactionData = !transactionResult.isEmpty() ? ((List<EventStatsDTO>) results.get("transaction_stats")).get(0) : new EventStatsDTO();
-        return EventStatsResponseDTO.builder().orderStats(orderData).transactionStats(transactionData).build();
+        final var transactionDateResult = ((List<EventTransactionDateStatsDTO>) results.get("transaction_date_stats"));
+        final var transactionDateData = !transactionDateResult.isEmpty() ?
+                ((List<EventTransactionDateStatsDTO>) results.get("transaction_date_stats")) :
+                new ArrayList<EventTransactionDateStatsDTO>();
+        return EventStatsResponseDTO.builder().orderStats(orderData).transactionStats(transactionData)
+                .transactionDateStats(transactionDateData)
+                .build();
     }
 
     private UUID getUserIdIfNotAdmin() {
