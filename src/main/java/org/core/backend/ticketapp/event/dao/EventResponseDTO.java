@@ -44,6 +44,7 @@ public class EventResponseDTO {
     private String streetAddress;
     private HashSet<String> categories;
     private String eventBanner;
+    private String theme;
     private boolean recurring;
     private String timeZone;
     private LocalDateTime eventDate;

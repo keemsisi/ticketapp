@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.request.AbstractFilterRequestDTO;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -39,6 +40,8 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     private String description;
     private EventTicketType eventTicketType;
     private UUID userId;
+    private UserType userType;
     private UUID tenantId;
+    private boolean myEvent;
 
 }

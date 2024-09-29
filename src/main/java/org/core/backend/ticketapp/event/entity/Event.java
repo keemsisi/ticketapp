@@ -35,6 +35,7 @@ import java.util.UUID;
         @Index(name = "ix_event_event_date_ix", columnList = "event_date"),
         @Index(name = "ix_event_is_public_ix", columnList = "is_public"),
         @Index(name = "ix_event_end_date_ix", columnList = "end_date"),
+        @Index(name = "ix_event_theme_ix", columnList = "theme"),
         @Index(name = "ix_event_date_created_ix", columnList = "date_created")
 })
 @Builder

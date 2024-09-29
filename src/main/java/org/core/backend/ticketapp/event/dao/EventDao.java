@@ -43,76 +43,88 @@ public class EventDao extends BaseDao {
     }
 
     @SuppressWarnings("unchecked")
-    public Page<EventResponseDTO> filterSearch(final EventFilterRequestDTO filterRequest) {
-        final var skip = filterRequest.getPage() * filterRequest.getSize();
-        final var limit = filterRequest.getSize();
+    public Page<EventResponseDTO> filterSearch(final EventFilterRequestDTO request) {
+        final var skip = request.getPage() * request.getSize();
+        final var limit = request.getSize();
         assert getJdbcTemplate() != null;
-        final var baseSQL = " SELECT %s FROM event e :innerQuery " +
+        var baseSQL = " SELECT %s FROM event e :innerQuery :seatSectionInnerQuery " +
                 " INNER JOIN users u ON u.id = e.user_id AND u.deleted=false WHERE e.deleted=false %s ";
-        final var seatSectionInnerQuery = " INNER JOIN event_seat_sections ss ON ss.event_id = e.id ";
-        final var order = ObjectUtils.defaultIfNull(filterRequest.getOrder(), Sort.Direction.DESC);
+        final var seatSectionInnerQuery = " %s INNER JOIN event_seat_sections ss ON ss.event_id = e.id ";
+        final var innerQuery = new StringBuilder();
+        final var order = ObjectUtils.defaultIfNull(request.getOrder(), Sort.Direction.DESC);
         final var paginationQuery = String.format(" ORDER BY e.date_created %s OFFSET %s LIMIT %s ", order.name(), skip, limit);
         final var subQuery = new StringBuilder();
-        if (Objects.nonNull(filterRequest.getIsPaidEvent())) {
-            subQuery.append(String.format(" AND e.free_event = '%s' ", filterRequest.getIsPaidEvent()));
-        }
-        if (Objects.nonNull(filterRequest.getLocation())) {
-            subQuery.append(" AND e.location iLIKE '%").append(filterRequest.getLocation()).append("%'");
-        }
-        if (StringUtils.isNotBlank(filterRequest.getAddress())) {
-            subQuery.append(" AND e.street_address iLIKE '%").append(filterRequest.getAddress()).append("%'");
-        }
-        if (Objects.nonNull(filterRequest.getEventCategory())) {
-            subQuery.append(" AND e.categories::varchar iLIKE '%").append(filterRequest.getEventCategory()).append("%'");
-        }
-        if (StringUtils.isNotBlank(filterRequest.getArtistName())) {
-            subQuery.append(" AND e.description iLIKE '%").append(filterRequest.getArtistName()).append("%'");
+        if (Objects.nonNull(request.getIsPaidEvent())) {
+            subQuery.append(String.format(" AND e.free_event = '%s' ", request.getIsPaidEvent()));
         }
 
-        if (Objects.nonNull(filterRequest.getApprovalStatus())) {
-            subQuery.append(String.format(" AND e.approval_status = '%s' ", filterRequest.getApprovalStatus()));
+        //All inner join query should be here, continue it with if(...){}
+        if (Objects.nonNull(request.getUserType()) && request.getUserType().isBuyer() && request.isMyEvent()) {
+            innerQuery.append(String.format("""
+                    INNER JOIN ticket tk ON tk.event_id = e.id
+                    AND tk.deleted=false AND tk.user_id = '%s'
+                    """, request.getUserId()));
         }
-        if (Objects.nonNull(filterRequest.getDescription())) {
-            subQuery.append(" AND e.description iLIKE '%").append(filterRequest.getDescription()).append("%'");
+        baseSQL = baseSQL.replace(":innerQuery", innerQuery);
+
+        if (Objects.nonNull(request.getLocation())) {
+            subQuery.append(" AND e.location iLIKE '%").append(request.getLocation()).append("%'");
         }
-        if (Objects.nonNull(filterRequest.getIsPhysicalEvent())) {
-            subQuery.append(String.format(" AND e.description = '%s' ", filterRequest.getIsPhysicalEvent()));
+        if (StringUtils.isNotBlank(request.getAddress())) {
+            subQuery.append(" AND e.street_address iLIKE '%").append(request.getAddress()).append("%'");
         }
-        if (Objects.nonNull(filterRequest.getStartDate()) && Objects.nonNull(filterRequest.getEndDate())) {
-            subQuery.append(String.format(" AND e.event_date BETWEEN '%s' AND '%s' ", filterRequest.getStartDate(), filterRequest.getEndDate()));
-        } else if (Objects.nonNull(filterRequest.getStartDate())) {
-            subQuery.append(String.format(" AND e.event_date BETWEEN '%s' AND now() ", filterRequest.getStartDate()));
+        if (Objects.nonNull(request.getEventCategory())) {
+            subQuery.append(" AND e.categories::varchar iLIKE '%").append(request.getEventCategory()).append("%'");
         }
-        if (Objects.nonNull(filterRequest.getStartPrice()) && Objects.nonNull(filterRequest.getEndPrice())) {
-            subQuery.append(String.format(" AND ss.price BETWEEN '%s' AND '%s' ", filterRequest.getStartPrice(), filterRequest.getEndPrice()));
-        } else if (Objects.nonNull(filterRequest.getStartPrice())) {
-            subQuery.append(String.format(" AND ss.price >= '%s' ", filterRequest.getStartPrice()));
+        if (StringUtils.isNotBlank(request.getArtistName())) {
+            subQuery.append(" AND e.description iLIKE '%").append(request.getArtistName()).append("%'");
         }
-        if (StringUtils.isNotBlank(filterRequest.getTitle())) {
-            subQuery.append(String.format(" AND e.title = '%s' ", filterRequest.getTitle()));
+
+        if (Objects.nonNull(request.getApprovalStatus())) {
+            subQuery.append(String.format(" AND e.approval_status = '%s' ", request.getApprovalStatus()));
         }
-        if (Objects.nonNull(filterRequest.getSeatSectionId())) {
-            subQuery.append(String.format(" AND ss.id = '%s' ", filterRequest.getSeatSectionId()));
+        if (Objects.nonNull(request.getDescription())) {
+            subQuery.append(" AND e.description iLIKE '%").append(request.getDescription()).append("%'");
         }
-        if (Objects.nonNull(filterRequest.getSeatSectionType())) {
-            subQuery.append(String.format(" AND ss.type = '%s' ", filterRequest.getSeatSectionType()));
+        if (Objects.nonNull(request.getIsPhysicalEvent())) {
+            subQuery.append(String.format(" AND e.description = '%s' ", request.getIsPhysicalEvent()));
         }
-        if (Objects.nonNull(filterRequest.getEventTicketType())) {
-            subQuery.append(String.format(" AND e.ticket_type = '%s' ", filterRequest.getEventTicketType()));
+        if (Objects.nonNull(request.getStartDate()) && Objects.nonNull(request.getEndDate())) {
+            subQuery.append(String.format(" AND e.event_date BETWEEN '%s' AND '%s' ", request.getStartDate(), request.getEndDate()));
+        } else if (Objects.nonNull(request.getStartDate())) {
+            subQuery.append(String.format(" AND e.event_date BETWEEN '%s' AND now() ", request.getStartDate()));
         }
-        if (Objects.nonNull(filterRequest.getSearch())) {
+        if (Objects.nonNull(request.getStartPrice()) && Objects.nonNull(request.getEndPrice())) {
+            subQuery.append(String.format(" AND ss.price BETWEEN '%s' AND '%s' ", request.getStartPrice(), request.getEndPrice()));
+        } else if (Objects.nonNull(request.getStartPrice())) {
+            subQuery.append(String.format(" AND ss.price >= '%s' ", request.getStartPrice()));
+        }
+        if (StringUtils.isNotBlank(request.getTitle())) {
+            subQuery.append(String.format(" AND e.title = '%s' ", request.getTitle()));
+        }
+        if (Objects.nonNull(request.getSeatSectionId())) {
+            subQuery.append(String.format(" AND ss.id = '%s' ", request.getSeatSectionId()));
+        }
+        if (Objects.nonNull(request.getSeatSectionType())) {
+            subQuery.append(String.format(" AND ss.type = '%s' ", request.getSeatSectionType()));
+        }
+        if (Objects.nonNull(request.getEventTicketType())) {
+            subQuery.append(String.format(" AND e.ticket_type = '%s' ", request.getEventTicketType()));
+        }
+        if (Objects.nonNull(request.getSearch())) {
             subQuery.append((" AND " +
                     "( e.title             iLIKE '%:search%' " +
                     "  OR e.description    iLIKE '%:search%' " +
                     "  OR e.location       iLIKE '%:search%' " +
                     "  OR e.street_address iLIKE '%:search%' " +
                     ") "
-            ).replaceAll(":search", filterRequest.getSearch()));
+            ).replaceAll(":search", request.getSearch()));
         }
-        subQuery.append(getUserSubQuery(filterRequest.getUserId()));
-        subQuery.append(determineTenantQuery(filterRequest.getTenantId()));
-        var finalBaseQuery = subQuery.toString().contains("ss.") ? baseSQL.replace(":innerQuery", seatSectionInnerQuery) :
-                baseSQL.replace(":innerQuery", "");
+        subQuery.append(getUserSubQuery(request.getUserId()));
+        subQuery.append(determineTenantQuery(request.getTenantId()));
+        var finalBaseQuery = subQuery.toString().contains("ss.") ? baseSQL.replace(":seatSectionInnerQuery", seatSectionInnerQuery) :
+                baseSQL.replace(":seatSectionInnerQuery", "");
+        finalBaseQuery = finalBaseQuery.replace(":innerQuery", "");
         final var eventsQuery = String.format(finalBaseQuery, "e.*", subQuery) + paginationQuery;
         final var countQuery = String.format(finalBaseQuery, "count(*) as count", subQuery);
         final var finalQuery = ":eventsQuery;:countQuery;"
@@ -130,7 +142,7 @@ public class EventDao extends BaseDao {
         pagedResults.setContent(events);
         pagedResults.setCount(counts);
         pagedResults.setSize(events.size());
-        pagedResults.setPageNumber(filterRequest.getPage());
+        pagedResults.setPageNumber(request.getPage());
         pagedResults.setLast(events.size() >= counts);
         pagedResults.setNumberOfElements(events.size());
         pagedResults.setTotalElements(counts);
@@ -160,7 +172,7 @@ public class EventDao extends BaseDao {
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'COMPLETED' THEN 1 ELSE 0 END)  total_successful, " +
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'CANCELLED' THEN 1 ELSE 0 END)  total_cancelled, " +
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'FAILED' THEN 1 ELSE 0 END)     total_failed " +
-                " FROM event e INNER  JOIN orders o ON o.event_id = e.id AND o.deleted = false WHERE  e.deleted = false ");
+                " FROM event e %s INNER  JOIN orders o ON o.event_id = e.id AND o.deleted = false WHERE  e.deleted = false ");
         final var transactionBaseSQL = new StringBuilder("SELECT " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.type   = 'EVENT_SETTLEMENT' AND t.event_id = e.id THEN 1 ELSE 0 END) total_settlements, " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'PENDING' THEN 1 ELSE 0 END)                                total_pending, " +
@@ -169,7 +181,13 @@ public class EventDao extends BaseDao {
                 " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'FAILED' THEN 1 ELSE 0 END)                                 total_failed, " +
                 " SUM(CASE   WHEN t.type = 'EVENT_TICKET' THEN t.amount ELSE 0 END)                                            total_sales_amount, " +
                 " SUM(CASE   WHEN t.type = 'EVENT_SETTLEMENT' AND t.order_id = e.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_settled_amount " +
-                " FROM event e INNER  JOIN transaction t ON t.event_id = e.id AND t.deleted = false WHERE  e.deleted = false ");
+                " FROM event e %s INNER  JOIN transaction t ON t.event_id = e.id AND t.deleted = false WHERE  e.deleted = false ");
+
+        if (Objects.nonNull(request.getEventId())) {
+            orderBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
+            transactionBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
+        }
+
         if (Objects.nonNull(request.getEventId())) {
             orderBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
             transactionBaseSQL.append(String.format(" AND e.id = '%s' ", request.getEventId()));
