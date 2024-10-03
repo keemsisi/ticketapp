@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.core.backend.ticketapp.common.enums.OrderType;
 import org.core.backend.ticketapp.common.enums.Status;
+import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.order.service.OrderService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Data
 @Service
@@ -52,7 +54,7 @@ public class SettlementServiceImpl implements SettlementService {
         };
     }
 
-    private Transaction processAndBuildPayStackTransaction(final BankAccountDetails bankAccountDetails, SettlementRequestDTO request) throws JsonProcessingException {
+    private Transaction processAndBuildPayStackTransaction(final BankAccountDetails bankAccountDetails, final SettlementRequestDTO request) throws JsonProcessingException {
         final var user = jwtTokenUtil.getUser();
         final var transferRequest = getTransferRequestDTO(bankAccountDetails, request);
         final var processorResponse = paymentProcessorService.transfer(transferRequest, bankAccountDetails);
@@ -72,12 +74,25 @@ public class SettlementServiceImpl implements SettlementService {
         return transactionService.save(transaction);
     }
 
-    private @NotNull TransferRequestDTO getTransferRequestDTO(BankAccountDetails bankAccountDetails, SettlementRequestDTO request) {
+    private @NotNull TransferRequestDTO getTransferRequestDTO(final BankAccountDetails bankAccountDetails, final SettlementRequestDTO request) {
+        final var event = Objects.nonNull(request.getEventId()) ? eventService.getById(request.getEventId()) : null;
+        final var user = coreUserService.getUserById(bankAccountDetails.getUserId())
+                .orElseThrow(() -> new ApplicationException(404, "not_found", "User not found!"));
+        if (Objects.nonNull(event) && !event.getTenantId().equals(bankAccountDetails.getTenantId()))
+            throw new ApplicationException(400, "bad_request", "Recipient is not the owner of the event!");
+        if (Objects.nonNull(event) && !user.getAccountType().isIndividualOrOrganizationMerchantOwner())
+            throw new ApplicationException(400, "bad_request", "Oops! Only Owner can request for event settlement payment!");
+        return getRequestDTO(bankAccountDetails, request);
+    }
+
+    private @NotNull TransferRequestDTO getRequestDTO(BankAccountDetails bankAccountDetails, SettlementRequestDTO request) {
         final var transferRequest = new TransferRequestDTO();
         transferRequest.setAmount(request.getAmount());
         transferRequest.setRecipient(bankAccountDetails.getReference());
         transferRequest.setSource(PAYSTACK_SOURCE);
-        transferRequest.setReason(String.format("Event settlement payment to %s", bankAccountDetails.getAccountName()));
+        transferRequest.setReason(String.format("Event %s payment to %s",
+                request.getTransactionType().name().toLowerCase(),
+                bankAccountDetails.getAccountName()));
         transferRequest.setPaymentProcessorType(PaymentProcessorType.PAYSTACK);
         return transferRequest;
     }

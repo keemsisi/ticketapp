@@ -42,6 +42,10 @@ public enum AccountType {
         );
     }
 
+    public boolean isIndividualOrOrganizationMerchantOwner() {
+        return this == INDIVIDUAL_MERCHANT_OWNER || this == ORGANIZATION_MERCHANT_OWNER;
+    }
+
     public String getType() {
         return type;
     }
