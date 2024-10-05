@@ -1,6 +1,6 @@
 package org.core.backend.ticketapp.passport.controller;
 
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dtos.core.ClientDto;
 import org.core.backend.ticketapp.passport.entity.Client;

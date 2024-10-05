@@ -69,7 +69,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public org.core.backend.ticketapp.common.Page<EventResponseDTO> searchEvents(final EventFilterRequestDTO filterRequest) {
+    public org.core.backend.ticketapp.common.dto.Page<EventResponseDTO> searchEvents(final EventFilterRequestDTO filterRequest) {
         final var userType = jwtTokenUtil.getUser().getUserType();
         filterRequest.setUserType(userType);
         return eventDao.filterSearch(filterRequest);

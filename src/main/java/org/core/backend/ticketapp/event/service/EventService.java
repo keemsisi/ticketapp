@@ -21,7 +21,7 @@ public interface EventService {
 
     List<Event> getAll();
 
-    org.core.backend.ticketapp.common.Page<EventResponseDTO> searchEvents(final EventFilterRequestDTO filterRequest);
+    org.core.backend.ticketapp.common.dto.Page<EventResponseDTO> searchEvents(final EventFilterRequestDTO filterRequest);
 
     Event getById(final UUID id);
 

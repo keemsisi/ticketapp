@@ -3,7 +3,7 @@ package org.core.backend.ticketapp.passport.error;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.core.backend.ticketapp.common.Error;
+import org.core.backend.ticketapp.common.dto.Error;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.response.RemoteResponse;
 import org.springframework.context.annotation.Configuration;

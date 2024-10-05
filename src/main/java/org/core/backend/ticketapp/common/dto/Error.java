@@ -1,4 +1,4 @@
-package org.core.backend.ticketapp.common;
+package org.core.backend.ticketapp.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

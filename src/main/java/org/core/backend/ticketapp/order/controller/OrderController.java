@@ -2,9 +2,9 @@ package org.core.backend.ticketapp.order.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.core.backend.ticketapp.common.GenericResponse;
-import org.core.backend.ticketapp.common.PagedMapperUtil;
-import org.core.backend.ticketapp.common.PagedResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
+import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.service.OrderService;

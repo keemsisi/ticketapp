@@ -10,7 +10,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.core.backend.ticketapp.common.ApplicationContextProvider;
+import org.core.backend.ticketapp.common.dto.ApplicationContextProvider;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.NotificationProcessorStatus;
 import org.core.backend.ticketapp.common.enums.NotificationType;

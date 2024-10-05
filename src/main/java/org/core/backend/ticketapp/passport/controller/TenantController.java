@@ -6,7 +6,8 @@ import io.github.thecarisma.FatalObjCopierException;
 import io.github.thecarisma.ObjCopier;
 import io.jsonwebtoken.lang.Assert;
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dtos.core.TenantAccountSettingsDto;
 import org.core.backend.ticketapp.passport.dtos.core.TenantDto;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,7 +51,7 @@ public class TenantController {
     private final TenantService tenantService;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createTenant(@Validated @RequestBody TenantDto tenantDto) throws JsonProcessingException {
+    public ResponseEntity<?> create(@Validated @RequestBody TenantDto tenantDto) throws JsonProcessingException {
         final var loggedInUserDto = jwtTokenUtil.getUser();
         if (!loggedInUserDto.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.UNAUTHORIZED);
@@ -61,33 +63,37 @@ public class TenantController {
         return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> get(@PathVariable(required = false) UUID tenantId) {
+        final var tenant = Objects.nonNull(tenantId) ? tenantId : tenantService.getByTenantId(jwtTokenUtil.getUser().getTenantId());
+        return new ResponseEntity<>(new GenericResponse<>("00",
+                "Tenant profile returned successful!",
+                tenant), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/filter-search", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getTenants(@RequestHeader(name = "Authorization", defaultValue = "Bearer ", required = true) String authorization) {
+        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name());
         var tenant = service.getAll(Pageable.unpaged());
         return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@Valid @RequestBody TenantDto tenantDto) throws FatalObjCopierException, JsonProcessingException {
-        Tenant newTenant;
-        String oldDataJSON;
-        var user = jwtTokenUtil.getUser();
+        final var user = jwtTokenUtil.getUser();
         Assert.notNull(tenantDto.getId());
-        Optional<Tenant> _tenant = service.getByTenantId(tenantDto.getId());
-
+        final var _tenant = service.getByTenantId(tenantDto.getId());
         if (_tenant.isEmpty()) {
             return new ResponseEntity<>(new GenericResponse<>("01", "The tenant does not exist", ""), HttpStatus.NOT_FOUND);
         }
-
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.UNAUTHORIZED);
         }
-        oldDataJSON = objectMapper.writeValueAsString(_tenant.get());
-        var tenant = _tenant.get();
+        final var oldDataJSON = objectMapper.writeValueAsString(_tenant.get());
+        final var tenant = _tenant.get();
         ObjCopier.copyFields(tenant, tenantDto);
-        newTenant = service.save(tenant);
+        final var newTenant = service.save(tenant);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), objectMapper.writeValueAsString(oldDataJSON), objectMapper.writeValueAsString(newTenant), "Initiated a request to update a tenant");
-
         return new ResponseEntity<>(new GenericResponse<>("00", "Successfully updated tenant's details", tenant), HttpStatus.OK);
 
     }
@@ -95,35 +101,18 @@ public class TenantController {
 
     @RequestMapping(value = "/logo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateLogo(@RequestHeader(name = "Authorization", defaultValue = "Bearer ", required = true) String authorization, @RequestPart("logo") MultipartFile file) throws IOException, URISyntaxException {
-        Tenant newTenant;
-        String oldDataJSON;
         var user = jwtTokenUtil.getUser();
-        Optional<Tenant> tenant = service.getByTenantId(user.getTenantId());
-
+        final Optional<Tenant> tenant = service.getByTenantId(user.getTenantId());
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.NOT_FOUND);
         }
         if (tenant.isEmpty())
             return new ResponseEntity<>(new GenericResponse<>("01", "Tenant with the given identity does not exists", tenant), HttpStatus.BAD_REQUEST);
-        oldDataJSON = objectMapper.writeValueAsString(tenant.get());
-        newTenant = service.updateLogo(tenant.get(), file);
+        final var oldDataJSON = objectMapper.writeValueAsString(tenant.get());
+        final Tenant newTenant = service.updateLogo(tenant.get(), file);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(newTenant), "Initiated a request to update tenant logo");
         return new ResponseEntity<>(new GenericResponse<>("00", "", newTenant), HttpStatus.OK);
     }
-
-
-    @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getPolicySetting(@PathVariable("tenantId") UUID tenantId) {
-        var user = jwtTokenUtil.getUser();
-
-        if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.NOT_FOUND);
-        }
-        var tenant = service.getByTenantId(tenantId);
-
-        return new ResponseEntity<>(new GenericResponse<>("00", "", tenant.get()), HttpStatus.OK);
-    }
-
 
     @RequestMapping(value = "/settings", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updatePolicySetting(@RequestBody TenantAccountSettingsDto settings, @RequestHeader(name = "Authorization", defaultValue = "Bearer ", required = true) String authorization) throws FatalObjCopierException, JsonProcessingException {

@@ -44,7 +44,7 @@ public class TenantService extends BaseRepoService<Tenant> {
     }
 
     public Tenant updateLogo(Tenant existing, MultipartFile logo) throws IOException, URISyntaxException {
-        existing.setLogoLocation(blobStorageService.uploadPicture("registrar_logo", logo));
+        existing.setLogoUrl(blobStorageService.uploadPicture("registrar_logo", logo));
         return repository.saveAndFlush(existing);
     }
 

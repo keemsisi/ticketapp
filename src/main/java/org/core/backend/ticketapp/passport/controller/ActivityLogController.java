@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.passport.controller;
 
 
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.passport.service.core.activitylog.IActivityLog;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;

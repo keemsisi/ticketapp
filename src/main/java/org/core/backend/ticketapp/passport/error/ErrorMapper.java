@@ -6,9 +6,8 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import io.github.thecarisma.InvalidEntryException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.core.backend.ticketapp.common.FieldError;
+import org.core.backend.ticketapp.common.dto.FieldError;
 import org.core.backend.ticketapp.common.response.ErrorResponse;
 import org.core.backend.ticketapp.passport.error.exception.*;
 import org.core.backend.ticketapp.passport.util.EnumUtil;
@@ -31,7 +30,6 @@ import javax.validation.UnexpectedTypeException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 

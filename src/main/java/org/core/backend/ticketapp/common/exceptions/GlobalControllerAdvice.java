@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.common.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,8 +1,8 @@
 package org.core.backend.ticketapp.event.controller;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.GenericResponse;
-import org.core.backend.ticketapp.common.Page;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.Page;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsResponseDTO;

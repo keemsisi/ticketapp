@@ -3,7 +3,7 @@ package org.core.backend.ticketapp.passport.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.passport.dao.ModuleDao;
 import org.core.backend.ticketapp.passport.dao.UserDao;
 import org.core.backend.ticketapp.passport.dtos.core.ModuleDto;

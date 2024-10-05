@@ -3,7 +3,7 @@ package org.core.backend.ticketapp.event.dao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.core.backend.ticketapp.common.Page;
+import org.core.backend.ticketapp.common.dto.Page;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsDTO;

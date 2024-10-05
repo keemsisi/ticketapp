@@ -1,7 +1,6 @@
-package org.core.backend.ticketapp.common;
+package org.core.backend.ticketapp.common.dto;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;

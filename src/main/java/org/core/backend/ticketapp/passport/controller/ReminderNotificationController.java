@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.passport.controller;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.passport.dtos.core.ReminderNotificationDto;
 import org.core.backend.ticketapp.passport.dtos.core.ReminderUpdateDto;
 import org.core.backend.ticketapp.passport.dtos.notification.NotificationReadDTO;

@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.transaction.controller;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;

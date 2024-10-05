@@ -1,15 +1,20 @@
 package org.core.backend.ticketapp.passport.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Getter;
 import lombok.Setter;
+import org.core.backend.ticketapp.common.dto.SocialMediaDTO;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.SubscriptionStatus;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -17,36 +22,15 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@Table(name = "tenant", indexes = {@Index(name = "ix_tbl_tenant_col_name_uq", columnList = "normalized_name", unique = true)})
+@Table(name = "tenant", indexes = {
+        @Index(name = "ix_tbl_tenant_col_name_uq", columnList = "normalized_name", unique = true)
+})
+@TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class),})
 public class Tenant extends AbstractBaseEntity {
     @Column(name = "plan_id")
     private UUID planId;
-    @Column(name = "name")
-    private String name;
     @Column(name = "normalized_name")
     private String normalizedName;
-    @Column(name = "address")
-    private String address;
-
-    @Column(name = "phone")
-    private String phone;
-
-    @Email
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "country")
-    private String country;
-
-    @Column(name = "state")
-    private String state;
-
-    @Column(name = "currency")
-    private String currency;
-
-    @Column(name = "logo_location")
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private String logoLocation;
 
     @Column(name = "password_expiration_in_days", columnDefinition = "int default(90)")
     private int passwordExpirationInDays;
@@ -63,17 +47,11 @@ public class Tenant extends AbstractBaseEntity {
     @Column(name = "created_by")
     private UUID createdBy;
 
-    @Column(name = "modified_by")
-    private UUID modifiedBy;
-
     @Column(name = "created_on")
     private Date createdOn;
 
     @Column(name = "modified_on")
     private Date modifiedOn;
-
-    @Column(name = "deleted", columnDefinition = "bool default(false)")
-    private boolean deleted;
 
     @Column(name = "system_alert_id")
     private UUID systemAlertId;
@@ -84,6 +62,37 @@ public class Tenant extends AbstractBaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "subscription_status", columnDefinition = "varchar(255) default 'ACTIVE'")
     private SubscriptionStatus subscriptionStatus;
+
+    //business profile
+    @Column(name = "website_url")
+    private String websiteUrl;
+    @Column(name = "name")
+    private String name;
+    @Type(type = "JSONB")
+    private List<String> galleries;
+    @Column(name = "logo_url")
+    private String logoUrl;
+    @Column(name = "phone_number")
+    private String phoneNumber;
+    @Column(name = "secondary_phone_number")
+    private String secondaryPhoneNumber;
+    @Column(name = "description")
+    private String description;
+    @Type(type = "JSONB")
+    private List<SocialMediaDTO> socialMediaHandles;
+    @Column(name = "address")
+    private String address;
+    @Column(name = "country")
+    private String country;
+    @Column(name = "phone")
+    private String phone;
+    @Email(message = "Oops! email is invalid!")
+    @Column(name = "email")
+    private String email;
+    @Column(name = "state")
+    private String state;
+    @Column(name = "currency")
+    private String currency;
 
     @PrePersist
     public void onCreate() {

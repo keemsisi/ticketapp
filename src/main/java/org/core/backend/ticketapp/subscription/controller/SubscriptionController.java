@@ -1,6 +1,6 @@
 package org.core.backend.ticketapp.subscription.controller;
 
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.subscription.entity.Subscription;
 import org.core.backend.ticketapp.subscription.service.SubscriptionService;

@@ -1,6 +1,6 @@
 package org.core.backend.ticketapp.event.controller;
 
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.event.dto.CreateEventSeatSectionDTO;
 import org.core.backend.ticketapp.event.dto.EventSeatSectionUpdateRequestDTO;

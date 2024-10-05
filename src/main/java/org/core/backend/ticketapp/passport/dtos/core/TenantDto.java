@@ -5,11 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.core.backend.ticketapp.common.dto.SocialMediaDTO;
 import org.core.backend.ticketapp.passport.validation.annotation.CountryCode;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -33,13 +34,18 @@ public class TenantDto {
     @NotBlank
     private String state;
     private String currency;
-    private String logoLocation;
+    private boolean emailAlert;
+    private boolean smsAlert;
+    private UUID ownerId;
+    private String websiteUrl;
+    private List<String> galleries;
+    private String logoUrl;
+    private String phoneNumber;
+    private String secondaryPhoneNumber;
+    private String description;
+    private List<SocialMediaDTO> socialMediaHandles;
     private Integer passwordExpirationInDays;
     private Integer accountLockoutDurationInMinutes;
     private Integer inactivePeriodInMinutes;
     private Integer accountLockoutThresholdCount;
-    private boolean emailAlert;
-    private boolean smsAlert;
-    @NotNull(message = "Tenant owner id must be valid!")
-    private UUID ownerId;
 }

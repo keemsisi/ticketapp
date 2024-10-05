@@ -1,9 +1,9 @@
 package org.core.backend.ticketapp.ticket.controller;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.GenericResponse;
-import org.core.backend.ticketapp.common.PagedMapperUtil;
-import org.core.backend.ticketapp.common.PagedResponse;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
+import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;

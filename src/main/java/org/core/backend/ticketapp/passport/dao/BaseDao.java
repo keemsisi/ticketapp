@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.passport.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.core.backend.ticketapp.common.Page;
+import org.core.backend.ticketapp.common.dto.Page;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;

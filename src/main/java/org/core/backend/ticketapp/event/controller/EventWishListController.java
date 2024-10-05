@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.event.controller;
 
-import org.core.backend.ticketapp.common.GenericResponse;
-import org.core.backend.ticketapp.common.PagedMapperUtil;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.request.events.wishlist.CreateEventWishListDTO;
 import org.core.backend.ticketapp.event.entity.EventWishList;
