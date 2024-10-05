@@ -48,7 +48,7 @@ public class TokenEnhancerService implements TokenEnhancer {
         if (!authentication.isClientOnly()) {
             user = (User) authentication.getPrincipal();
             final var tenantId = user.getTenantId();
-            final var tenant = Objects.isNull(tenantId) ? new Tenant() : tenantService.getByTenantId(user.getTenantId()).orElse(new Tenant());
+            final var tenant = Objects.isNull(tenantId) ? new Tenant() : tenantService.getByTenantId(user.getTenantId());
             var permissions = coreUserService.getUserPermissions(user.getId()).orElseThrow();
             additionalInformation.put("first_name", user.getFirstName());
             additionalInformation.put("last_name", user.getLastName());

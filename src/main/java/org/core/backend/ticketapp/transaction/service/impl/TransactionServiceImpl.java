@@ -324,8 +324,7 @@ public class TransactionServiceImpl implements TransactionService {
             if (transaction.getStatus().isPaid()) {
                 final var user = coreUserService.getUserById(transaction.getUserId())
                         .orElseThrow(() -> new ApplicationException(400, "not_found", "User not found!"));
-                final var tenant = tenantService.getByTenantId(user.getTenantId()).
-                        orElseThrow(() -> new ApplicationException(400, "not_found", "Tenant not found!"));
+                final var tenant = tenantService.getByTenantId(user.getTenantId());
                 if (Objects.nonNull(tenant.getPlanId())) {
                     final var oldTenantData = objectMapper.writeValueAsString(tenant);
                     final var oldPlan = planService.getById(tenant.getPlanId());

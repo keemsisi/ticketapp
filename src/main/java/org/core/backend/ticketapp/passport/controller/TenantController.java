@@ -34,7 +34,6 @@ import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 
@@ -64,11 +63,11 @@ public class TenantController {
     }
 
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> get(@PathVariable(required = false) UUID tenantId) {
-        final var tenant = Objects.nonNull(tenantId) ? tenantId : tenantService.getByTenantId(jwtTokenUtil.getUser().getTenantId());
-        return new ResponseEntity<>(new GenericResponse<>("00",
-                "Tenant profile returned successful!",
-                tenant), HttpStatus.OK);
+    public ResponseEntity<GenericResponse<Tenant>> get(@PathVariable(required = false) UUID tenantId) {
+        final var _tenantId = Objects.nonNull(tenantId) ? tenantId : jwtTokenUtil.getUser().getTenantId();
+        final var tenant = service.getByTenantId(_tenantId);
+        return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
+
     }
 
     @RequestMapping(value = "/filter-search", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -83,18 +82,14 @@ public class TenantController {
         final var user = jwtTokenUtil.getUser();
         Assert.notNull(tenantDto.getId());
         final var _tenant = service.getByTenantId(tenantDto.getId());
-        if (_tenant.isEmpty()) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "The tenant does not exist", ""), HttpStatus.NOT_FOUND);
-        }
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.UNAUTHORIZED);
         }
-        final var oldDataJSON = objectMapper.writeValueAsString(_tenant.get());
-        final var tenant = _tenant.get();
-        ObjCopier.copyFields(tenant, tenantDto);
-        final var newTenant = service.save(tenant);
+        final var oldDataJSON = objectMapper.writeValueAsString(_tenant);
+        ObjCopier.copyFields(_tenant, tenantDto);
+        final var newTenant = service.save(_tenant);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), objectMapper.writeValueAsString(oldDataJSON), objectMapper.writeValueAsString(newTenant), "Initiated a request to update a tenant");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully updated tenant's details", tenant), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully updated tenant's details", _tenant), HttpStatus.OK);
 
     }
 
@@ -102,14 +97,12 @@ public class TenantController {
     @RequestMapping(value = "/logo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateLogo(@RequestHeader(name = "Authorization", defaultValue = "Bearer ", required = true) String authorization, @RequestPart("logo") MultipartFile file) throws IOException, URISyntaxException {
         var user = jwtTokenUtil.getUser();
-        final Optional<Tenant> tenant = service.getByTenantId(user.getTenantId());
+        final var tenant = service.getByTenantId(user.getTenantId());
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.NOT_FOUND);
         }
-        if (tenant.isEmpty())
-            return new ResponseEntity<>(new GenericResponse<>("01", "Tenant with the given identity does not exists", tenant), HttpStatus.BAD_REQUEST);
-        final var oldDataJSON = objectMapper.writeValueAsString(tenant.get());
-        final Tenant newTenant = service.updateLogo(tenant.get(), file);
+        final var oldDataJSON = objectMapper.writeValueAsString(tenant);
+        final Tenant newTenant = service.updateLogo(tenant, file);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(newTenant), "Initiated a request to update tenant logo");
         return new ResponseEntity<>(new GenericResponse<>("00", "", newTenant), HttpStatus.OK);
     }
@@ -124,14 +117,10 @@ public class TenantController {
         }
 
         var _tenant = service.getByTenantId(settings.getTenantId());
-        if (!_tenant.isPresent()) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "No tenant exists with the provided details.", ""), HttpStatus.NOT_FOUND);
-        }
-        oldDataJSON = objectMapper.writeValueAsString(_tenant.get());
-        var tenant = _tenant.get();
-        BeanUtils.copyProperties(settings, tenant);
-        tenant.setTwoFaEnabled(settings.getIsTwoFaEnabled());
-        newTenant = service.save(tenant);
+        oldDataJSON = objectMapper.writeValueAsString(_tenant);
+        BeanUtils.copyProperties(settings, _tenant);
+        _tenant.setTwoFaEnabled(settings.getIsTwoFaEnabled());
+        newTenant = service.save(_tenant);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(newTenant), "Initiated a request to update a tenant policy settings");
         return new ResponseEntity<>(new GenericResponse<>("00", "Settings updated successfully", null), HttpStatus.OK);
     }

@@ -4,6 +4,7 @@ package org.core.backend.ticketapp.passport.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.passport.dtos.core.TenantDto;
 import org.core.backend.ticketapp.passport.entity.SystemAlert;
 import org.core.backend.ticketapp.passport.entity.Tenant;
@@ -24,7 +25,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Optional;
 import java.util.UUID;
 
 
@@ -39,8 +39,10 @@ public class TenantService extends BaseRepoService<Tenant> {
     private final JwtTokenUtil jwtTokenUtil;
     private final AppConfigs appConfigs;
 
-    public Optional<Tenant> getByTenantId(UUID tenantId) {
-        return repository.findRegistrar(tenantId);
+    public Tenant getByTenantId(UUID tenantId) {
+        return repository.findRegistrar(tenantId)
+                .orElseThrow(() -> new ApplicationException(404, "not_found", "Tenant with the given " +
+                        "identity does not exists"));
     }
 
     public Tenant updateLogo(Tenant existing, MultipartFile logo) throws IOException, URISyntaxException {

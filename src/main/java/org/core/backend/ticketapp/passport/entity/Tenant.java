@@ -76,7 +76,7 @@ public class Tenant extends AbstractBaseEntity {
     private String phoneNumber;
     @Column(name = "secondary_phone_number")
     private String secondaryPhoneNumber;
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "varchar(2500)")
     private String description;
     @Type(type = "JSONB")
     private List<SocialMediaDTO> socialMediaHandles;
