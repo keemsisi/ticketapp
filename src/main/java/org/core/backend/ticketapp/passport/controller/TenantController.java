@@ -143,7 +143,7 @@ public class TenantController {
     }
 
     @RequestMapping(value = "/bank-account-details", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<BankAccountDetails>> getAccountDetails(@RequestParam(required = false) UUID tenantId) {
+    public ResponseEntity<GenericResponse<List<BankAccountDetails>>> getAccountDetails(@RequestParam(required = false) UUID tenantId) {
         final var user = jwtTokenUtil.getUser();
         if (Objects.nonNull(tenantId)) {
             UserUtils.assertUserHasRole(user.getRoles(), AccountType.SUPER_ADMIN.getType());
@@ -151,6 +151,6 @@ public class TenantController {
             throw new ApplicationException(403, "forbidden", "Access not allowed!");
         }
         final var response = bankAccountDetailsService.getByTenantId(ObjectUtils.defaultIfNull(tenantId, user.getTenantId()));
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Settings updated successfully", response), HttpStatus.CREATED);
     }
 }
