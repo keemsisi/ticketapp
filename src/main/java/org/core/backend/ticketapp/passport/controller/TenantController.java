@@ -143,7 +143,7 @@ public class TenantController {
     }
 
     @RequestMapping(value = "/bank-account-details", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<List<BankAccountDetails>>> getAccountDetails(@RequestParam(required = false) UUID tenantId) {
+    public ResponseEntity<GenericResponse<List<BankAccountDetails>>> getBankAccountDetails(@RequestParam(required = false) UUID tenantId) {
         final var user = jwtTokenUtil.getUser();
         if (Objects.nonNull(tenantId)) {
             UserUtils.assertUserHasRole(user.getRoles(), AccountType.SUPER_ADMIN.getType());
