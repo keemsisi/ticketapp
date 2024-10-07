@@ -50,7 +50,7 @@ public class EventDao extends BaseDao {
         assert getJdbcTemplate() != null;
         var baseSQL = " SELECT %s FROM event e :innerQuery :seatSectionInnerQuery " +
                 " INNER JOIN users u ON u.id = e.user_id AND u.deleted=false WHERE e.deleted=false %s ";
-        final var seatSectionInnerQuery = " %s INNER JOIN event_seat_sections ss ON ss.event_id = e.id ";
+        final var seatSectionInnerQuery = " INNER JOIN event_seat_sections ss ON ss.event_id = e.id ";
         final var innerQuery = new StringBuilder();
         final var order = ObjectUtils.defaultIfNull(request.getOrder(), Sort.Direction.DESC);
         final var paginationQuery = String.format(" ORDER BY e.date_created %s OFFSET %s LIMIT %s ", order.name(), skip, limit);
@@ -60,7 +60,7 @@ public class EventDao extends BaseDao {
         }
 
         //All inner join query should be here, continue it with if(...){}
-        if (Objects.nonNull(request.getUserType()) && request.getUserType().isBuyer() && request.isBuyerEvent()) {
+        if (Objects.nonNull(request.getUserType()) && request.getUserType().isBuyer() && request.getIsBuyerEvent()) {
             innerQuery.append(String.format("""
                     INNER JOIN ticket tk ON tk.event_id = e.id
                     AND tk.deleted=false AND tk.user_id = '%s'
@@ -249,7 +249,7 @@ public class EventDao extends BaseDao {
     }
 
     private String getUserSubQuery(final EventFilterRequestDTO request) {
-        if (!request.isBuyerEvent() && Objects.nonNull(request.getUserId())) {
+        if (!request.getIsBuyerEvent() && Objects.nonNull(request.getUserId())) {
             return " AND e.user_id = '%s' ";
         }
         return " AND e.user_id IS NOT NULL ";

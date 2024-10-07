@@ -41,7 +41,7 @@ public class PlanServiceImpl implements PlanService {
     private final AppConfigs appConfigs;
     private final RestTemplate restTemplate;
 
-    private static @NotNull Plan getPlan(ResponseEntity<PlanCreateResponseDTO> response) {
+    private static @NotNull Plan getPlan(final ResponseEntity<PlanCreateResponseDTO> response) {
         if (response.getStatusCode().isError()) {
             throw new ApplicationException(400, "req_failed", "Failed to init payment");
         }
@@ -71,15 +71,16 @@ public class PlanServiceImpl implements PlanService {
     }
 
     @Override
-    public Plan createPlan(final PlanCreateRequestDTO createPlanDto) throws Exception {
+    public Plan createPlan(final PlanCreateRequestDTO request) {
         try {
-            System.out.println(mapper.writeValueAsString(createPlanDto));
+            System.out.println(mapper.writeValueAsString(request));
             final var headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
-            final var entity = new HttpEntity<>(createPlanDto, headers);
+            final var entity = new HttpEntity<>(request, headers);
             final var response = restTemplate.exchange(PAYSTACK_PLAN_BASE_URL, HttpMethod.POST, entity, PlanCreateResponseDTO.class);
             final var newPlan = getPlan(response);
+            newPlan.setFeatures(request.getFeatures());
             return planRepository.save(newPlan);
         } catch (Exception ex) {
             log.error(">>> An Exception occurred : ", ex);
