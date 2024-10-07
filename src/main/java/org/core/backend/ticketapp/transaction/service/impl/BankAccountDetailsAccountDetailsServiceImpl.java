@@ -11,12 +11,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @AllArgsConstructor
-public class BankAccountDetailsServiceImpl implements BankService {
+public class BankAccountDetailsAccountDetailsServiceImpl implements BankAccountDetailsService {
     private final BankAccountDetailsRepository bankAccountDetailsRepository;
     private final PayStackPaymentProcessorImpl payStackPaymentProcessor;
 
@@ -26,6 +27,12 @@ public class BankAccountDetailsServiceImpl implements BankService {
                 () -> new ApplicationException(404, "not_found", "Resource not found"));
         bankAccountDetails.setDeleted(true);
         return bankAccountDetails;
+    }
+
+
+    @Override
+    public List<BankAccountDetails> getByTenantId(final UUID id) {
+        return bankAccountDetailsRepository.findByTenantId(id);
     }
 
     @Override

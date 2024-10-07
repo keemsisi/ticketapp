@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,4 +26,6 @@ public interface BankAccountDetailsRepository extends JpaRepository<BankAccountD
     @Query(value = "SElECT * FROM bank_account_details bad WHERE bad.deleted=false", nativeQuery = true)
     Page<BankAccountDetails> getAll(final @NotNull Pageable pageable);
 
+    @Query(value = "SElECT * FROM bank_account_details bad WHERE bad.tenant_id=?1", nativeQuery = true)
+    List<BankAccountDetails> findByTenantId(UUID id);
 }

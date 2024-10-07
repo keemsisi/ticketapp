@@ -39,7 +39,7 @@ public class SettlementServiceImpl implements SettlementService {
     private final CoreUserService coreUserService;
     private final OrderService orderService;
     private final TransactionService transactionService;
-    private final BankService bankService;
+    private final BankAccountDetailsService bankAccountDetailsService;
     private final PaymentProcessorService paymentProcessorService;
     private final ObjectMapper objectMapper;
     private final String PAYSTACK_SOURCE = "balance";
@@ -48,7 +48,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     public Transaction transfer(final SettlementRequestDTO request) throws JsonProcessingException {
-        final var bankAccountDetails = bankService.getByUserId(request.getUserId());
+        final var bankAccountDetails = bankAccountDetailsService.getByUserId(request.getUserId());
         return switch (appConfigs.defaultPaymentProcessor) {
             case PAYSTACK -> processAndBuildPayStackTransaction(bankAccountDetails, request);
         };

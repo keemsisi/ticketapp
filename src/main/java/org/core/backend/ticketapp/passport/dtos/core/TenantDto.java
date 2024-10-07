@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.core.backend.ticketapp.common.dto.OperationalHours;
 import org.core.backend.ticketapp.common.dto.SocialMediaDTO;
 import org.core.backend.ticketapp.passport.validation.annotation.CountryCode;
 
@@ -48,4 +49,5 @@ public class TenantDto {
     private Integer accountLockoutDurationInMinutes;
     private Integer inactivePeriodInMinutes;
     private Integer accountLockoutThresholdCount;
+    private OperationalHours operationalHours;
 }

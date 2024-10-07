@@ -105,12 +105,18 @@ public class EventServiceImpl implements EventService {
         event.setPublic(request.isPublic());
 
         if (request.getBankAccountDetails() != null) {
-            final var bankDetails = modelMapper.map(request.getBankAccountDetails(), BankAccountDetails.class);
-            bankDetails.setUserId(userId);
-            bankDetails.setId(UUID.randomUUID());
-            bankDetails.setTenantId(tenantId);
-            bankDetails.setAccountNumberType(request.getBankAccountDetails().getType());
-            bankAccountDetailsRepository.save(bankDetails);
+            final var bankAccountDetails = bankAccountDetailsRepository.findByTenantId(event.getTenantId());
+            if (bankAccountDetails.isEmpty() && Objects.nonNull(user.getAccountType()) &&
+                    user.getAccountType().isIndividualOrOrganizationMerchantOwner()) {
+                final var bankDetails = modelMapper.map(request.getBankAccountDetails(), BankAccountDetails.class);
+                bankDetails.setUserId(userId);
+                bankDetails.setId(UUID.randomUUID());
+                bankDetails.setTenantId(event.getTenantId());
+                bankDetails.setDateCreated(LocalDateTime.now());
+                bankDetails.setTenantId(tenantId);
+                bankDetails.setAccountNumberType(request.getBankAccountDetails().getType());
+                bankAccountDetailsRepository.save(bankDetails);
+            }
         }
 
         final var seatSections = new ArrayList<EventSeatSection>();

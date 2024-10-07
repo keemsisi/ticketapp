@@ -3,6 +3,7 @@ package org.core.backend.ticketapp.passport.entity;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Getter;
 import lombok.Setter;
+import org.core.backend.ticketapp.common.dto.OperationalHours;
 import org.core.backend.ticketapp.common.dto.SocialMediaDTO;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.SubscriptionStatus;
@@ -93,6 +94,8 @@ public class Tenant extends AbstractBaseEntity {
     private String state;
     @Column(name = "currency")
     private String currency;
+    @Type(type = "JSONB")
+    private OperationalHours operationalHours;
 
     @PrePersist
     public void onCreate() {

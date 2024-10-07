@@ -5,11 +5,14 @@ import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 
-public interface BankService {
+public interface BankAccountDetailsService {
     BankAccountDetails getById(final UUID id);
+
+    List<BankAccountDetails> getByTenantId(UUID id);
 
     BankAccountDetails getByUserId(final UUID id);
 

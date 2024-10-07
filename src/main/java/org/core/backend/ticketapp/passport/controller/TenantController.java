@@ -6,8 +6,10 @@ import io.github.thecarisma.FatalObjCopierException;
 import io.github.thecarisma.ObjCopier;
 import io.jsonwebtoken.lang.Assert;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dtos.core.TenantAccountSettingsDto;
 import org.core.backend.ticketapp.passport.dtos.core.TenantDto;
@@ -19,6 +21,8 @@ import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
+import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
+import org.core.backend.ticketapp.transaction.service.impl.BankAccountDetailsAccountDetailsServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -48,6 +52,8 @@ public class TenantController {
     private final ActivityLogProcessorUtils activityLogProcessorUtils;
     private final SystemAlertRepository systemAlertRepository;
     private final TenantService tenantService;
+    private final BankAccountDetailsAccountDetailsServiceImpl bankAccountDetailsService;
+
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> create(@Validated @RequestBody TenantDto tenantDto) throws JsonProcessingException {
@@ -134,5 +140,17 @@ public class TenantController {
         users = userService.createUserFromExcel(loggedInUserDto, file);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), null, objectMapper.writeValueAsString(users), "Initiated a request to create new users from uploaded excel sheet");
         return new ResponseEntity<>(new GenericResponse<>("00", "Settings updated successfully", null), HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/bank-account-details", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<BankAccountDetails>> getAccountDetails(@RequestParam(required = false) UUID tenantId) {
+        final var user = jwtTokenUtil.getUser();
+        if (Objects.nonNull(tenantId)) {
+            UserUtils.assertUserHasRole(user.getRoles(), AccountType.SUPER_ADMIN.getType());
+        } else if (user.getUserType().isBuyer()) {
+            throw new ApplicationException(403, "forbidden", "Access not allowed!");
+        }
+        final var response = bankAccountDetailsService.getByTenantId(ObjectUtils.defaultIfNull(tenantId, user.getTenantId()));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
