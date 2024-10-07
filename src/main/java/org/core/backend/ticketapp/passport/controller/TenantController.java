@@ -151,6 +151,6 @@ public class TenantController {
             throw new ApplicationException(403, "forbidden", "Access not allowed!");
         }
         final var response = bankAccountDetailsService.getByTenantId(ObjectUtils.defaultIfNull(tenantId, user.getTenantId()));
-        return new ResponseEntity<>(new GenericResponse<>("00", "Settings updated successfully", response), HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully fetched details!", response), HttpStatus.CREATED);
     }
 }
