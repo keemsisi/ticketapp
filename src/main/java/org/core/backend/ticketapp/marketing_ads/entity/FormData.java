@@ -14,7 +14,6 @@ import javax.persistence.Table;
 @Setter
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "form_data")
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class FormData extends AbstractBaseEntity {

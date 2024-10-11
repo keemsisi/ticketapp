@@ -15,7 +15,6 @@ import javax.persistence.Table;
 @Setter
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "event_promotion")
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class EventPromotion extends AbstractBaseEntity {

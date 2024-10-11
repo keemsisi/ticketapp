@@ -15,7 +15,6 @@ import javax.persistence.Table;
 @Setter
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "sponsored_offer")
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class SponsoredOffer extends AbstractBaseEntity {

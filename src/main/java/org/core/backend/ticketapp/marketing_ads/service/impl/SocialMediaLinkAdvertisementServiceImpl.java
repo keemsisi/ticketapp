@@ -1,12 +1,13 @@
 package org.core.backend.ticketapp.marketing_ads.service.impl;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import org.core.backend.ticketapp.marketing_ads.repository.SocialMediaLinkAdvertisementRepository;
 import org.core.backend.ticketapp.marketing_ads.service.SocialMediaLinkAdvertisementService;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-@NoArgsConstructor
 public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkAdvertisementService {
+    private final SocialMediaLinkAdvertisementRepository repository;
+
 }
