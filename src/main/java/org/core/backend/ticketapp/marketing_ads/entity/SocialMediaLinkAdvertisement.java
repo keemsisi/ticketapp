@@ -22,5 +22,4 @@ import javax.persistence.Table;
 @Table(name = "social_media_link_ad")
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class SocialMediaLinkAdvertisement extends AbstractBaseEntity {
-    private final SocialMediaLinkAdvertisementRepository repository;
 }
