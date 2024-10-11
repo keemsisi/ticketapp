@@ -158,7 +158,7 @@ public class EventDao extends BaseDao {
                 " COUNT(tk) AS total_acquired_tickets,  " +
                 " ((SELECT ess2.capacity FROM event_seat_sections ess2 WHERE ess2.id = ':seatSectionId') - COUNT(tk)) AS total_available_tickets " +
                 " FROM ticket tk INNER JOIN event_seat_sections ess ON ess.id = ':seatSectionId' WHERE ess.deleted = false;";
-        final var results = executeQuery(baseSQL.replace("seatSectionId",
+        final var results = executeQuery(baseSQL.replace(":seatSectionId",
                 seatSectionId.toString()), EventTicketStatsDTO.class);
         final var result = ((List<EventTicketStatsDTO>) results.get("result"));
         if (ObjectUtils.isNotEmpty(result)) return ((List<EventTicketStatsDTO>) results.get("result")).get(0);
