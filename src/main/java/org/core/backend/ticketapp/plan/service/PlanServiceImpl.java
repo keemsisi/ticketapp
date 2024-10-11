@@ -92,7 +92,7 @@ public class PlanServiceImpl implements PlanService {
     }
 
     @Override
-    public PlanDTO fetchPlans() throws Exception {
+    public PlanDTO fetchPlans() {
         PlanDTO allPlans = null;
         try {
             final var client = HttpClientBuilder.create().build();
