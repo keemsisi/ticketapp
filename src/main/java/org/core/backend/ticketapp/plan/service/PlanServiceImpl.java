@@ -9,6 +9,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
+import org.core.backend.ticketapp.plan.dto.PayStackPlanCreateRequestDTO;
 import org.core.backend.ticketapp.plan.dto.PlanCreateRequestDTO;
 import org.core.backend.ticketapp.plan.dto.PlanCreateResponseDTO;
 import org.core.backend.ticketapp.plan.dto.PlanDTO;
@@ -73,16 +74,18 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public Plan createPlan(final PlanCreateRequestDTO request) {
         try {
-            System.out.println(mapper.writeValueAsString(request));
             final var headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
-            final var entity = new HttpEntity<>(request, headers);
+            final var createPlanRequest = mapper.convertValue(request, PayStackPlanCreateRequestDTO.class);
+            final var entity = new HttpEntity<>(createPlanRequest, headers);
+            final var features = request.getFeatures();
+            request.setFeatures(null);
             final var response = restTemplate.exchange(PAYSTACK_PLAN_BASE_URL, HttpMethod.POST, entity, PlanCreateResponseDTO.class);
             final var newPlan = getPlan(response);
-            newPlan.setFeatures(request.getFeatures());
+            newPlan.setFeatures(features);
             return planRepository.save(newPlan);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             log.error(">>> An Exception occurred : ", ex);
         }
         throw new ApplicationException(400, "req_failed", "Failed to create plan");
