@@ -7,7 +7,7 @@ import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.marketing.dto.social.CreateSocialLinksRequest;
-import org.core.backend.ticketapp.marketing.entity.SocialMediaLinksAdvertisement;
+import org.core.backend.ticketapp.marketing.entity.SocialMediaLinkAdvertisement;
 import org.core.backend.ticketapp.marketing.service.SocialMediaLinkAdvertisementService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
@@ -26,12 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/social-media-links/advertisements")
 @AllArgsConstructor
-public class SocialMediaLinkAdvertisementController {
+public class SocialMediaLinksAdvertisementController {
     private final SocialMediaLinkAdvertisementService service;
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<SocialMediaLinksAdvertisement>> create(@Validated @RequestBody CreateSocialLinksRequest request) throws Exception {
+    public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> create(@Validated @RequestBody CreateSocialLinksRequest request) throws Exception {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var result = service.create(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Social links created successfully", result), HttpStatus.CREATED);

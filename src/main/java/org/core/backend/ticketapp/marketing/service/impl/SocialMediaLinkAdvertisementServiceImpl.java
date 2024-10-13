@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.marketing.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
-import org.core.backend.ticketapp.marketing.entity.SocialMediaLinksAdvertisement;
+import org.core.backend.ticketapp.marketing.entity.SocialMediaLinkAdvertisement;
 import org.core.backend.ticketapp.marketing.repository.SocialMediaLinksAdvertisementRepository;
 import org.core.backend.ticketapp.marketing.service.SocialMediaLinkAdvertisementService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -23,8 +23,8 @@ public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkA
     private final ModelMapper modelMapper;
 
     @Override
-    public <R> SocialMediaLinksAdvertisement create(final R request) {
-        final var record = modelMapper.map(request, SocialMediaLinksAdvertisement.class);
+    public <R> SocialMediaLinkAdvertisement create(final R request) {
+        final var record = modelMapper.map(request, SocialMediaLinkAdvertisement.class);
         record.setUserId(jwtTokenUtil.getUser().getUserId());
         record.setTenantId(jwtTokenUtil.getUser().getTenantId());
         record.setDateCreated(LocalDateTime.now());
@@ -32,13 +32,13 @@ public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkA
     }
 
     @Override
-    public Page<SocialMediaLinksAdvertisement> getAll(final Pageable pageable) {
+    public Page<SocialMediaLinkAdvertisement> getAll(final Pageable pageable) {
         final var userId = jwtTokenUtil.getUser().getUserId();
         return Objects.nonNull(userId) ? repository.findAll(userId, pageable) : repository.findAll(pageable);
     }
 
     @Override
-    public <R> SocialMediaLinksAdvertisement update(final R request) {
+    public <R> SocialMediaLinkAdvertisement update(final R request) {
         return SocialMediaLinkAdvertisementService.super.update(request);
     }
 
@@ -52,7 +52,7 @@ public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkA
     }
 
     @Override
-    public SocialMediaLinksAdvertisement getById(final UUID id) {
+    public SocialMediaLinkAdvertisement getById(final UUID id) {
         return repository.findById(id).orElseThrow(ApplicationExceptionUtils::notFound);
     }
 }
