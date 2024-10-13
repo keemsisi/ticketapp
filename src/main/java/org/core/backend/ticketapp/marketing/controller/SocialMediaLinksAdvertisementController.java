@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @Validated
 @Slf4j
 @RestController
@@ -37,9 +39,21 @@ public class SocialMediaLinksAdvertisementController {
         return new ResponseEntity<>(new GenericResponse<>("00", "Social links created successfully", result), HttpStatus.CREATED);
     }
 
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> getById(final UUID id) {
+        final var result = service.getById(id);
+        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched social link", result));
+    }
+
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
         final var result = PagedMapperUtil.map(service.getAll(pageable));
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched social links", result));
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> deleteById(final UUID id) {
+        service.delete(id);
+        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched social link", null));
     }
 }

@@ -17,10 +17,10 @@ public interface SocialMediaLinksAdvertisementRepository extends JpaRepository<S
     @Query(value = "SELECT * FROM social_media_link_advertisement WHERE id = ?1 AND deleted = false ", nativeQuery = true)
     Optional<SocialMediaLinkAdvertisement> findById(@NotNull UUID uuid);
 
-    @Query(value = "SELECT * FROM social_media_link_advertisement WHERE WHERE user_id = ?1 AND deleted = false ", nativeQuery = true)
+    @Query(value = "SELECT * FROM social_media_link_advertisement WHERE user_id = ?1 AND deleted = false ", nativeQuery = true)
     Page<SocialMediaLinkAdvertisement> findAll(@NotNull UUID userId, @NotNull Pageable pageable);
 
     @NotNull
-    @Query(value = "SELECT * FROM social_media_link_advertisement WHERE WHERE deleted = false ", nativeQuery = true)
+    @Query(value = "SELECT * FROM social_media_link_advertisement WHERE deleted = false ", nativeQuery = true)
     Page<SocialMediaLinkAdvertisement> findAll(@NotNull Pageable pageable);
 }

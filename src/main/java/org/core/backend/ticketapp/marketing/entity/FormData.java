@@ -23,7 +23,7 @@ import java.util.UUID;
 @Table(name = "form_data")
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class FormData extends AbstractBaseEntity {
-    @Column(nullable = false)
+    @Column(name = "title", columnDefinition = "varchar(250)")
     private String title;
 
     @PrePersist

@@ -24,7 +24,7 @@ import java.util.UUID;
 @Table(name = "sponsored_offer")
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class SponsoredOffer extends AbstractBaseEntity {
-    @Column(nullable = false)
+    @Column(name = "title", columnDefinition = "varchar(250)", nullable = false)
     private String title;
 
     @PrePersist
