@@ -2,11 +2,13 @@ package org.core.backend.ticketapp.marketing.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
+import org.core.backend.ticketapp.marketing.dto.social.UpdateSocialLinksRequest;
 import org.core.backend.ticketapp.marketing.entity.SocialMediaLinkAdvertisement;
 import org.core.backend.ticketapp.marketing.repository.SocialMediaLinksAdvertisementRepository;
 import org.core.backend.ticketapp.marketing.service.SocialMediaLinkAdvertisementService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,7 +41,10 @@ public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkA
 
     @Override
     public <R> SocialMediaLinkAdvertisement update(final R request) {
-        return SocialMediaLinkAdvertisementService.super.update(request);
+        final var requestData = modelMapper.map(request, UpdateSocialLinksRequest.class);
+        final var record = getById(requestData.getId());
+        BeanUtils.copyProperties(requestData, record);
+        return repository.save(record);
     }
 
     @Override

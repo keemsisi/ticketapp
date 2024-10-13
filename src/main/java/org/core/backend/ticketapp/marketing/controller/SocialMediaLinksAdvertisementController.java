@@ -7,6 +7,7 @@ import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.marketing.dto.social.CreateSocialLinksRequest;
+import org.core.backend.ticketapp.marketing.dto.social.UpdateSocialLinksRequest;
 import org.core.backend.ticketapp.marketing.entity.SocialMediaLinkAdvertisement;
 import org.core.backend.ticketapp.marketing.service.SocialMediaLinkAdvertisementService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -51,6 +52,12 @@ public class SocialMediaLinksAdvertisementController {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> deleteById(final @PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched social link", null));
+        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully deleted social link!", null));
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> update(final @RequestBody UpdateSocialLinksRequest request) {
+        final var result = service.update(request);
+        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully updated social link!", result));
     }
 }
