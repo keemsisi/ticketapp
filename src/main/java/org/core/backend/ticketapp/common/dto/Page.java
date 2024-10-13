@@ -32,8 +32,8 @@ public class Page<T> {
 
     @JsonGetter(value = "last")
     public boolean isLast() {
-        return !this.hasNext();
-        //return (pageNumber + 1) * reqSize >= totalElements;
+//        return !this.hasNext();
+        return (pageNumber + 1) * reqSize >= totalElements;
     }
 
     private int getTotalPages() {

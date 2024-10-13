@@ -51,6 +51,10 @@ public class LoggedInUserDto {
     @JsonProperty("last_name")
     private String lastName;
 
+    @ExcelColumn(columnName = "Plan ID")
+    @JsonProperty("plan_id")
+    private String planId;
+
     private String profilePictureLocation;
 
     @ExcelColumn(columnName = "Phone", failIfAbsent = false)
@@ -65,8 +69,12 @@ public class LoggedInUserDto {
     private List<String> roles = new ArrayList<>();
 
     private List<String> scope = new ArrayList<>();
+
+    @JsonProperty("account_type")
     @ExcelColumn(columnName = "account_type", failIfAbsent = false)
     private AccountType accountType;
+
+    @JsonProperty("user_type")
     @ExcelColumn(columnName = "user_type", failIfAbsent = false)
     private UserType userType;
 

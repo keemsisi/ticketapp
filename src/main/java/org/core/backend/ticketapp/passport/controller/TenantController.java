@@ -145,7 +145,7 @@ public class TenantController {
     @RequestMapping(value = "/bank-account-details", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<List<BankAccountDetails>>> getBankAccountDetails(@RequestParam(required = false) UUID tenantId) {
         final var user = jwtTokenUtil.getUser();
-        if (!user.getAccountType().isIndividualOrOrganizationMerchantOwner()) {
+        if (Objects.nonNull(user.getAccountType()) && !user.getAccountType().isIndividualOrOrganizationMerchantOwner()) {
             UserUtils.assertUserHasRole(user.getRoles(), AccountType.SUPER_ADMIN.getType());
         } else if (user.getUserType().isBuyer()) {
             throw new ApplicationException(403, "forbidden", "Access not allowed!");
