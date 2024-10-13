@@ -217,7 +217,7 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private UserType userType;
+    private UserType type;
 
 
     @Override

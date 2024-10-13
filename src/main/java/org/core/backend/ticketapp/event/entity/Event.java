@@ -48,6 +48,7 @@ public class Event extends AbstractBaseEntity {
     @NotBlank
     private String title;
     @NotBlank
+    @Column(columnDefinition = "varchar(1000)")
     private String description;
 
     @Column(name = "physical_event", columnDefinition = "bool", nullable = false)

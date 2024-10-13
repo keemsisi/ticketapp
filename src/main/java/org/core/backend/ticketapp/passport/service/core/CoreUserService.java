@@ -277,6 +277,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         final var gender = Gender.valueOf(userDto.getGender().toUpperCase());
         user.setGender(org.apache.commons.lang3.ObjectUtils.isEmpty(gender) ? "OTHERS" : gender.name());
         user.setAccountType(userDto.getAccountType());
+        user.setType(userDto.getUserType());
         user.setPasswordExpirationInDays(appConfigs.passwordExpirationInDays.intValue());
         if (StringUtils.isNotBlank(userDto.getPassword())) {
             if (!passwordAdhereToPolicy(user, userDto.getPassword())) {

@@ -8,6 +8,8 @@ import lombok.Setter;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
+import org.hibernate.validator.constraints.Length;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -26,6 +28,7 @@ public class EventCreateRequestDTO {
 
     @NotNull
     @NotBlank
+    @Length(max = 1000)
     private String description;
 
     @NotNull

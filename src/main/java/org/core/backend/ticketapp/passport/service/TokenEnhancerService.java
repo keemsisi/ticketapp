@@ -57,7 +57,7 @@ public class TokenEnhancerService implements TokenEnhancer {
             additionalInformation.put("tenant_id", user.getTenantId());
             additionalInformation.put("idle_time", userIdleTime);
             additionalInformation.put("account_type", user.getAccountType());
-            additionalInformation.put("user_type", user.getUserType());
+            additionalInformation.put("user_type", user.getType());
             additionalInformation.put("plan_id", tenant.getPlanId());
             additionalInformation.put("exp", Instant.now().getEpochSecond() +
                     TimeUnit.SECONDS.convert(24 * 60, TimeUnit.MINUTES));
