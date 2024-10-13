@@ -1,6 +1,6 @@
-package org.core.backend.ticketapp.marketing_ads.repository;
+package org.core.backend.ticketapp.marketing.repository;
 
-import org.core.backend.ticketapp.marketing_ads.entity.JobAdvertisement;
+import org.core.backend.ticketapp.marketing.entity.JobAdvertisement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

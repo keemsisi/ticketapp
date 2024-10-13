@@ -1,8 +1,8 @@
-package org.core.backend.ticketapp.marketing_ads.service.impl;
+package org.core.backend.ticketapp.marketing.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.marketing_ads.repository.JobAdvertisementRepository;
-import org.core.backend.ticketapp.marketing_ads.service.JobAdvertisementService;
+import org.core.backend.ticketapp.marketing.repository.JobAdvertisementRepository;
+import org.core.backend.ticketapp.marketing.service.JobAdvertisementService;
 import org.springframework.stereotype.Service;
 
 @Service

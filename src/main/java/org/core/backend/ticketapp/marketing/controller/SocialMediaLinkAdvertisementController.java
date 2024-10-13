@@ -1,0 +1,45 @@
+package org.core.backend.ticketapp.marketing.controller;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
+import org.core.backend.ticketapp.common.dto.PagedResponse;
+import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.marketing.dto.social.CreateSocialLinksRequest;
+import org.core.backend.ticketapp.marketing.entity.SocialMediaLinksAdvertisement;
+import org.core.backend.ticketapp.marketing.service.SocialMediaLinkAdvertisementService;
+import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.passport.util.UserUtils;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+@Validated
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/social-media-links/advertisements")
+@AllArgsConstructor
+public class SocialMediaLinkAdvertisementController {
+    private final SocialMediaLinkAdvertisementService service;
+    private final JwtTokenUtil jwtTokenUtil;
+
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<SocialMediaLinksAdvertisement>> create(@Validated @RequestBody CreateSocialLinksRequest request) throws Exception {
+        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
+        final var result = service.create(request);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Social links created successfully", result), HttpStatus.CREATED);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
+        final var result = PagedMapperUtil.map(service.getAll(pageable));
+        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched social links", result));
+    }
+}

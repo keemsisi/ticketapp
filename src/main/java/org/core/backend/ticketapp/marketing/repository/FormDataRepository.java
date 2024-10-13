@@ -1,6 +1,6 @@
-package org.core.backend.ticketapp.marketing_ads.repository;
+package org.core.backend.ticketapp.marketing.repository;
 
-import org.core.backend.ticketapp.marketing_ads.entity.FormData;
+import org.core.backend.ticketapp.marketing.entity.FormData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

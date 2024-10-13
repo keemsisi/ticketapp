@@ -34,7 +34,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/v1/users/validate-2fa-auth",
             "/api/v1/users/onboard",
             "/api/v1/users/auth",
-            "/api/v1/events/filter-search"
+            "/api/v1/events/filter-search",
     };
     @Autowired
     private AuthenticationProviderConfig authenticationProvider;
@@ -68,6 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/api/v1/plans/*").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/tenants/*").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/orders/*").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/social-media-links/advertisements/*").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/transactions/verify/*").permitAll()
                 .anyRequest().authenticated()
                 .and()

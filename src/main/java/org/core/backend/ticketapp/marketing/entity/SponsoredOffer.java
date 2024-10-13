@@ -1,4 +1,4 @@
-package org.core.backend.ticketapp.marketing_ads.entity;
+package org.core.backend.ticketapp.marketing.entity;
 
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;

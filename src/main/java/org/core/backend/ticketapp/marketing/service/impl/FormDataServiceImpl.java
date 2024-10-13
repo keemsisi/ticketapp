@@ -1,8 +1,8 @@
-package org.core.backend.ticketapp.marketing_ads.service.impl;
+package org.core.backend.ticketapp.marketing.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.marketing_ads.repository.FormDataRepository;
-import org.core.backend.ticketapp.marketing_ads.service.FormDataService;
+import org.core.backend.ticketapp.marketing.repository.FormDataRepository;
+import org.core.backend.ticketapp.marketing.service.FormDataService;
 import org.springframework.stereotype.Service;
 
 @Service

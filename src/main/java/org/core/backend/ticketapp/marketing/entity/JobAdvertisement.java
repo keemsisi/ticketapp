@@ -1,4 +1,5 @@
-package org.core.backend.ticketapp.marketing_ads.entity;
+package org.core.backend.ticketapp.marketing.entity;
+
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
@@ -14,7 +15,7 @@ import javax.persistence.Table;
 @Setter
 @Entity
 @AllArgsConstructor
-@Table(name = "form_data")
+@Table(name = "job_ads")
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
-public class FormData extends AbstractBaseEntity {
+public class JobAdvertisement extends AbstractBaseEntity {
 }
