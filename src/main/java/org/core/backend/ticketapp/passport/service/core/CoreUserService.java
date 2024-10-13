@@ -136,7 +136,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     }
 
     @Transactional
-    public void updateLogin(User user) {
+    public void updateLogin(final User user) {
         user.setLastLogin(new Date());
         user.setLoginAttempt(0);
         userRepository.saveAndFlush(user);
