@@ -55,7 +55,7 @@ public class SocialMediaLinksAdvertisementController {
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully deleted social link!", null));
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> update(final @RequestBody UpdateSocialLinksRequest request) {
         final var result = service.update(request);
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully updated social link!", result));

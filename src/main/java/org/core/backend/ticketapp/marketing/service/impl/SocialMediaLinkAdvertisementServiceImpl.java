@@ -42,8 +42,12 @@ public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkA
     @Override
     public <R> SocialMediaLinkAdvertisement update(final R request) {
         final var requestData = modelMapper.map(request, UpdateSocialLinksRequest.class);
-        final var record = getById(requestData.getId());
+        final var id = requestData.getId();
+        final var userId = jwtTokenUtil.getUser().getUserId();
+        final var record = repository.findById(id, userId).orElseThrow(ApplicationExceptionUtils::notFound);
         BeanUtils.copyProperties(requestData, record);
+        record.setModifiedBy(userId);
+        record.setDateModified(LocalDateTime.now());
         return repository.save(record);
     }
 
