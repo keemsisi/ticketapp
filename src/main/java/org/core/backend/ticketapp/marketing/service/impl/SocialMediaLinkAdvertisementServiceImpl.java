@@ -44,7 +44,8 @@ public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkA
 
     @Override
     public void delete(final UUID id) {
-        final var record = repository.findById(id).orElseThrow(ApplicationExceptionUtils::notFound);
+        final var userId = jwtTokenUtil.getUser().getUserId();
+        final var record = repository.findById(id, userId).orElseThrow(ApplicationExceptionUtils::notFound);
         record.setDeleted(true);
         record.setDateModified(LocalDateTime.now());
         record.setModifiedBy(jwtTokenUtil.getUser().getUserId());

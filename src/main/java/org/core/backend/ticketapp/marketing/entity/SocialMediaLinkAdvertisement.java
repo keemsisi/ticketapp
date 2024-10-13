@@ -21,7 +21,7 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "social_media_link_advertisement")
+@Table(name = "social_media_link_advertisement", indexes = {})
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class SocialMediaLinkAdvertisement extends AbstractBaseEntity {
     @Column(name = "ticket_global", columnDefinition = "varchar(500)")

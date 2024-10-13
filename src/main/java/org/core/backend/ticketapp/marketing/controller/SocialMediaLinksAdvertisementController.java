@@ -48,8 +48,8 @@ public class SocialMediaLinksAdvertisementController {
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched social links", result));
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> deleteById(final UUID id) {
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> deleteById(final @PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched social link", null));
     }
