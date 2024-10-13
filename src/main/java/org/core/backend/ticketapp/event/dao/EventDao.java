@@ -144,7 +144,8 @@ public class EventDao extends BaseDao {
         pagedResults.setCount(counts);
         pagedResults.setSize(events.size());
         pagedResults.setPageNumber(request.getPage());
-        pagedResults.setLast(events.size() >= counts);
+        pagedResults.setReqSize(request.getSize());
+        pagedResults.setLast(events.isEmpty());
         pagedResults.setNumberOfElements(events.size());
         pagedResults.setTotalElements(counts);
         return pagedResults;
@@ -295,5 +296,6 @@ public class EventDao extends BaseDao {
         final @NotNull Map<String, Object> results = jdbcTemplate.call(csc, returnedParams);
         return results;
     }
+
 
 }
