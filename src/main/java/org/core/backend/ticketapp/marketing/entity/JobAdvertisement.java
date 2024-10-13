@@ -3,13 +3,17 @@ package org.core.backend.ticketapp.marketing.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Entity;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Builder
 @Getter
@@ -22,4 +26,10 @@ import javax.persistence.Table;
 public class JobAdvertisement extends AbstractBaseEntity {
     @NotNull
     private String title;
+
+    @PrePersist
+    public void onCreate() {
+        id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
+        dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
+    }
 }
