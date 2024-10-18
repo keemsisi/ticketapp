@@ -3,7 +3,7 @@ package org.core.backend.ticketapp.common.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Builder
 @Setter
@@ -32,9 +32,9 @@ public class OperationalHours {
     @AllArgsConstructor
     private static final class OperationalHour {
         @NotNull(message = "openingTime is required")
-        private LocalDateTime openingTime;
+        private LocalTime openingTime;
         @NotNull(message = "closingTime is required")
-        private LocalDateTime closingTime;
-        private boolean open;
+        private LocalTime closingTime;
+        private boolean isOpen;
     }
 }

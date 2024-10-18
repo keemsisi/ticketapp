@@ -46,6 +46,10 @@ public enum AccountType {
         return this == INDIVIDUAL_MERCHANT_OWNER || this == ORGANIZATION_MERCHANT_OWNER;
     }
 
+    public boolean isSuperAdmin() {
+        return this == SUPER_ADMIN;
+    }
+
     public String getType() {
         return type;
     }

@@ -50,7 +50,7 @@ public class EventDao extends BaseDao {
         assert getJdbcTemplate() != null;
         var baseSQL = " SELECT %s FROM event e :innerQuery :seatSectionInnerQuery " +
                 " INNER JOIN users u ON u.id = e.user_id AND u.deleted=false WHERE e.deleted=false %s ";
-        final var seatSectionInnerQuery = " INNER JOIN event_seat_sections ss ON ss.event_id = e.id ";
+        final var seatSectionInnerQuery = new StringBuilder(" INNER JOIN event_seat_sections ss ON ss.event_id = e.id ");
         final var innerQuery = new StringBuilder();
         final var order = ObjectUtils.defaultIfNull(request.getOrder(), Sort.Direction.DESC);
         final var paginationQuery = String.format(" ORDER BY e.date_created %s OFFSET %s LIMIT %s ", order.name(), skip, limit);
@@ -63,8 +63,9 @@ public class EventDao extends BaseDao {
         if (Objects.nonNull(request.getUserType()) && request.getUserType().isBuyer() && request.getIsBuyerEvent()) {
             innerQuery.append(String.format("""
                     INNER JOIN ticket tk ON tk.event_id = e.id
-                    AND tk.deleted=false AND tk.user_id = '%s'
+                    AND tk.deleted=false AND tk.user_id = '%s' 
                     """, request.getUserId()));
+            seatSectionInnerQuery.append(" AND tk.seat_section = ss.id ");
         }
         baseSQL = baseSQL.replace(":innerQuery", innerQuery);
 

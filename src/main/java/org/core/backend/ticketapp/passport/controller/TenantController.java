@@ -88,8 +88,10 @@ public class TenantController {
         final var user = jwtTokenUtil.getUser();
         Assert.notNull(tenantDto.getId());
         final var _tenant = service.getByTenantId(tenantDto.getId());
-        if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN) || !user.getAccountType().isIndividualOrOrganizationMerchantOwner()) {
-            //add checks for permission check here
+        if (user.getTenantId() != tenantDto.getId() && !user.getAccountType().isSuperAdmin()) {
+            return new ResponseEntity<>(new GenericResponse<>("01", "Oops! Resource update not allowed!", ""), HttpStatus.FORBIDDEN);
+        } else if (!user.getAccountType().isSuperAdmin() && !user.getAccountType().isIndividualOrOrganizationMerchantOwner()) {
+            //TODO: add checks for permission check here
             return new ResponseEntity<>(new GenericResponse<>("01", "Oops! Resource update not allowed!", ""), HttpStatus.FORBIDDEN);
         }
         final var oldDataJSON = objectMapper.writeValueAsString(_tenant);

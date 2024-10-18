@@ -7,7 +7,6 @@ import lombok.Setter;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.UUID;
 
@@ -23,7 +22,6 @@ public abstract class AbstractFilterRequestDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endDateApproved;
     private UUID requestedById;
-    private boolean userId;
     private long index;
     private int size = 20;
     private Sort.Direction order = Sort.Direction.DESC;

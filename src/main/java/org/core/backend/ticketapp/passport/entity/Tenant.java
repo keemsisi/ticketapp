@@ -70,6 +70,7 @@ public class Tenant extends AbstractBaseEntity {
     @Column(name = "name")
     private String name;
     @Type(type = "JSONB")
+    @Column(name = "galleries", columnDefinition = "JSONB default null")
     private List<String> galleries;
     @Column(name = "logo_url")
     private String logoUrl;
@@ -80,6 +81,7 @@ public class Tenant extends AbstractBaseEntity {
     @Column(name = "description", columnDefinition = "varchar(2500)")
     private String description;
     @Type(type = "JSONB")
+    @Column(name = "social_media_handles", columnDefinition = "JSONB default null")
     private List<SocialMediaDTO> socialMediaHandles;
     @Column(name = "address")
     private String address;
