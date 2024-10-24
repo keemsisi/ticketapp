@@ -5,6 +5,7 @@ import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
 import org.core.backend.ticketapp.marketing.dto.formdata.CreateCustomerFormDataRequest;
 import org.core.backend.ticketapp.marketing.dto.formdata.UpdateCustomerFormDataRequest;
 import org.core.backend.ticketapp.marketing.entity.CustomerFormData;
+import org.core.backend.ticketapp.marketing.entity.FormData;
 import org.core.backend.ticketapp.marketing.repository.CustomerFormDataRepository;
 import org.core.backend.ticketapp.marketing.repository.FormDataRepository;
 import org.core.backend.ticketapp.marketing.service.CustomerFormDataService;
@@ -34,8 +35,7 @@ public class CustomerFormDataServiceImpl implements CustomerFormDataService {
         record.setUserId(jwtTokenUtil.getUser().getUserId());
         record.setTenantId(jwtTokenUtil.getUser().getTenantId());
         record.setDateCreated(LocalDateTime.now());
-        final var formData = formDataRepository.findByCode(tempRequest.getCode())
-                .orElseThrow(ApplicationExceptionUtils::notFound);
+        final var formData = getByCode(tempRequest.getCode());
         record.setUserId(formData.getUserId());
         return repository.save(record);
     }
@@ -71,5 +71,9 @@ public class CustomerFormDataServiceImpl implements CustomerFormDataService {
     @Override
     public CustomerFormData getById(final UUID id) {
         return repository.findById(id).orElseThrow(ApplicationExceptionUtils::notFound);
+    }
+
+    private FormData getByCode(String code) {
+        return formDataRepository.findByCode(code).orElseThrow(ApplicationExceptionUtils::notFound);
     }
 }

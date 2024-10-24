@@ -65,4 +65,9 @@ public class FormDataServiceImpl implements FormDataService {
     public FormData getById(final UUID id) {
         return repository.findById(id).orElseThrow(ApplicationExceptionUtils::notFound);
     }
+
+    @Override
+    public FormData getByCode(String code) {
+        return repository.findByCode(code).orElseThrow(ApplicationExceptionUtils::notFound);
+    }
 }

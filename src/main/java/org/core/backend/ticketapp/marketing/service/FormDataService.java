@@ -5,4 +5,5 @@ import org.core.backend.ticketapp.marketing.entity.CustomerFormData;
 import org.core.backend.ticketapp.marketing.entity.FormData;
 
 public interface FormDataService extends IService<FormData> {
+    FormData getByCode(String code);
 }

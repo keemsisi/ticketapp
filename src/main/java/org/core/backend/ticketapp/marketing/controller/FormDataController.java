@@ -6,15 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
-import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.marketing.dto.formdata.CreateFormDataRequest;
 import org.core.backend.ticketapp.marketing.dto.social.UpdateSocialLinksRequest;
 import org.core.backend.ticketapp.marketing.entity.FormData;
-import org.core.backend.ticketapp.marketing.entity.FormData;
 import org.core.backend.ticketapp.marketing.service.FormDataService;
-import org.core.backend.ticketapp.marketing.service.FormDataService;
-import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,7 +26,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FormDataController {
     private final FormDataService service;
-    private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<FormData>> create(@Validated @RequestBody CreateFormDataRequest request) throws Exception {
@@ -61,5 +55,11 @@ public class FormDataController {
     public ResponseEntity<GenericResponse<FormData>> update(final @RequestBody UpdateSocialLinksRequest request) {
         final var result = service.update(request);
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully updated resource!", result));
+    }
+
+    @RequestMapping(value = "/by-code/{code}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<FormData>> getByCode(final @PathVariable String code) {
+        final var result = service.getByCode(code);
+        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched resource!", result));
     }
 }
