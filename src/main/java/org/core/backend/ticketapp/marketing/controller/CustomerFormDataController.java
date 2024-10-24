@@ -33,7 +33,6 @@ public class CustomerFormDataController {
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<CustomerFormData>> create(@Validated @RequestBody CreateCustomerFormDataRequest request) throws Exception {
-        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var result = service.create(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Resource created successfully", result), HttpStatus.CREATED);
     }
