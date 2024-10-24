@@ -25,7 +25,7 @@ import java.util.UUID;
 @Validated
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/form-data")
+@RequestMapping("/api/v1/customer-form-data")
 @AllArgsConstructor
 public class CustomerFormDataController {
     private final CustomerFormDataService service;
