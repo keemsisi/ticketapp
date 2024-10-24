@@ -23,4 +23,6 @@ public class CreateCustomerFormDataRequest {
     @Email(message = "Oops! Invalid email address")
     @NotBlank(message = "email can't be blank")
     private String email;
+    @NotBlank(message = "code can't be blank")
+    private String code;
 }

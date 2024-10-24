@@ -2,9 +2,11 @@ package org.core.backend.ticketapp.marketing.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
+import org.core.backend.ticketapp.marketing.dto.formdata.CreateCustomerFormDataRequest;
 import org.core.backend.ticketapp.marketing.dto.formdata.UpdateCustomerFormDataRequest;
 import org.core.backend.ticketapp.marketing.entity.CustomerFormData;
 import org.core.backend.ticketapp.marketing.repository.CustomerFormDataRepository;
+import org.core.backend.ticketapp.marketing.repository.FormDataRepository;
 import org.core.backend.ticketapp.marketing.service.CustomerFormDataService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
@@ -21,15 +23,20 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CustomerFormDataServiceImpl implements CustomerFormDataService {
     private final CustomerFormDataRepository repository;
+    private final FormDataRepository formDataRepository;
     private final JwtTokenUtil jwtTokenUtil;
     private final ModelMapper modelMapper;
 
     @Override
     public <R> CustomerFormData create(final R request) {
         final var record = modelMapper.map(request, CustomerFormData.class);
+        final var tempRequest = modelMapper.map(request, CreateCustomerFormDataRequest.class);
         record.setUserId(jwtTokenUtil.getUser().getUserId());
         record.setTenantId(jwtTokenUtil.getUser().getTenantId());
         record.setDateCreated(LocalDateTime.now());
+        final var formData = formDataRepository.findByCode(tempRequest.getCode())
+                .orElseThrow(ApplicationExceptionUtils::notFound);
+        record.setUserId(formData.getUserId());
         return repository.save(record);
     }
 
