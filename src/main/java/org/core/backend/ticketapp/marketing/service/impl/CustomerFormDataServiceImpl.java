@@ -2,10 +2,10 @@ package org.core.backend.ticketapp.marketing.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
-import org.core.backend.ticketapp.marketing.dto.formdata.UpdateFormDataRequest;
-import org.core.backend.ticketapp.marketing.entity.FormData;
-import org.core.backend.ticketapp.marketing.repository.FormDataRepository;
-import org.core.backend.ticketapp.marketing.service.FormDataService;
+import org.core.backend.ticketapp.marketing.dto.formdata.UpdateCustomerFormDataRequest;
+import org.core.backend.ticketapp.marketing.entity.CustomerFormData;
+import org.core.backend.ticketapp.marketing.repository.CustomerFormDataRepository;
+import org.core.backend.ticketapp.marketing.service.CustomerFormDataService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
@@ -19,14 +19,14 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
-public class FormDataServiceImpl implements FormDataService {
-    private final FormDataRepository repository;
+public class CustomerFormDataServiceImpl implements CustomerFormDataService {
+    private final CustomerFormDataRepository repository;
     private final JwtTokenUtil jwtTokenUtil;
     private final ModelMapper modelMapper;
 
     @Override
-    public <R> FormData create(final R request) {
-        final var record = modelMapper.map(request, FormData.class);
+    public <R> CustomerFormData create(final R request) {
+        final var record = modelMapper.map(request, CustomerFormData.class);
         record.setUserId(jwtTokenUtil.getUser().getUserId());
         record.setTenantId(jwtTokenUtil.getUser().getTenantId());
         record.setDateCreated(LocalDateTime.now());
@@ -34,14 +34,14 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public Page<FormData> getAll(final Pageable pageable) {
+    public Page<CustomerFormData> getAll(final Pageable pageable) {
         final var userId = jwtTokenUtil.getUser().getUserId();
         return Objects.nonNull(userId) ? repository.findAll(userId, pageable) : repository.findAll(pageable);
     }
 
     @Override
-    public <R> FormData update(final R request) {
-        final var requestData = modelMapper.map(request, UpdateFormDataRequest.class);
+    public <R> CustomerFormData update(final R request) {
+        final var requestData = modelMapper.map(request, UpdateCustomerFormDataRequest.class);
         final var id = requestData.getId();
         final var userId = jwtTokenUtil.getUser().getUserId();
         final var record = repository.findById(id, userId).orElseThrow(ApplicationExceptionUtils::notFound);
@@ -62,7 +62,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public FormData getById(final UUID id) {
+    public CustomerFormData getById(final UUID id) {
         return repository.findById(id).orElseThrow(ApplicationExceptionUtils::notFound);
     }
 }

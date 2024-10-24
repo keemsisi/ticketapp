@@ -17,6 +17,4 @@ import org.springframework.web.bind.annotation.RestController;
 public class JobAdvertisementController {
     private final JobAdvertisementService service;
     private final JwtTokenUtil jwtTokenUtil;
-
-
 }

@@ -11,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -20,14 +21,18 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "form_data")
+@Table(name = "customer_form_data")
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
-public class FormData extends AbstractBaseEntity {
-    @Column(name = "title", columnDefinition = "varchar(250)")
-    private String title;
-    @Column(name = "description", columnDefinition = "varchar(2500)")
-    private String description;
-    //define other fields to collect here
+public class CustomerFormData extends AbstractBaseEntity {
+    @Column(name = "first_name", columnDefinition = "varchar(250)")
+    private String firstName;
+    @Column(name = "last_name", columnDefinition = "varchar(250)")
+    private String lastName;
+    @Column(name = "phone_number", columnDefinition = "varchar(15)")
+    private String phoneNumber;
+    @Email(message = "Oops! Invalid email address")
+    @Column(name = "email", columnDefinition = "varchar(250)")
+    private String email;
 
     @PrePersist
     public void onCreate() {
