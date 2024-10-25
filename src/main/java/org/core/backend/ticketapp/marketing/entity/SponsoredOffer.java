@@ -26,6 +26,16 @@ import java.util.UUID;
 public class SponsoredOffer extends AbstractBaseEntity {
     @Column(name = "title", columnDefinition = "varchar(250)", nullable = false)
     private String title;
+    @Column(name = "valid_from", columnDefinition = "timestamptz", nullable = false)
+    private LocalDateTime validFrom;
+    @Column(name = "valid_to", columnDefinition = "timestamptz", nullable = false)
+    private LocalDateTime validTo;
+    @Column(name = "details", nullable = false)
+    private String details;
+    @Column(name = "code", nullable = false)
+    private String code;
+    @Column(name = "image", nullable = false)
+    private String image;
 
     @PrePersist
     public void onCreate() {

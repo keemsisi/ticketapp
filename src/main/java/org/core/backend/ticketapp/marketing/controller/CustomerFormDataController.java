@@ -7,7 +7,7 @@ import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.marketing.dto.formdata.CreateCustomerFormDataRequest;
-import org.core.backend.ticketapp.marketing.dto.social.UpdateSocialLinksRequest;
+import org.core.backend.ticketapp.marketing.dto.formdata.UpdateCustomerFormDataRequest;
 import org.core.backend.ticketapp.marketing.entity.CustomerFormData;
 import org.core.backend.ticketapp.marketing.service.CustomerFormDataService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -54,7 +54,7 @@ public class CustomerFormDataController {
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<CustomerFormData>> update(final @RequestBody UpdateSocialLinksRequest request) {
+    public ResponseEntity<GenericResponse<CustomerFormData>> update(final @RequestBody UpdateCustomerFormDataRequest request) {
         final var result = service.update(request);
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully updated resource!", result));
     }

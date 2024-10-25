@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -23,6 +25,10 @@ public class CreateCustomerFormDataRequest {
     @Email(message = "Oops! Invalid email address")
     @NotBlank(message = "email can't be blank")
     private String email;
+    @NotNull(message = "dob can't be null")
+    private LocalDateTime dob;
+    @NotBlank(message = "address can't be blank")
+    private String address;
     @NotBlank(message = "code can't be blank")
     private String code;
 }

@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -33,6 +34,10 @@ public class CustomerFormData extends AbstractBaseEntity {
     @Email(message = "Oops! Invalid email address")
     @Column(name = "email", columnDefinition = "varchar(250)")
     private String email;
+    @NotBlank(message = "dob can't be blank")
+    private LocalDateTime dob;
+    @NotBlank(message = "address can't be blank")
+    private String address;
 
     @PrePersist
     public void onCreate() {
