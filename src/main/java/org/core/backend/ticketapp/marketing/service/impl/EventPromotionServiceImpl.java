@@ -2,7 +2,8 @@ package org.core.backend.ticketapp.marketing.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
-import org.core.backend.ticketapp.marketing.dto.event_promtion.UpdateEventPromotionRequest;
+import org.core.backend.ticketapp.event.service.EventService;
+import org.core.backend.ticketapp.marketing.dto.event_promotion.UpdateEventPromotionRequest;
 import org.core.backend.ticketapp.marketing.entity.EventPromotion;
 import org.core.backend.ticketapp.marketing.repository.EventPromotionRepository;
 import org.core.backend.ticketapp.marketing.service.EventPromotionService;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class EventPromotionServiceImpl implements EventPromotionService {
     private final EventPromotionRepository repository;
+    private final EventService eventService;
     private final JwtTokenUtil jwtTokenUtil;
     private final ModelMapper modelMapper;
 
@@ -31,6 +33,7 @@ public class EventPromotionServiceImpl implements EventPromotionService {
         record.setUserId(jwtTokenUtil.getUser().getUserId());
         record.setTenantId(jwtTokenUtil.getUser().getTenantId());
         record.setDateCreated(LocalDateTime.now());
+        eventService.getById(record.getEventId());
         return repository.save(record);
     }
 

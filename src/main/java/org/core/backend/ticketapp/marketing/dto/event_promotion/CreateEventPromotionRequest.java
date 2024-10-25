@@ -1,4 +1,4 @@
-package org.core.backend.ticketapp.marketing.dto.event_promtion;
+package org.core.backend.ticketapp.marketing.dto.event_promotion;
 
 
 import lombok.AllArgsConstructor;
