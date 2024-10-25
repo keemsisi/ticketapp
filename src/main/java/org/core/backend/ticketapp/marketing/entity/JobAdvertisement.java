@@ -26,6 +26,20 @@ import java.util.UUID;
 public class JobAdvertisement extends AbstractBaseEntity {
     @Column(name = "title", columnDefinition = "varchar(250)", nullable = false)
     private String title;
+    @Column(name = "description", columnDefinition = "varchar(250)", nullable = false)
+    private String description;
+    @Column(name = "industry", columnDefinition = "varchar(250)", nullable = false)
+    private String industry;
+    @Column(name = "address", columnDefinition = "varchar(250)", nullable = false)
+    private String address;
+    @Column(name = "job_type", columnDefinition = "varchar(250)", nullable = false)
+    private String jobType;
+    @Column(name = "deadline_date", columnDefinition = "timestamptz", nullable = false)
+    private LocalDateTime deadlineDate;
+    @Column(name = "cvUrl", columnDefinition = "varchar(250)", nullable = false)
+    private String cvUrl;
+    @Column(name = "overview", columnDefinition = "varchar(250)", nullable = false)
+    private String overview;
 
     @PrePersist
     public void onCreate() {
