@@ -5,6 +5,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 @Builder
 @Getter
@@ -12,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InitPaymentGateWayRequestDTO {
+public class InitPaymentGateWayRequestDTO implements Serializable, Cloneable {
     @NotNull(message = "Amount cannot be null")
     private double amount;
     @NotNull(message = "Email cannot be null")
@@ -22,4 +23,13 @@ public class InitPaymentGateWayRequestDTO {
     private String callback;
     @Value("${system.payment.vendor.paystack.channels}")
     private String[] channels;
+
+    @Override
+    public InitPaymentGateWayRequestDTO clone() {
+        try {
+            return new InitPaymentGateWayRequestDTO(this.amount, this.email, this.plan, this.callback, this.channels);
+        } catch (final Exception e) {
+            throw new AssertionError();
+        }
+    }
 }

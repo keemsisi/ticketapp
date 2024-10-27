@@ -128,6 +128,8 @@ public class TransactionServiceImpl implements TransactionService {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
+            final var processPaymentRequest = paymentRequest.clone();
+            processPaymentRequest.setAmount(paymentRequest.getAmount() * 100);
             final var entity = new HttpEntity<>(paymentRequest, headers);
             response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, PaymentInitResponseDTO.class);
             if (response.getStatusCode().isError()) {
