@@ -22,7 +22,7 @@ import java.util.UUID;
 @Validated
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/customer-form-data")
+@RequestMapping("/api/v1/event-promotions")
 @AllArgsConstructor
 public class EventPromotionController {
     private final EventPromotionService service;
