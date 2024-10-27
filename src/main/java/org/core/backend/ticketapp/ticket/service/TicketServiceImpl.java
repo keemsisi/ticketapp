@@ -116,6 +116,7 @@ public class TicketServiceImpl implements TicketService {
                 final var qrCode = createTicketQrCodeAndSendEmail(ticket);
                 log.info(">>> Successfully created ticketId: {} qrCodeId: {} and orderId: {}  processed",
                         ticket.getId(), qrCode.getId(), order.getId());
+                ticket.setQrCode(qrCode);
                 return ticket;
             } catch (Exception e) {
                 event.setTicketsAvailable(event.getTicketsAvailable() + 1);

@@ -479,6 +479,7 @@ public class TransactionServiceImpl implements TransactionService {
         orderService.save(order);
         transaction.setStatus(Status.COMPLETED);
         transaction.setDateModified(LocalDateTime.now());
+        transaction.setQrCodeLink(ticket.getQrCode().getLink());
         transaction.setComment(String.format("User event payment was processed and transaction marked as completed on %s", new Date()));
         transactionRepository.save(transaction);
     }

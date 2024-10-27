@@ -11,6 +11,6 @@ public record ScannedQrCodeResponse(
         Status status,
         LocalDateTime dateCreated,
         LocalDateTime dateModified,
-        Long totalScan
+        int totalScan
 ) {
 }

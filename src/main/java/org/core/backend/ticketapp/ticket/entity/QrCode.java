@@ -36,6 +36,9 @@ public class QrCode extends AbstractBaseEntity {
     @Transient
     private String link;
 
+    @Column(name = "total_scanned")
+    private int totalScanned;
+
     @PrePersist
     public void onCreate() {
         id = UUID.randomUUID();
@@ -52,5 +55,9 @@ public class QrCode extends AbstractBaseEntity {
         if (dateModified == null) {
             dateModified = LocalDateTime.now();
         }
+    }
+
+    public int incrementScan(){
+       return ++totalScanned;
     }
 }

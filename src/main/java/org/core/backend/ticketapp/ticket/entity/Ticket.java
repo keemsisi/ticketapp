@@ -45,6 +45,9 @@ public class Ticket  extends AbstractBaseEntity {
 
     private LocalDateTime dateModified;
 
+    @Transient
+    private QrCode qrCode;
+
     @PrePersist
     public void onCreate() {
         id = UUID.randomUUID();

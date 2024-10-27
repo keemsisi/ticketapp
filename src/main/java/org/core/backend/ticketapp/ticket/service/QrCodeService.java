@@ -19,5 +19,5 @@ public interface QrCodeService {
 
     Page<QrCode> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageRequest);
 
-    ScannedQrCodeResponse scanQr(UUID id);
+    ScannedQrCodeResponse scanQr(final String id);
 }

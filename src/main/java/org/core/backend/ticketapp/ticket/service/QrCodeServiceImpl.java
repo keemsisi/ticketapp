@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
+import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -26,10 +29,11 @@ import java.util.UUID;
 @Transactional
 @AllArgsConstructor
 public class QrCodeServiceImpl implements QrCodeService {
-    private final QrCodeRepository qrCodeRepository;
+    private final QrCodeRepository repository;
     private final JwtTokenUtil jwtTokenUtil;
     private final TicketRepository ticketRepository;
     private final AppConfigs appConfigs;
+    private final EventService eventService;
 
     @Override
     public QrCode create(final QrCodeCreateRequestDTO requestDTO) {
@@ -42,7 +46,7 @@ public class QrCodeServiceImpl implements QrCodeService {
         qrcode.setCode(id.toString().replace("-", "").toUpperCase());
         qrcode.setUserId(ticket.getUserId());
         qrcode.setTenantId(ticket.getTenantId());
-        qrCodeRepository.save(qrcode);
+        repository.save(qrcode);
         qrcode.setLink(String.format(appConfigs.baseUrl, qrcode.getCode()));
         return qrcode;
 
@@ -51,17 +55,17 @@ public class QrCodeServiceImpl implements QrCodeService {
     @Override
     public QrCode getById(UUID id) {
         final var tenantId = jwtTokenUtil.getUser().getTenantId();
-        return qrCodeRepository.getById(id, tenantId)
+        return repository.getById(id, tenantId)
                 .orElseThrow(() -> new ApplicationException(400, "not_found", "QrCode not found!"));
     }
 
     @Override
     public void delete(final UUID id) {
         final var tenantId = jwtTokenUtil.getUser().getTenantId();
-        final var qrCode = qrCodeRepository.getById(id, tenantId)
+        final var qrCode = repository.getById(id, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("QrCode not found with id", id.toString()));
         qrCode.setDeleted(true);
-        qrCodeRepository.save(qrCode);
+        repository.save(qrCode);
     }
 
     @Override
@@ -74,22 +78,30 @@ public class QrCodeServiceImpl implements QrCodeService {
             UserUtils.containsActionName("event_view_qr");
             tenantId = requestDTO.tenantId();
             return Objects.nonNull(requestDTO.eventId()) ?
-                    qrCodeRepository.findByEventIdAndTenantId(eventId, tenantId, pageable) :
-                    qrCodeRepository.findByTenantId(tenantId, pageable);
+                    repository.findByEventIdAndTenantId(eventId, tenantId, pageable) :
+                    repository.findByTenantId(tenantId, pageable);
         } else if (Objects.nonNull(userType) && userType.equals(UserType.SELLER)) {
             return Objects.nonNull(requestDTO.userId()) ?
-                    qrCodeRepository.findByTenantIdAndUserId(tenantId, requestDTO.userId(), pageable) :
-                    qrCodeRepository.findByTenantId(tenantId, pageable);
+                    repository.findByTenantIdAndUserId(tenantId, requestDTO.userId(), pageable) :
+                    repository.findByTenantId(tenantId, pageable);
         } else if (Objects.nonNull(userType) && userType.equals(UserType.BUYER)) {
             return Objects.nonNull(requestDTO.eventId()) ?
-                    qrCodeRepository.findByEventIdAndTenantIdAndUserId(eventId, tenantId, userId, pageable) :
-                    qrCodeRepository.findByTenantIdAndUserId(tenantId, userId, pageable);
+                    repository.findByEventIdAndTenantIdAndUserId(eventId, tenantId, userId, pageable) :
+                    repository.findByTenantIdAndUserId(tenantId, userId, pageable);
         }
-        return qrCodeRepository.findByUserId(ObjectUtils.defaultIfNull(requestDTO.userId(), userId), pageable);
+        return repository.findByUserId(ObjectUtils.defaultIfNull(requestDTO.userId(), userId), pageable);
     }
 
     @Override
-    public ScannedQrCodeResponse scanQr(UUID id) {
-        return null;
+    public ScannedQrCodeResponse scanQr(final String code) {
+        final var qrcode = repository.getByCode(code).orElseThrow(ApplicationExceptionUtils::notFound);
+        final var event = eventService.getById(qrcode.getEventId());
+        if (LocalDateTime.now().isBefore(event.getEventDate())) {
+            throw new ApplicationException(403, "forbidden", "Oops! QR Code can't be scanned until the event date!");
+        }
+        return new ScannedQrCodeResponse(
+                qrcode.getTicketId(), qrcode.getId(), qrcode.getStatus(),
+                qrcode.getDateCreated(), qrcode.getDateModified(), qrcode.incrementScan()
+        );
     }
 }

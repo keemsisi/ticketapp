@@ -6,7 +6,7 @@ import org.core.backend.ticketapp.common.response.EventStatsResponseDTO;
 import org.core.backend.ticketapp.common.response.EventTicketStatsDTO;
 import org.core.backend.ticketapp.event.dao.EventResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
-import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
+import org.core.backend.ticketapp.event.dto.CreateEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EventService {
-    Event create(final EventCreateRequestDTO requestDTO) throws Exception;
+    Event create(final CreateEventRequestDTO requestDTO) throws Exception;
 
     List<Event> getAll();
 

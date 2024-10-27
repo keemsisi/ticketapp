@@ -1,12 +1,15 @@
 package org.core.backend.ticketapp.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
+import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.hibernate.validator.constraints.Length;
 
@@ -21,7 +24,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EventCreateRequestDTO {
+public class CreateEventRequestDTO {
     @NotBlank
     @NotNull
     private String title;
@@ -73,4 +76,13 @@ public class EventCreateRequestDTO {
     private boolean recurring = false;
     private Set<String> categories;
     private String link;
+    private String frequency;
+
+    @JsonProperty(value = "frequency")
+    public String getFrequency() {
+        if (!isRecurring() && ObjectUtils.isEmpty(frequency)) {
+            throw new ApplicationException(400, "not_allowed", "Frequency of the event is required!");
+        }
+        return frequency;
+    }
 }

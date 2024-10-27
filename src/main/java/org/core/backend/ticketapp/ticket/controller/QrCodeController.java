@@ -1,10 +1,10 @@
 package org.core.backend.ticketapp.ticket.controller;
 
 import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
-import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
@@ -52,9 +52,9 @@ public class QrCodeController implements ICrudController {
         return ResponseEntity.ok(new GenericResponse<>("00", "Successfully fetched records", records));
     }
 
-    @RequestMapping(value = "/scan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<ScannedQrCodeResponse>> scanQrCode(@PathVariable UUID id) {
-        final var record = qrCodeService.scanQr(id);
+    @RequestMapping(value = "/scan/{code}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<ScannedQrCodeResponse>> scanQrCode(@PathVariable String code) {
+        final var record = qrCodeService.scanQr(code);
         return ResponseEntity.ok(new GenericResponse<>("00", "QrCode Scanned successfully!", record));
     }
 }

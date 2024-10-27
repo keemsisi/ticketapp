@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.ObjectUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OptimisticLockType;
@@ -14,7 +13,7 @@ import org.hibernate.annotations.OptimisticLocking;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -50,4 +49,7 @@ public abstract class AbstractBaseEntity {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Column(name = "tenant_id", columnDefinition = "uuid default null")
     private UUID tenantId;
+
+    @Transient
+    private String qrCodeLink;
 }

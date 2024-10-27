@@ -10,7 +10,7 @@ import org.core.backend.ticketapp.common.response.EventTicketStatsDTO;
 import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.dao.EventResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
-import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
+import org.core.backend.ticketapp.event.dto.CreateEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
@@ -77,7 +77,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public Event create(@NotNull final EventCreateRequestDTO request) throws Exception {
+    public Event create(@NotNull final CreateEventRequestDTO request) throws Exception {
         final var event = convertToEntity(request);
         final var user = jwtTokenUtil.getUser();
         final var userId = user.getUserId();
@@ -230,11 +230,11 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(event);
     }
 
-    private EventCreateRequestDTO convertToDTO(Event event) {
-        return modelMapper.map(event, EventCreateRequestDTO.class);
+    private CreateEventRequestDTO convertToDTO(Event event) {
+        return modelMapper.map(event, CreateEventRequestDTO.class);
     }
 
-    private Event convertToEntity(EventCreateRequestDTO eventDTO) {
+    private Event convertToEntity(CreateEventRequestDTO eventDTO) {
         return modelMapper.map(eventDTO, Event.class);
     }
 

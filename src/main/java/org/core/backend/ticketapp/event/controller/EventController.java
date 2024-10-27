@@ -7,7 +7,7 @@ import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
-import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
+import org.core.backend.ticketapp.event.dto.CreateEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
@@ -30,7 +30,7 @@ public class EventController implements ICrudController {
     private final EventService eventService;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Event>> create(@Valid @RequestBody EventCreateRequestDTO request) throws Exception {
+    public ResponseEntity<GenericResponse<Event>> create(@Valid @RequestBody CreateEventRequestDTO request) throws Exception {
         final var event = eventService.create(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Created successfully", event), HttpStatus.CREATED);
     }
