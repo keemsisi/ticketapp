@@ -88,7 +88,7 @@ public class TenantController {
         final var user = jwtTokenUtil.getUser();
         Assert.notNull(tenantDto.getId());
         final var _tenant = service.getByTenantId(tenantDto.getId());
-        if (user.getTenantId() != tenantDto.getId() && !user.getAccountType().isSuperAdmin()) {
+        if (!user.getTenantId().equals(tenantDto.getId()) && !user.getAccountType().isSuperAdmin()) {
             return new ResponseEntity<>(new GenericResponse<>("01", "Oops! Resource update not allowed!", ""), HttpStatus.FORBIDDEN);
         } else if (!user.getAccountType().isSuperAdmin() && !user.getAccountType().isIndividualOrOrganizationMerchantOwner()) {
             //TODO: add checks for permission check here
