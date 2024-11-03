@@ -12,7 +12,7 @@ VALUES
                     "currency": "NGN"
                 }
             ],
-            "paymentProcessingFee": [
+            "paymentProcessingFee": [paymentProcessingFee
                 {
                     "processor": "PayStack",
                     "currency": "NGN",

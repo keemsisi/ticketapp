@@ -57,4 +57,10 @@ public class QrCodeController implements ICrudController {
         final var record = qrCodeService.scanQr(code);
         return ResponseEntity.ok(new GenericResponse<>("00", "QrCode Scanned successfully!", record));
     }
+
+    @RequestMapping(value = "/stats", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<ScannedQrCodeResponse>> stats(@PathVariable String code) {
+        final var record = qrCodeService.scanQr(code);
+        return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully!", record));
+    }
 }

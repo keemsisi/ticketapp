@@ -53,7 +53,7 @@ public class QrCodeServiceImpl implements QrCodeService {
     }
 
     @Override
-    public QrCode getById(UUID id) {
+    public QrCode getById(final UUID id) {
         final var tenantId = jwtTokenUtil.getUser().getTenantId();
         return repository.getById(id, tenantId)
                 .orElseThrow(() -> new ApplicationException(400, "not_found", "QrCode not found!"));
@@ -98,6 +98,9 @@ public class QrCodeServiceImpl implements QrCodeService {
         final var event = eventService.getById(qrcode.getEventId());
         if (LocalDateTime.now().isBefore(event.getEventDate())) {
             throw new ApplicationException(403, "forbidden", "Oops! QR Code can't be scanned until the event date!");
+        }
+        if (!qrcode.getScanned()) {
+            qrcode.setScanned(true);
         }
         return new ScannedQrCodeResponse(
                 qrcode.getTicketId(), qrcode.getId(), qrcode.getStatus(),

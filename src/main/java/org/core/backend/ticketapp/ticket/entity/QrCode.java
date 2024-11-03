@@ -37,7 +37,10 @@ public class QrCode extends AbstractBaseEntity {
     private String link;
 
     @Column(name = "total_scanned")
-    private int totalScanned;
+    private Integer totalScanned;
+
+    @Column(name = "scanned", columnDefinition = "boolean default false")
+    private Boolean scanned;
 
     @PrePersist
     public void onCreate() {
@@ -57,7 +60,7 @@ public class QrCode extends AbstractBaseEntity {
         }
     }
 
-    public int incrementScan(){
-       return ++totalScanned;
+    public int incrementScan() {
+        return ++totalScanned;
     }
 }
