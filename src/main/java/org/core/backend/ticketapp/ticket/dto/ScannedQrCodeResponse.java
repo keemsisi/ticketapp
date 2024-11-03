@@ -11,6 +11,9 @@ public record ScannedQrCodeResponse(
         Status status,
         LocalDateTime dateCreated,
         LocalDateTime dateModified,
-        int totalScan
+        int totalScan,
+        String ownerName,
+        String eventTitle,
+        String eventImage
 ) {
 }

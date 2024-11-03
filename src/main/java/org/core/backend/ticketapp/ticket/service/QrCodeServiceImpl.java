@@ -8,6 +8,7 @@ import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
+import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
@@ -34,6 +35,7 @@ public class QrCodeServiceImpl implements QrCodeService {
     private final TicketRepository ticketRepository;
     private final AppConfigs appConfigs;
     private final EventService eventService;
+    private final CoreUserService coreUserService;
 
     @Override
     public QrCode create(final QrCodeCreateRequestDTO requestDTO) {
@@ -95,6 +97,7 @@ public class QrCodeServiceImpl implements QrCodeService {
     @Override
     public ScannedQrCodeResponse scanQr(final String code) {
         final var qrcode = repository.getByCode(code).orElseThrow(ApplicationExceptionUtils::notFound);
+        final var user = coreUserService.getUserById(qrcode.getUserId()).orElseThrow(ApplicationExceptionUtils::notFound);
         final var event = eventService.getById(qrcode.getEventId());
         if (LocalDateTime.now().isBefore(event.getEventDate())) {
             throw new ApplicationException(403, "forbidden", "Oops! QR Code can't be scanned until the event date!");
@@ -102,9 +105,12 @@ public class QrCodeServiceImpl implements QrCodeService {
         if (!qrcode.getScanned()) {
             qrcode.setScanned(true);
         }
+        final var fullName = user.getFullName();
         return new ScannedQrCodeResponse(
                 qrcode.getTicketId(), qrcode.getId(), qrcode.getStatus(),
-                qrcode.getDateCreated(), qrcode.getDateModified(), qrcode.incrementScan()
+                qrcode.getDateCreated(), qrcode.getDateModified(),
+                qrcode.incrementScan(), fullName, event.getTitle(),
+                event.getEventBanner()
         );
     }
 }

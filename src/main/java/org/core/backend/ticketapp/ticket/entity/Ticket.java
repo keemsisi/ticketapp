@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.ticket.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.Status;
@@ -45,6 +46,7 @@ public class Ticket  extends AbstractBaseEntity {
 
     private LocalDateTime dateModified;
 
+    @JsonIgnore
     @Transient
     private QrCode qrCode;
 
