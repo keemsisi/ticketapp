@@ -12,4 +12,3 @@ public class MoneyAmount {
     private String value;
     private String percentage;
 }
-c
