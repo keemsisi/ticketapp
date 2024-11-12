@@ -12,7 +12,7 @@ VALUES
                     "currency": "NGN"
                 }
             ],
-            "paymentProcessingFee": [paymentProcessingFee
+            "paymentProcessingFee": [
                 {
                     "processor": "PayStack",
                     "currency": "NGN",
@@ -54,6 +54,7 @@ VALUES
             ],
             "cappedAmount": [
                 {
+                    "processor": "PayStack",
                     "currency": "NGN",
                     "value": "2000",
                     "percentage": null
@@ -132,6 +133,7 @@ VALUES
             ],
             "cappedAmount": [
                 {
+                    "processor": "PayStack",
                     "currency": "NGN",
                     "value": "3000",
                     "percentage": null
@@ -210,6 +212,7 @@ VALUES
             ],
             "cappedAmount": [
                 {
+                    "processor": "PayStack",
                     "currency": "NGN",
                     "value": "5000",
                     "percentage": null

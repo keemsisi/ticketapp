@@ -97,7 +97,10 @@ public class Tenant extends AbstractBaseEntity {
     @Column(name = "currency")
     private String currency;
     @Type(type = "JSONB")
+    @Column(name = "operational_hours")
     private OperationalHours operationalHours;
+
+    private String logoLocation;
 
     @PrePersist
     public void onCreate() {
