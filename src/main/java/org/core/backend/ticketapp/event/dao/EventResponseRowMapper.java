@@ -57,7 +57,7 @@ public class EventResponseRowMapper implements RowMapper<EventResponseDTO> {
         eventResponseDTO.setTheme(rs.getString("theme"));
         eventResponseDTO.setRecurring(rs.getBoolean("recurring"));
         eventResponseDTO.setTimeZone(rs.getString("time_zone"));
-        eventResponseDTO.setEventDate(Timestamp.valueOf(rs.getString("event_date")).toLocalDateTime());
+        eventResponseDTO.setEventDate(rs.getTimestamp("event_date").toLocalDateTime());
         eventResponseDTO.setApprovalStatus(ApprovalStatus.valueOf(rs.getString("approval_status")));
         eventResponseDTO.setTicketType(EventTicketType.valueOf(rs.getString("ticket_type")));
         eventResponseDTO.setApprovalRequired(rs.getBoolean("approval_required"));

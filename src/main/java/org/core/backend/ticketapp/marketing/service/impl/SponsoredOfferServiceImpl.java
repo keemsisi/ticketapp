@@ -3,7 +3,6 @@ package org.core.backend.ticketapp.marketing.service.impl;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
 import org.core.backend.ticketapp.marketing.dto.formdata.UpdateCustomerFormDataRequest;
-import org.core.backend.ticketapp.marketing.entity.CustomerFormData;
 import org.core.backend.ticketapp.marketing.entity.SponsoredOffer;
 import org.core.backend.ticketapp.marketing.repository.SponsoredOfferRepository;
 import org.core.backend.ticketapp.marketing.service.SponsoredOfferService;
