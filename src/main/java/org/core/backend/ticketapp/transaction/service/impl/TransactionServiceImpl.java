@@ -70,7 +70,6 @@ public class TransactionServiceImpl implements TransactionService {
     private final TenantService tenantService;
     private final ActivityLogPublisherUtil activityLogPublisherUtil;
     private final ModelMapper modelMapper;
-    private final String callbackUrl = "https://goodgle.com/?orderId=%s";
 
     @Override
     public Page<Transaction> getAll(final Pageable pageable) {
@@ -132,7 +131,7 @@ public class TransactionServiceImpl implements TransactionService {
             headers.set("Content-Type", "application/json");
             final var processPaymentRequest = paymentRequest.clone();
             processPaymentRequest.setAmount(paymentRequest.getAmount() * 100);
-            paymentRequest.setCallback(String.format(callbackUrl, orderId));
+            paymentRequest.setCallback(String.format(String.format("%s/?orderId=%s", appConfigs.baseUrlFe, orderId)));
             final var entity = new HttpEntity<>(paymentRequest, headers);
             response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, PaymentInitResponseDTO.class);
             if (response.getStatusCode().isError()) {
