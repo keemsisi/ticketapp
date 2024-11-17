@@ -36,8 +36,8 @@ public class QrCode extends AbstractBaseEntity {
     @Transient
     private String link;
 
-    @Column(name = "total_scanned")
-    private Integer totalScanned;
+    @Column(name = "total_scanned", columnDefinition = "numeric(19) default 0")
+    private int totalScanned;
 
     @Column(name = "scanned", columnDefinition = "boolean default false")
     private Boolean scanned;
