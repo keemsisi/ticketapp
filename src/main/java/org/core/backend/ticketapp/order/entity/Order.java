@@ -101,7 +101,7 @@ public class Order extends AbstractBaseEntity {
 
     @PrePersist
     public void onCreate() {
-        id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
-        dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
+        if (this.id == null) this.id = UUID.randomUUID();
+        if (this.dateCreated == null) this.dateCreated = LocalDateTime.now();
     }
 }

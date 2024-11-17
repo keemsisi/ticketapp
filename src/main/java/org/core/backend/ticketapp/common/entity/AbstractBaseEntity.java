@@ -52,4 +52,5 @@ public abstract class AbstractBaseEntity {
 
     @Transient
     private String qrCodeLink;
+
 }

@@ -70,6 +70,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TenantService tenantService;
     private final ActivityLogPublisherUtil activityLogPublisherUtil;
     private final ModelMapper modelMapper;
+    private final String callbackUrl = "https://goodgle.com/?orderId=%s";
 
     @Override
     public Page<Transaction> getAll(final Pageable pageable) {
@@ -125,17 +126,19 @@ public class TransactionServiceImpl implements TransactionService {
         }
         ResponseEntity<PaymentInitResponseDTO> response = null;
         try {
-            HttpHeaders headers = new HttpHeaders();
+            final var orderId = UUID.randomUUID();
+            final var headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
             final var processPaymentRequest = paymentRequest.clone();
             processPaymentRequest.setAmount(paymentRequest.getAmount() * 100);
+            paymentRequest.setCallback(String.format(callbackUrl, orderId));
             final var entity = new HttpEntity<>(paymentRequest, headers);
             response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, PaymentInitResponseDTO.class);
             if (response.getStatusCode().isError()) {
                 throw new ApplicationException(400, "init_payment_failed", "Failed to init payment");
             }
-            return getOrders(eventSeatSectionMap, request, paymentRequest.getAmount(),
+            return getOrders(orderId, eventSeatSectionMap, request, paymentRequest.getAmount(),
                     Objects.requireNonNull(response.getBody()), paymentRequest, isPlanPayment);
         } catch (Throwable e) {
             log.error(">>> Error Occurred while initiating transaction", e);
@@ -143,12 +146,13 @@ public class TransactionServiceImpl implements TransactionService {
         throw new ApplicationException(400, "init_payment_failed", "Failed to init payment with checkout link!");
     }
 
-    private OrderResponseDto getOrders(final Map<UUID, EventSeatSection> eventSeatSectionMap,
-                                       final InitPaymentOrderRequestDTO initRequest,
-                                       final double totalAmountPaid,
-                                       final PaymentInitResponseDTO response,
-                                       final InitPaymentGateWayRequestDTO request,
-                                       final boolean isPlanTransaction) {
+    private OrderResponseDto getOrders(
+            final UUID orderId, final Map<UUID, EventSeatSection> eventSeatSectionMap,
+            final InitPaymentOrderRequestDTO initRequest,
+            final double totalAmountPaid,
+            final PaymentInitResponseDTO response,
+            final InitPaymentGateWayRequestDTO request,
+            final boolean isPlanTransaction) {
         final var quantity = !initRequest.getSecondary().isEmpty() ? initRequest.getSecondary().size() + 1 : 1;
         final var primary = initRequest.getPrimary();
         final var secondary = initRequest.getSecondary();
@@ -160,6 +164,7 @@ public class TransactionServiceImpl implements TransactionService {
         final var data = Objects.isNull(response) ? new PaymentInitResponseDTO.Data() : response.getData();
         final var primaryUserDto = getOrCreateNewUser(primary);
         final var orderType = isPlanTransaction ? OrderType.PLAN_SUBSCRIPTION : OrderType.EVENT_TICKET;
+        order.setId(orderId);
         order.setEventId(eventId);
         order.setQuantity(quantity);
         order.setUserId(jwtTokenUtil.getUser().getUserId());
@@ -405,7 +410,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     public OrderResponseDto processFreeEvent(final Map<UUID, EventSeatSection> eventSeatSectionMap, final InitPaymentOrderRequestDTO request) {
-        final var orders = getOrders(eventSeatSectionMap, request, 0.0, null, null, false);
+        final var orders = getOrders(UUID.randomUUID(), eventSeatSectionMap, request, 0.0, null, null, false);
         final var primaryOrder = orders.getPrimary();
         final var secondaryOrders = orders.getSecondary();
         final var ticketDto = new TicketCreateRequestDTO(

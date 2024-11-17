@@ -23,11 +23,12 @@ public class InitPaymentGateWayRequestDTO implements Serializable, Cloneable {
     private String callback;
     @Value("${system.payment.vendor.paystack.channels}")
     private String[] channels;
+    private String callback_url;
 
     @Override
     public InitPaymentGateWayRequestDTO clone() {
         try {
-            return new InitPaymentGateWayRequestDTO(this.amount, this.email, this.plan, this.callback, this.channels);
+            return new InitPaymentGateWayRequestDTO(this.amount, this.email, this.plan, this.callback, this.channels,this.callback_url);
         } catch (final Exception e) {
             throw new AssertionError();
         }
