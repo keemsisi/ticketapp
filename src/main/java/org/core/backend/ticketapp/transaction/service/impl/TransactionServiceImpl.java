@@ -280,6 +280,7 @@ public class TransactionServiceImpl implements TransactionService {
                         String.format("Failed to verify payment, please try again later or contact support with code: %s", errorCode));
             } else {
                 final var data = Objects.requireNonNull(Objects.requireNonNull(response.getBody()).getData());
+                final var isValidAmount = ((double) (data.getAmount() / 100)) >= order.getTotalBatchAmount().doubleValue();
                 final var gatewayResponse = objectMapper.writeValueAsString(response.getBody());
                 final var meta = PaymentGatewayMeta.builder()
                         .paidAt(data.getPaidAt())
@@ -290,7 +291,7 @@ public class TransactionServiceImpl implements TransactionService {
                         .gatewayResponse(gatewayResponse)
                         .build();
                 final var transaction = createOrGetExistingTransaction(order, meta);
-                if (!transaction.getStatus().isCompleted()) {
+                if (!transaction.getStatus().isCompleted() && isValidAmount) {
                     if (ObjectUtils.isNotEmpty(data.getPlan())) {
                         CompletableFuture.runAsync(() -> {
                             log.info(">>> Processing plan upgrade with user : {} code : {} and amount {} ",
@@ -300,6 +301,9 @@ public class TransactionServiceImpl implements TransactionService {
                         return transaction;
                     }
                     processCreateTicketAndQrCode(transaction, order);
+                } else if (!isValidAmount) {
+                    transaction.setStatus(Status.LESSER_AMOUNT_PAID);
+                    transaction.setDateModified(LocalDateTime.now());
                 }
                 return transaction;
             }

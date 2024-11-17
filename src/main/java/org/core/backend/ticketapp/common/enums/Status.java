@@ -8,7 +8,8 @@ public enum Status {
     DELETED,
     BLACKLISTED,
     EXPIRED,
-    COMPLETED;
+    COMPLETED,
+    LESSER_AMOUNT_PAID;
 
     public boolean isPaid() {
         return this == PAID;
