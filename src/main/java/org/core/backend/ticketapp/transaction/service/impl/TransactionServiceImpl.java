@@ -302,8 +302,10 @@ public class TransactionServiceImpl implements TransactionService {
                     }
                     processCreateTicketAndQrCode(transaction, order);
                 } else if (!isValidAmount) {
-                    transaction.setStatus(Status.LESSER_AMOUNT_PAID);
+                    final var providerStatus = StringUtils.isNotBlank(meta.getPaidAt()) ? Status.COMPLETED : Status.FAILED;
+                    transaction.setProviderStatus(providerStatus);
                     transaction.setDateModified(LocalDateTime.now());
+                    transaction.setStatus(Status.INVALID_AMOUNT_PAID);
                 }
                 return transaction;
             }

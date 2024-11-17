@@ -54,6 +54,10 @@ public class Transaction extends AbstractBaseEntity {
     @Enumerated(value = EnumType.STRING)
     private Status status;
 
+    @Column(name = "provider_status")
+    @Enumerated(value = EnumType.STRING)
+    private Status providerStatus;
+
     @Column(name = "comment")
     private String comment;
 

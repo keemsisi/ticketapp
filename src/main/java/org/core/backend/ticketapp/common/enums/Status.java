@@ -9,7 +9,8 @@ public enum Status {
     BLACKLISTED,
     EXPIRED,
     COMPLETED,
-    LESSER_AMOUNT_PAID;
+    FAILED,
+    INVALID_AMOUNT_PAID;
 
     public boolean isPaid() {
         return this == PAID;
