@@ -14,6 +14,7 @@ public record ScannedQrCodeResponse(
         int totalScan,
         String ownerName,
         String eventTitle,
-        String eventImage
+        String eventImage,
+        UUID eventId
 ) {
 }

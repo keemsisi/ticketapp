@@ -36,9 +36,9 @@ public interface QrCodeRepository extends JpaRepository<QrCode, UUID>, PagingAnd
     @Query(value = "SELECT * FROM qr_code t WHERE t.code = ?1 AND t.deleted=false ", nativeQuery = true)
     Optional<QrCode> getByCode(final String code);
 
-    @Query(value = "SELECT count(*) FROM qr_code t WHERE t.scanned = true AND t.deleted=true AND t.event_id=?1 AND t.tenant_id=?2 ", nativeQuery = true)
+    @Query(value = "SELECT count(*) FROM qr_code t WHERE t.scanned = true AND t.deleted=false AND t.event_id=?1 AND t.tenant_id=?2 ", nativeQuery = true)
     Long countAllScannedQr(final UUID eventId, final UUID tenantId);
 
-    @Query(value = "SELECT count(*) FROM qr_code t WHERE t.scanned = true AND t.deleted=false AND t.event_id=?1 AND t.tenant_id=?2 ", nativeQuery = true)
+    @Query(value = "SELECT count(*) FROM qr_code t WHERE t.scanned = false AND t.deleted=false AND t.event_id=?1 AND t.tenant_id=?2 ", nativeQuery = true)
     Long countAllUnScannedQr(final UUID eventId, final UUID tenantId);
 }

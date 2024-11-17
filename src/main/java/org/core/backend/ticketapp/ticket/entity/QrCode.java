@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.ticket.entity;
 
 import lombok.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.Status;
 
@@ -37,7 +38,7 @@ public class QrCode extends AbstractBaseEntity {
     private String link;
 
     @Column(name = "total_scanned", columnDefinition = "numeric(19) default 0")
-    private int totalScanned;
+    private Integer totalScanned;
 
     @Column(name = "scanned", columnDefinition = "boolean default false")
     private Boolean scanned;
@@ -60,7 +61,12 @@ public class QrCode extends AbstractBaseEntity {
         }
     }
 
+    public Integer getTotalScanned() {
+        return ObjectUtils.defaultIfNull(totalScanned, 0);
+    }
+
     public int incrementScan() {
+        this.totalScanned = getTotalScanned();
         return ++totalScanned;
     }
 }

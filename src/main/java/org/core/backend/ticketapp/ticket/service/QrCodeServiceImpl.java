@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Transactional
@@ -107,19 +108,26 @@ public class QrCodeServiceImpl implements QrCodeService {
             qrcode.setScanned(true);
         }
         final var fullName = user.getFullName();
-        return new ScannedQrCodeResponse(
+        final var response = new ScannedQrCodeResponse(
                 qrcode.getTicketId(), qrcode.getId(), qrcode.getStatus(),
                 qrcode.getDateCreated(), qrcode.getDateModified(),
                 qrcode.incrementScan(), fullName, event.getTitle(),
-                event.getEventBanner()
+                event.getEventBanner(), event.getId()
         );
+        CompletableFuture.runAsync(() -> {
+            qrcode.setDateModified(LocalDateTime.now());
+            repository.save(qrcode);
+        });
+        return response;
     }
 
     @Override
     public QrCodeStatsDTO getStats(final UUID eventId) {
+        final var event = eventService.getById(eventId);
         final var tenantId = jwtTokenUtil.getUser().getTenantId();
         final var totalScanned = repository.countAllScannedQr(eventId, tenantId);
         final var totalUnScanned = repository.countAllUnScannedQr(eventId, tenantId);
-        return new QrCodeStatsDTO(totalScanned, totalUnScanned);
+        return new QrCodeStatsDTO(totalScanned, totalUnScanned, event.getId(),
+                event.getTitle(), event.getEventDate(), event.getEventBanner());
     }
 }
