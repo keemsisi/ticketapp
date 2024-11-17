@@ -32,7 +32,7 @@ public class SocialMediaLinksAdvertisementController {
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> create(@Validated @RequestBody CreateSocialLinksRequest request) throws Exception {
-        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
+//        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var result = service.create(request);
         return new ResponseEntity<>(new GenericResponse<>("00", "Social links created successfully", result), HttpStatus.CREATED);
     }
