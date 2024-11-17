@@ -6,10 +6,13 @@ import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.QrCodeCreateRequestDTO;
+import org.core.backend.ticketapp.ticket.dto.QrCodeStatsDTO;
 import org.core.backend.ticketapp.ticket.dto.ScannedQrCodeResponse;
 import org.core.backend.ticketapp.ticket.entity.QrCode;
 import org.core.backend.ticketapp.ticket.service.QrCodeService;
@@ -18,12 +21,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequestMapping(value = "/api/v1/qrcode")
 @RestController
 @AllArgsConstructor
 public class QrCodeController implements ICrudController {
+    private final AppConfigs appConfigs;
     private final QrCodeService qrCodeService;
     private final JwtTokenUtil jwtTokenUtil;
 
@@ -31,12 +36,14 @@ public class QrCodeController implements ICrudController {
     public ResponseEntity<GenericResponse<QrCode>> create(final @RequestBody QrCodeCreateRequestDTO request) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var data = qrCodeService.create(request);
+        data.setLink(String.format(appConfigs.baseUrl, data.getCode()));
         return ResponseEntity.ok(new GenericResponse<>("00", "QrCode created successfully", data));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<QrCode>> getById(final @PathVariable UUID id) {
         final var data = qrCodeService.getById(id);
+        data.setLink(String.format(appConfigs.baseUrl, data.getCode()));
         return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully", data));
     }
 
@@ -49,6 +56,7 @@ public class QrCodeController implements ICrudController {
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
         final var records = PagedMapperUtil.map(qrCodeService.getAll(requestDTO, pageable));
+        ((List<QrCode>) records.getContent()).forEach(qrCode -> qrCode.setLink(String.format(appConfigs.baseUrl, qrCode.getCode())));
         return ResponseEntity.ok(new GenericResponse<>("00", "Successfully fetched records", records));
     }
 
@@ -58,9 +66,12 @@ public class QrCodeController implements ICrudController {
         return ResponseEntity.ok(new GenericResponse<>("00", "QrCode Scanned successfully!", record));
     }
 
-    @RequestMapping(value = "/stats", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<ScannedQrCodeResponse>> stats(@PathVariable String code) {
-        final var record = qrCodeService.scanQr(code);
+    @RequestMapping(value = "/stats/{eventId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericResponse<QrCodeStatsDTO>> stats(@PathVariable UUID eventId) {
+        if (!jwtTokenUtil.getUser().getUserType().isSeller() || !jwtTokenUtil.getUser().isAdmin()) {
+            throw new ApplicationException(403, "forbidden", "Oops! Access not allowed");
+        }
+        final var record = qrCodeService.getStats(eventId);
         return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully!", record));
     }
 }

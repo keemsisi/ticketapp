@@ -10,4 +10,10 @@ public enum UserType {
     public boolean isBuyer() {
         return this == BUYER;
     }
+
+    public boolean isSeller() {
+        return this == SELLER;
+    }
+
+
 }

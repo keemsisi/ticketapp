@@ -13,6 +13,7 @@ import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.QrCodeCreateRequestDTO;
+import org.core.backend.ticketapp.ticket.dto.QrCodeStatsDTO;
 import org.core.backend.ticketapp.ticket.dto.ScannedQrCodeResponse;
 import org.core.backend.ticketapp.ticket.entity.QrCode;
 import org.core.backend.ticketapp.ticket.repository.QrCodeRepository;
@@ -112,5 +113,13 @@ public class QrCodeServiceImpl implements QrCodeService {
                 qrcode.incrementScan(), fullName, event.getTitle(),
                 event.getEventBanner()
         );
+    }
+
+    @Override
+    public QrCodeStatsDTO getStats(final UUID eventId) {
+        final var tenantId = jwtTokenUtil.getUser().getTenantId();
+        final var totalScanned = repository.countAllScannedQr(eventId, tenantId);
+        final var totalUnScanned = repository.countAllUnScannedQr(eventId, tenantId);
+        return new QrCodeStatsDTO(totalScanned, totalUnScanned);
     }
 }

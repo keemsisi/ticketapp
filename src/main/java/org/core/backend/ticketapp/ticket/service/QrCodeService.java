@@ -3,6 +3,7 @@ package org.core.backend.ticketapp.ticket.service;
 
 import org.core.backend.ticketapp.ticket.dto.FilterTicketRequestDTO;
 import org.core.backend.ticketapp.ticket.dto.QrCodeCreateRequestDTO;
+import org.core.backend.ticketapp.ticket.dto.QrCodeStatsDTO;
 import org.core.backend.ticketapp.ticket.dto.ScannedQrCodeResponse;
 import org.core.backend.ticketapp.ticket.entity.QrCode;
 import org.springframework.data.domain.Page;
@@ -20,4 +21,6 @@ public interface QrCodeService {
     Page<QrCode> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageRequest);
 
     ScannedQrCodeResponse scanQr(final String id);
+
+    QrCodeStatsDTO getStats(final UUID eventId);
 }
