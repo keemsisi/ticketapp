@@ -56,6 +56,7 @@ import static org.core.backend.ticketapp.common.util.Constants.PAYSTACK_VERIFY;
 @Service
 @AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
+    private final static String CALLBACK_TEMPLATE = "%s/?orderId=%s";
     private final TransactionRepository transactionRepository;
     private final OrderService orderService;
     private final RestTemplate restTemplate;
@@ -131,7 +132,7 @@ public class TransactionServiceImpl implements TransactionService {
             headers.set("Content-Type", "application/json");
             final var processPaymentRequest = paymentRequest.clone();
             processPaymentRequest.setAmount(paymentRequest.getAmount() * 100);
-            paymentRequest.setCallback(String.format(String.format("%s/?orderId=%s", appConfigs.baseUrlFe, orderId)));
+            paymentRequest.setCallback(String.format(String.format(CALLBACK_TEMPLATE, appConfigs.baseUrlFe, orderId)));
             final var entity = new HttpEntity<>(paymentRequest, headers);
             response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, PaymentInitResponseDTO.class);
             if (response.getStatusCode().isError()) {
