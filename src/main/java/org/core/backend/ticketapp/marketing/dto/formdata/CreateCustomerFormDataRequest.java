@@ -19,7 +19,7 @@ public class CreateCustomerFormDataRequest {
     private String firstName;
     @NotBlank(message = "lastName can't be blank")
     private String lastName;
-    @Max(value = 15, message = "phoneNumber max is 15")
+//    @Max(value = 15, message = "phoneNumber max is 15")
     @NotBlank(message = "phoneNumber can't be blank")
     private String phoneNumber;
     @Email(message = "Oops! Invalid email address")
