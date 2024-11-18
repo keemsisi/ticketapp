@@ -434,7 +434,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public void processCreateTicketAndQrCode(final Transaction transaction, final Order order) throws JsonProcessingException {
         processQrCodeAndTicketHelper(order, transaction);
-        final var orders = orderService.getByBatchId(order.getBatchOrderId());
+        final var orders = orderService.getByBatchId(order.getId());
         if (!orders.isEmpty()) {
             orders.forEach(secOrder -> {
                 final var secTransaction = new Transaction();
@@ -486,12 +486,13 @@ public class TransactionServiceImpl implements TransactionService {
                 StringUtils.defaultIfBlank(user.getGender(), Gender.OTHERS.name()))
         );
         final var ticket = ticketService.create(ticketDto, order);
-        order.setTicketId(ticket.getId());
-        orderService.save(order);
         transaction.setStatus(Status.COMPLETED);
         transaction.setDateModified(LocalDateTime.now());
         transaction.setQrCodeLink(ticket.getQrCode().getLink());
         transaction.setComment(String.format("User event payment was processed and transaction marked as completed on %s", new Date()));
         transactionRepository.save(transaction);
+        order.setStatus(OrderStatus.COMPLETED);
+        order.setTicketId(ticket.getId());
+        orderService.save(order);
     }
 }
