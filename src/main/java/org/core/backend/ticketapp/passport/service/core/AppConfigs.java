@@ -10,8 +10,8 @@ import java.util.UUID;
 public class AppConfigs {
     @Value(value = "${ticket.app.baseUrl}")
     public String baseUrl;
-    @Value(value = "${ticket.app.baseUrl.fe}")
-    public String baseUrlFe;
+    @Value(value = "${ticket.app.payment.callback_url}")
+    public String paymentCallbackUrl;
     @Value("${system.payment.vendor.paystack.secret.api_key}")
     public String payStackApiKey;
     @Value(value = "${system.default.plan.standard}")

@@ -132,7 +132,7 @@ public class TransactionServiceImpl implements TransactionService {
             headers.set("Content-Type", "application/json");
             final var processPaymentRequest = paymentRequest.clone();
             processPaymentRequest.setAmount(paymentRequest.getAmount() * 100);
-            processPaymentRequest.setCallback_url(String.format(String.format(CALLBACK_TEMPLATE, appConfigs.baseUrlFe, orderId)));
+            processPaymentRequest.setCallback_url(String.format(String.format(CALLBACK_TEMPLATE, appConfigs.paymentCallbackUrl, orderId)));
             final var entity = new HttpEntity<>(processPaymentRequest, headers);
             response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, PaymentInitResponseDTO.class);
             if (response.getStatusCode().isError()) {
