@@ -434,11 +434,8 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public void processCreateTicketAndQrCode(final Transaction transaction, final Order order) throws JsonProcessingException {
         processQrCodeAndTicketHelper(order, transaction);
-        if (Objects.nonNull(order.getBatchOrderId())) {
-            final var orders = orderService.getByBatchId(order.getBatchOrderId());
-            if (orders.isEmpty()) {
-                log.info(">>> Could not find batch orders with batchId : {} ", orders);
-            }
+        final var orders = orderService.getByBatchId(order.getBatchOrderId());
+        if (!orders.isEmpty()) {
             orders.forEach(secOrder -> {
                 final var secTransaction = new Transaction();
                 secTransaction.setId(UUID.randomUUID());
@@ -457,6 +454,8 @@ public class TransactionServiceImpl implements TransactionService {
                 transactionRepository.save(secTransaction);
                 processQrCodeAndTicketHelper(secOrder, secTransaction);
             });
+        } else {
+            log.info(">>> Processing only primary orders, no secondary orders : {} ", orders);
         }
         activityLogPublisherUtil.saveActivityLog(order.getUserId(), Order.class.getTypeName(),
                 null, objectMapper.writeValueAsString(order),
