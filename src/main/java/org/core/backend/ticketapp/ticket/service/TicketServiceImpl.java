@@ -109,7 +109,7 @@ public class TicketServiceImpl implements TicketService {
                     final var loggedInUserId = jwtTokenUtil.getUser().getUserId();
                     ticket.setUserId(loggedInUserId);
                 }
-                ticket.setTenantId(event.getTenantId());
+                ticket.setTenantId(order.getTenantId());
                 ticket.setDateCreated(LocalDateTime.now());
                 ticket.setId(UUID.randomUUID());
                 ticket = ticketRepository.save(ticket);

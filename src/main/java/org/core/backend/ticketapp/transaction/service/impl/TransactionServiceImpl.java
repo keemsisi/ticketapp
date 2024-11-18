@@ -140,7 +140,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
             return getOrders(orderId, eventSeatSectionMap, request, paymentRequest.getAmount(),
                     Objects.requireNonNull(response.getBody()), paymentRequest, isPlanPayment);
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             log.error(">>> Error Occurred while initiating transaction", e);
         }
         throw new ApplicationException(400, "init_payment_failed", "Failed to init payment with checkout link!");
@@ -167,7 +167,6 @@ public class TransactionServiceImpl implements TransactionService {
         order.setId(orderId);
         order.setEventId(eventId);
         order.setQuantity(quantity);
-        order.setUserId(jwtTokenUtil.getUser().getUserId());
         order.setAmount(new BigDecimal(String.valueOf(primaryOrderAmount)));
         order.setTotalBatchAmount(secondary.isEmpty() ? null : new BigDecimal(String.valueOf(totalAmountPaid)));
         order.setTotalFee(null);//update here for fee processing
