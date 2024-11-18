@@ -106,8 +106,7 @@ public class TicketServiceImpl implements TicketService {
                     }
                     throw new ApplicationException(400, "not_found", "Order does not exists!");
                 } else {
-                    final var loggedInUserId = jwtTokenUtil.getUser().getUserId();
-                    ticket.setUserId(loggedInUserId);
+                    ticket.setUserId(order.getUserId());
                 }
                 ticket.setTenantId(order.getTenantId());
                 ticket.setDateCreated(LocalDateTime.now());
