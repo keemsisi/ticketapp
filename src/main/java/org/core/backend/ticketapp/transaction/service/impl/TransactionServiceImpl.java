@@ -256,12 +256,12 @@ public class TransactionServiceImpl implements TransactionService {
                     log.error("An exception occurred while creating user ", e);
                 }
             });
-            modelMapper.map(createUserRequestDto, LoggedInUserDto.class);
+            modelMapper.map(createUserRequestDto, createdUserDto);
             createdUserDto.setUserId(userId);
             return createdUserDto;
         }
         final var user = optUser.get();
-        modelMapper.map(optUser, LoggedInUserDto.class);
+        modelMapper.map(user, createdUserDto);
         createdUserDto.setUserId(user.getId());
         return createdUserDto;
     }
