@@ -132,8 +132,8 @@ public class TransactionServiceImpl implements TransactionService {
             headers.set("Content-Type", "application/json");
             final var processPaymentRequest = paymentRequest.clone();
             processPaymentRequest.setAmount(paymentRequest.getAmount() * 100);
-            paymentRequest.setCallback(String.format(String.format(CALLBACK_TEMPLATE, appConfigs.baseUrlFe, orderId)));
-            final var entity = new HttpEntity<>(paymentRequest, headers);
+            processPaymentRequest.setCallback_url(String.format(String.format(CALLBACK_TEMPLATE, appConfigs.baseUrlFe, orderId)));
+            final var entity = new HttpEntity<>(processPaymentRequest, headers);
             response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, PaymentInitResponseDTO.class);
             if (response.getStatusCode().isError()) {
                 throw new ApplicationException(400, "init_payment_failed", "Failed to init payment");
