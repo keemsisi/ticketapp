@@ -55,12 +55,12 @@ public class PlanConfig {
         return transactionProcessingFeesDTO;
     }
 
-    private double getAmountToCharge(final FeeType feeType, final String feeAmount, final double amount) {
+    private double getAmountToCharge(final FeeType feeType, final String value, final double amount) {
         if (Objects.requireNonNull(feeType) == FeeType.PERCENTAGE) {
-            final var percentageVal = new BigDecimal(String.valueOf(feeAmount)).divide(new BigDecimal(String.valueOf(100)), RoundingMode.UNNECESSARY);
+            final var percentageVal = new BigDecimal(String.valueOf(value)).divide(new BigDecimal(String.valueOf(100)), RoundingMode.UNNECESSARY);
             return percentageVal.multiply(new BigDecimal(String.valueOf(amount))).doubleValue();
         } else if (Objects.requireNonNull(feeType) == FeeType.FIXED) {
-            final var percentageVal = new BigDecimal(String.valueOf(feeAmount));
+            final var percentageVal = new BigDecimal(String.valueOf(value));
             return percentageVal.doubleValue();
         } else if (Objects.requireNonNull(feeType) == FeeType.RANGE) {
             return 0; //not implemented at the moment
