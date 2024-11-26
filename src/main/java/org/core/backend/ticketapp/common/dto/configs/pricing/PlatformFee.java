@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PlatformFee {
     private String processor;
-    private String feeType;
+    private FeeType feeType;
     private String amount;
     private String currency;
 }

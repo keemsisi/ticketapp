@@ -11,8 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.Gender;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
-import org.core.backend.ticketapp.passport.service.core.mail.mailchimp.dto.SendMessage;
-import org.core.backend.ticketapp.passport.service.core.mail.mailchimp.dto.To;
 import org.core.backend.ticketapp.common.redis.TwoFADTO;
 import org.core.backend.ticketapp.common.request.MessagingServiceRequest;
 import org.core.backend.ticketapp.common.request.TwoFaValidationDTO;
@@ -27,10 +25,12 @@ import org.core.backend.ticketapp.passport.repository.EmailVerificationRepositor
 import org.core.backend.ticketapp.passport.repository.RoleRepository;
 import org.core.backend.ticketapp.passport.repository.UserRepository;
 import org.core.backend.ticketapp.passport.repository.UserRoleRepository;
-import org.core.backend.ticketapp.passport.service.core.mail.mailchimp.MailChimpService;
 import org.core.backend.ticketapp.passport.service.RedisService;
 import org.core.backend.ticketapp.passport.service.SmsService;
 import org.core.backend.ticketapp.passport.service.TenantService;
+import org.core.backend.ticketapp.passport.service.core.mail.mailchimp.MailChimpService;
+import org.core.backend.ticketapp.passport.service.core.mail.mailchimp.dto.SendMessage;
+import org.core.backend.ticketapp.passport.service.core.mail.mailchimp.dto.To;
 import org.core.backend.ticketapp.passport.util.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
@@ -289,7 +289,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
             final var hashedPassword = passwordEncoder.encode(password);
             user.setPassword(hashedPassword);
         }
-
+        user.setDefaultPlanId(appConfigs.defaultPlanId);//set default plan Id for the user
 
         userRepository.saveAndFlush(user);
 //        user.setPassword(password); //set the password so it can be sent to the user via email

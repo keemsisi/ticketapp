@@ -16,6 +16,10 @@ public interface ApplicationConfigRepository extends JpaRepository<ApplicationCo
     @Query(value = "SELECT e.* FROM application_config e WHERE e.id = ?1 AND e.deleted=false", nativeQuery = true)
     Optional<ApplicationConfig> findById(final @NotNull UUID id);
 
+    @NotNull
+    @Query(value = "SELECT e.* FROM application_config e WHERE e.name = ?1 AND e.deleted=false", nativeQuery = true)
+    Optional<ApplicationConfig> findByName(final @NotNull String name);
+
 }
 
 

@@ -55,6 +55,10 @@ public class LoggedInUserDto {
     @JsonProperty("plan_id")
     private String planId;
 
+    @ExcelColumn(columnName = "Plan Type")
+    @JsonProperty("plan_type")
+    private String planType;
+
     private String profilePictureLocation;
 
     @ExcelColumn(columnName = "Phone", failIfAbsent = false)

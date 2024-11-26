@@ -7,8 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.core.backend.ticketapp.common.dto.configs.pricing.PlanConfig;
+import org.core.backend.ticketapp.common.dto.configs.pricing.TransactionProcessingFeesDTO;
 import org.core.backend.ticketapp.common.enums.*;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.service.EventSeatSectionService;
 import org.core.backend.ticketapp.event.service.EventService;
@@ -17,6 +20,7 @@ import org.core.backend.ticketapp.order.service.OrderService;
 import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.core.backend.ticketapp.passport.dtos.core.UserDto;
 import org.core.backend.ticketapp.passport.entity.Tenant;
+import org.core.backend.ticketapp.passport.repository.ApplicationConfigRepository;
 import org.core.backend.ticketapp.passport.service.TenantService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
@@ -71,6 +75,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TenantService tenantService;
     private final ActivityLogPublisherUtil activityLogPublisherUtil;
     private final ModelMapper modelMapper;
+    private final ApplicationConfigRepository applicationConfigRepository;
 
     @Override
     public Page<Transaction> getAll(final Pageable pageable) {
@@ -130,6 +135,7 @@ public class TransactionServiceImpl implements TransactionService {
             final var headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
+//            final var paymentFees = getConfiguredPaymentFees(request, paymentRequest);
             final var processPaymentRequest = paymentRequest.clone();
             processPaymentRequest.setAmount(paymentRequest.getAmount() * 100);
             processPaymentRequest.setCallback_url(String.format(CALLBACK_TEMPLATE, appConfigs.paymentCallbackUrl, orderId));
@@ -144,6 +150,25 @@ public class TransactionServiceImpl implements TransactionService {
             log.error(">>> Error Occurred while initiating transaction", e);
         }
         throw new ApplicationException(400, "init_payment_failed", "Failed to init payment with checkout link!");
+    }
+
+    //Ticket Price	10,000
+    //Fees	600
+    //Tax	750
+    private TransactionProcessingFeesDTO getConfiguredPaymentFees(final InitPaymentOrderRequestDTO request, final InitPaymentGateWayRequestDTO paymentRequest) {
+        //    private List<PlatformFee> platformFee;
+        //    private List<PaymentProcessingFee> paymentProcessingFee;
+        //    private List<AdditionalFee> additionalFee;
+        final var userDto = getOrCreateNewUser(request.getPrimary());
+        final var plan = planService.getById(UUID.fromString(userDto.getPlanId()));//get the tenant, so we can retrieve the subscription plan id
+        final var planName = plan.getName().toUpperCase();
+        final var applicationConfigs = applicationConfigRepository.findByName(planName).orElseThrow(ApplicationExceptionUtils::notFound);
+        final var planConfig = objectMapper.convertValue(applicationConfigs.getData(), PlanConfig.class);
+        final var transactionProcessingFeesDTO = new TransactionProcessingFeesDTO();
+        transactionProcessingFeesDTO.setFee(TransactionProcessingFeesDTO.FeeDTO.builder().build());
+        transactionProcessingFeesDTO.setFee(TransactionProcessingFeesDTO.FeeDTO.builder().build());
+        transactionProcessingFeesDTO.setFee(TransactionProcessingFeesDTO.FeeDTO.builder().build());
+        return transactionProcessingFeesDTO;
     }
 
     private OrderResponseDto getOrders(
@@ -258,6 +283,7 @@ public class TransactionServiceImpl implements TransactionService {
             });
             modelMapper.map(createUserRequestDto, createdUserDto);
             createdUserDto.setUserId(userId);
+            createdUserDto.setPlanId(appConfigs.defaultPlanId.toString());
             return createdUserDto;
         }
         final var user = optUser.get();

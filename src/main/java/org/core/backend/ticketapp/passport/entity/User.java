@@ -219,6 +219,9 @@ public class User implements UserDetails {
     @Column(name = "type")
     private UserType type;
 
+    @Column(name = "default_plan_id")
+    private UUID defaultPlanId;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

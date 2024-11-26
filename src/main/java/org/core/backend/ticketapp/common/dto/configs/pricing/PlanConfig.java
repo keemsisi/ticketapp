@@ -19,4 +19,17 @@ public class PlanConfig {
     private List<String> features;
     private List<String> support;
     private List<SubscriptionOption> subscriptionOption;
+    //{
+    //     "processor": "PayStack",
+    //     "feeType": "PERCENTAGE",
+    //     "amount": "3",
+    //     "currency": "NGN"
+    //}
+    public double getTotalFees(final double amount , final String processor, final String currency){
+//        final var platformFee = this.platformFee.stream()
+//                .filter(platFee -> platFee.getProcessor().equalsIgnoreCase(processor)
+//                        && platFee.getCurrency().equalsIgnoreCase(currency))
+//                .map(platFee->{if (platFee.getFeeType().)});
+        return 0;
+    }
 }
