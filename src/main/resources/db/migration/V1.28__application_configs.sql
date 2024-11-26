@@ -1,13 +1,13 @@
 INSERT INTO application_config (name, data)
 VALUES
     (
-        'Standard Plan',
+        'STANDARD_PLAN',
         '{
             "plan": "Standard",
             "platformFee": [
                 {
                     "processor": "PayStack",
-                    "feeType": "PERCENTAGE",
+                    "type": "PERCENTAGE",
                     "amount": "3.5",
                     "currency": "NGN"
                 }
@@ -29,7 +29,7 @@ VALUES
             "additionalFee": [
                 {
                     "processor": "PayStack",
-                    "feeType": "PERCENTAGE",
+                    "type": "PERCENTAGE",
                     "amount": "5",
                     "additionalFeeType": "FIXED",
                     "additionalAmount": "100",
@@ -37,7 +37,7 @@ VALUES
                 },
                 {
                     "processor": "PayStack",
-                    "feeType": "PERCENTAGE",
+                    "type": "PERCENTAGE",
                     "amount": "5",
                     "additionalFeeType": "FIXED",
                     "additionalAmount": "100",
@@ -80,13 +80,13 @@ VALUES
         }'
     ),
     (
-        'Pro Plan',
+        'PRO_PLAN',
         '{
             "plan": "Pro",
             "platformFee": [
                 {
                     "processor": "PayStack",
-                    "feeType": "PERCENTAGE",
+                    "type": "PERCENTAGE",
                     "amount": "3",
                     "currency": "NGN"
                 }
@@ -108,7 +108,7 @@ VALUES
             "additionalFee": [
                 {
                     "processor": "PayStack",
-                    "feeType": "PERCENTAGE",
+                    "type": "PERCENTAGE",
                     "amount": "4.5",
                     "additionalFeeType": "FIXED",
                     "additionalAmount": "100",
@@ -116,7 +116,7 @@ VALUES
                 },
                 {
                     "processor": "PayStack",
-                    "feeType": "PERCENTAGE",
+                    "type": "PERCENTAGE",
                     "amount": "4.5",
                     "additionalFeeType": "FIXED",
                     "additionalAmount": "100",
@@ -159,13 +159,13 @@ VALUES
         }'
     ),
     (
-        'Premium Plan',
+        'PREMIUM_PLAN',
         '{
             "plan": "Premium",
             "platformFee": [
                 {
                     "processor": "PayStack",
-                    "feeType": "PERCENTAGE",
+                    "type": "PERCENTAGE",
                     "amount": "2.5",
                     "currency": "NGN"
                 }
@@ -187,7 +187,7 @@ VALUES
             "additionalFee": [
                 {
                     "processor": "PayStack",
-                    "feeType": "PERCENTAGE",
+                    "type": "PERCENTAGE",
                     "amount": "4",
                     "additionalFeeType": "FIXED",
                     "additionalAmount": "100",
@@ -195,7 +195,7 @@ VALUES
                 },
                 {
                     "processor": "PayStack",
-                    "feeType": "PERCENTAGE",
+                    "type": "PERCENTAGE",
                     "amount": "4",
                     "additionalFeeType": "FIXED",
                     "additionalAmount": "100",

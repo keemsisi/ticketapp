@@ -8,7 +8,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.dto.configs.pricing.PlanConfig;
-import org.core.backend.ticketapp.common.dto.configs.pricing.TransactionProcessingFeesDTO;
+import org.core.backend.ticketapp.common.dto.configs.pricing.TransactionFeesDTO;
 import org.core.backend.ticketapp.common.enums.*;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
@@ -24,6 +24,7 @@ import org.core.backend.ticketapp.passport.repository.ApplicationConfigRepositor
 import org.core.backend.ticketapp.passport.service.TenantService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
+import org.core.backend.ticketapp.passport.service.core.PaymentProcessorType;
 import org.core.backend.ticketapp.passport.util.ActivityLogPublisherUtil;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.PasswordUtil;
@@ -135,11 +136,14 @@ public class TransactionServiceImpl implements TransactionService {
             final var headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
-//            final var paymentFees = getConfiguredPaymentFees(request, paymentRequest);
-            final var processPaymentRequest = paymentRequest.clone();
-            processPaymentRequest.setAmount(paymentRequest.getAmount() * 100);
-            processPaymentRequest.setCallback_url(String.format(CALLBACK_TEMPLATE, appConfigs.paymentCallbackUrl, orderId));
-            final var entity = new HttpEntity<>(processPaymentRequest, headers);
+            final var paymentFees = getConfiguredPaymentFees(request, paymentRequest);
+            final var processorPaymentRequest = paymentRequest.clone();
+            final var paymentToProcess = new BigDecimal(String.valueOf(paymentFees.getPrice()))
+                    .add(new BigDecimal(String.valueOf(paymentFees.getTotalFes())));
+            processorPaymentRequest.setAmount(paymentToProcess.multiply(new BigDecimal(String.valueOf(100))).doubleValue());
+            paymentRequest.setAmount(paymentToProcess.doubleValue());
+            processorPaymentRequest.setCallback_url(String.format(CALLBACK_TEMPLATE, appConfigs.paymentCallbackUrl, orderId));
+            final var entity = new HttpEntity<>(processorPaymentRequest, headers);
             response = restTemplate.exchange(PAYSTACK_INITIALIZE_PAY, HttpMethod.POST, entity, PaymentInitResponseDTO.class);
             if (response.getStatusCode().isError()) {
                 throw new ApplicationException(400, "init_payment_failed", "Failed to init payment");
@@ -152,23 +156,14 @@ public class TransactionServiceImpl implements TransactionService {
         throw new ApplicationException(400, "init_payment_failed", "Failed to init payment with checkout link!");
     }
 
-    //Ticket Price	10,000
-    //Fees	600
-    //Tax	750
-    private TransactionProcessingFeesDTO getConfiguredPaymentFees(final InitPaymentOrderRequestDTO request, final InitPaymentGateWayRequestDTO paymentRequest) {
-        //    private List<PlatformFee> platformFee;
-        //    private List<PaymentProcessingFee> paymentProcessingFee;
-        //    private List<AdditionalFee> additionalFee;
+
+    private TransactionFeesDTO getConfiguredPaymentFees(final InitPaymentOrderRequestDTO request, final InitPaymentGateWayRequestDTO paymentRequest) {
         final var userDto = getOrCreateNewUser(request.getPrimary());
         final var plan = planService.getById(UUID.fromString(userDto.getPlanId()));//get the tenant, so we can retrieve the subscription plan id
         final var planName = plan.getName().toUpperCase();
         final var applicationConfigs = applicationConfigRepository.findByName(planName).orElseThrow(ApplicationExceptionUtils::notFound);
         final var planConfig = objectMapper.convertValue(applicationConfigs.getData(), PlanConfig.class);
-        final var transactionProcessingFeesDTO = new TransactionProcessingFeesDTO();
-        transactionProcessingFeesDTO.setFee(TransactionProcessingFeesDTO.FeeDTO.builder().build());
-        transactionProcessingFeesDTO.setFee(TransactionProcessingFeesDTO.FeeDTO.builder().build());
-        transactionProcessingFeesDTO.setFee(TransactionProcessingFeesDTO.FeeDTO.builder().build());
-        return transactionProcessingFeesDTO;
+        return planConfig.getTransactionFeesDto(paymentRequest.getAmount(), PaymentProcessorType.PAYSTACK, "NGN");
     }
 
     private OrderResponseDto getOrders(
@@ -287,8 +282,11 @@ public class TransactionServiceImpl implements TransactionService {
             return createdUserDto;
         }
         final var user = optUser.get();
+        final var tenant = Optional.ofNullable(tenantService.getByTenantId(user.getTenantId()))
+                .orElseThrow(ApplicationExceptionUtils::notFound);
         modelMapper.map(user, createdUserDto);
         createdUserDto.setUserId(user.getId());
+        createdUserDto.setPlanId(tenant.getPlanId().toString());
         return createdUserDto;
     }
 

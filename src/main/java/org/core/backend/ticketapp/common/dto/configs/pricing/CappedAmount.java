@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 class CappedAmount {
     private String processor;
     private String currency;
-    private String value;
+    private String amount;
     private String percentage;
 }

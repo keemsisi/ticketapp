@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 class Tax {
     private String processor;
     private String currency;
-    private String value;
+    private String amount;
     private FeeType type;
 }
