@@ -67,8 +67,11 @@ public class EventDao extends BaseDao {
         final var skip = request.getPage() * request.getSize();
         final var limit = request.getSize();
         assert getJdbcTemplate() != null;
-        var baseSQL = " SELECT DISTINCT %s FROM event e :innerQuery :seatSectionInnerQuery " +
-                " INNER JOIN users u ON u.id = e.user_id AND u.deleted=false WHERE e.deleted=false %s :eventWishedListSubQuery ";
+        var baseSQL = """
+                SELECT DISTINCT %s FROM event e :innerQuery :seatSectionInnerQuery
+                INNER JOIN users u ON u.id = e.user_id AND u.deleted=false
+                :eventWishedListSubQuery WHERE e.deleted=false %s
+                """;
         final var seatSectionInnerQuery = new StringBuilder(" INNER JOIN event_seat_sections ss ON ss.event_id = e.id ");
         final var innerQuery = new StringBuilder();
         final var order = ObjectUtils.defaultIfNull(request.getOrder(), Sort.Direction.DESC);
