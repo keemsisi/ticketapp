@@ -52,4 +52,5 @@ public class EventResponseDTO {
     private EventTicketType ticketType;
     private boolean approvalRequired;
     private List<EventSeatSection> seatSections;
+    private boolean isWishedList;
 }

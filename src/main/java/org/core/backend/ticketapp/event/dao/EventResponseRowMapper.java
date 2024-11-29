@@ -61,6 +61,7 @@ public class EventResponseRowMapper implements RowMapper<EventResponseDTO> {
         eventResponseDTO.setApprovalStatus(ApprovalStatus.valueOf(rs.getString("approval_status")));
         eventResponseDTO.setTicketType(EventTicketType.valueOf(rs.getString("ticket_type")));
         eventResponseDTO.setApprovalRequired(rs.getBoolean("approval_required"));
+        eventResponseDTO.setEventWishListId((UUID) rs.getObject("event_wishlist_id"));
         return eventResponseDTO;
     }
 }

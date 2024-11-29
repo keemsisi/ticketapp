@@ -12,6 +12,7 @@ import org.core.backend.ticketapp.common.response.EventTicketStatsDTO;
 import org.core.backend.ticketapp.common.response.EventTransactionDateStatsDTO;
 import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.passport.dao.BaseDao;
+import org.core.backend.ticketapp.passport.mapper.EventWishedListDTO;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
@@ -38,6 +39,24 @@ public class EventDao extends BaseDao {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private static @org.jetbrains.annotations.NotNull CallableStatementCreatorFactory
+    getCallableStatementCreatorFactory(final String finalBaseQuery,
+                                       final StringBuilder subQuery,
+                                       final String paginationQuery) {
+        var eventsQuery = String.format(finalBaseQuery, "e.*", subQuery) + paginationQuery;
+        var countQuery = String.format(finalBaseQuery, "count(*) as count", subQuery);
+        var eventWistListQuery = String.format(finalBaseQuery, "ew.event_id, ew.id", subQuery);
+        eventsQuery = eventsQuery.replaceAll(":eventWishedListSubQuery", "");
+        countQuery = countQuery.replaceAll(":eventWishedListSubQuery", "");
+        eventWistListQuery = eventWistListQuery.replaceAll(":eventWishedListSubQuery",
+                "RIGHT OUTER JOIN event_wishlist ew ON ew.event_id = e.id AND ew.user_id = u.id");
+        final var finalQuery = ":eventsQuery;:countQuery;:eventWistListQuery;"
+                .replaceAll(":eventsQuery", eventsQuery)
+                .replaceAll(":countQuery", countQuery)
+                .replaceAll(":eventWistListQuery", eventWistListQuery);
+        return new CallableStatementCreatorFactory(finalQuery);
+    }
+
     @PostConstruct
     private void initialize() {
         setDataSource(dataSource);
@@ -49,7 +68,7 @@ public class EventDao extends BaseDao {
         final var limit = request.getSize();
         assert getJdbcTemplate() != null;
         var baseSQL = " SELECT DISTINCT %s FROM event e :innerQuery :seatSectionInnerQuery " +
-                " INNER JOIN users u ON u.id = e.user_id AND u.deleted=false WHERE e.deleted=false %s ";
+                " INNER JOIN users u ON u.id = e.user_id AND u.deleted=false WHERE e.deleted=false %s :eventWishedListSubQuery ";
         final var seatSectionInnerQuery = new StringBuilder(" INNER JOIN event_seat_sections ss ON ss.event_id = e.id ");
         final var innerQuery = new StringBuilder();
         final var order = ObjectUtils.defaultIfNull(request.getOrder(), Sort.Direction.DESC);
@@ -127,20 +146,27 @@ public class EventDao extends BaseDao {
         var finalBaseQuery = subQuery.toString().contains("ss.") ? baseSQL.replace(":seatSectionInnerQuery", seatSectionInnerQuery) :
                 baseSQL.replace(":seatSectionInnerQuery", "");
         finalBaseQuery = finalBaseQuery.replace(":innerQuery", "");
-        final var eventsQuery = String.format(finalBaseQuery, "e.*", subQuery) + paginationQuery;
-        final var countQuery = String.format(finalBaseQuery, "count(*) as count", subQuery);
-        final var finalQuery = ":eventsQuery;:countQuery;"
-                .replaceAll(":eventsQuery", eventsQuery)
-                .replaceAll(":countQuery", countQuery);
-        final var cscFactory = new CallableStatementCreatorFactory(finalQuery);
+        final var cscFactory = getCallableStatementCreatorFactory(finalBaseQuery, subQuery, paginationQuery);
         final var returnedParams = Arrays.<SqlParameter>asList(
                 new SqlReturnResultSet("events", new EventResponseRowMapper(objectMapper)),
-                new SqlReturnResultSet("count", BeanPropertyRowMapper.newInstance(LongWrapper.class)));
+                new SqlReturnResultSet("count", BeanPropertyRowMapper.newInstance(LongWrapper.class)),
+                new SqlReturnResultSet("eventWishedList", BeanPropertyRowMapper.newInstance(EventWishedListDTO.class)));
         final var csc = cscFactory.newCallableStatementCreator(new HashMap<>());
         final var results = getJdbcTemplate().call(csc, returnedParams);
         final var pagedResults = new Page<EventResponseDTO>();
         final var events = (List<EventResponseDTO>) results.get("events");
         final var counts = ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount();
+        final var eventWishedList = ((ArrayList<EventWishedListDTO>) results.get("eventWishedList"));
+        if (ObjectUtils.isNotEmpty(eventWishedList)) {
+            events.stream().map(event -> {
+                eventWishedList.forEach(eventWished -> {
+                    if (eventWished.getEventId().equals(event.getId())) {
+                        event.setWishedList(true);
+                    }
+                });
+                return event;
+            });
+        }
         pagedResults.setContent(events);
         pagedResults.setCount(counts);
         pagedResults.setSize(events.size());
@@ -251,10 +277,18 @@ public class EventDao extends BaseDao {
     }
 
     private String getUserSubQuery(final EventFilterRequestDTO request) {
-        if (!request.getIsBuyerEvent() && Objects.nonNull(request.getUserId())) {
+        if (isBuyerEvent(request)) {
             return " AND e.user_id = '%s' ";
         }
         return " AND e.user_id IS NOT NULL ";
+    }
+
+    private boolean isBuyerEvent(final EventFilterRequestDTO request) {
+        return !request.getIsBuyerEvent() && Objects.nonNull(request.getUserId());
+    }
+
+    private boolean hasUserId(final EventFilterRequestDTO request) {
+        return Objects.nonNull(request.getUserId());
     }
 
 
