@@ -57,7 +57,7 @@ public class PlanConfig {
 
     private double getAmountToCharge(final FeeType feeType, final String value, final double amount) {
         if (Objects.requireNonNull(feeType) == FeeType.PERCENTAGE) {
-            final var percentageVal = new BigDecimal(String.valueOf(value)).divide(new BigDecimal(String.valueOf(100)), RoundingMode.UNNECESSARY);
+            final var percentageVal = new BigDecimal(String.valueOf(value)).divide(new BigDecimal(String.valueOf(100)), RoundingMode.UP);
             return percentageVal.multiply(new BigDecimal(String.valueOf(amount))).doubleValue();
         } else if (Objects.requireNonNull(feeType) == FeeType.FIXED) {
             final var percentageVal = new BigDecimal(String.valueOf(value));
