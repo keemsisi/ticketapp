@@ -310,7 +310,8 @@ public class TransactionServiceImpl implements TransactionService {
                         String.format("Failed to verify payment, please try again later or contact support with code: %s", errorCode));
             } else {
                 final var data = Objects.requireNonNull(Objects.requireNonNull(response.getBody()).getData());
-                final var isValidAmount = ((double) (data.getAmount() / 100)) >= order.getTotalBatchAmount().doubleValue();
+                final var isValidAmount = ((new BigDecimal(String.valueOf(data.getAmount()))
+                        .divide(new BigDecimal(100))).doubleValue() >= order.getTotalBatchAmount().doubleValue());
                 final var gatewayResponse = objectMapper.writeValueAsString(response.getBody());
                 final var meta = PaymentGatewayMeta.builder()
                         .paidAt(data.getPaidAt())
