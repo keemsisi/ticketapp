@@ -515,7 +515,7 @@ public class TransactionServiceImpl implements TransactionService {
         final var ticket = ticketService.create(ticketDto, order);
         transaction.setStatus(Status.COMPLETED);
         transaction.setDateModified(LocalDateTime.now());
-        transaction.setQrCodeLink(ticket.getQrCode().getLink());
+        transaction.setQrCodeLink(ticket.getQrCodeLink());
         transaction.setComment(String.format("User event payment was processed and transaction marked as completed on %s", new Date()));
         transactionRepository.save(transaction);
         order.setStatus(OrderStatus.COMPLETED);

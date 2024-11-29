@@ -36,14 +36,14 @@ public class QrCodeController implements ICrudController {
     public ResponseEntity<GenericResponse<QrCode>> create(final @RequestBody QrCodeCreateRequestDTO request) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var data = qrCodeService.create(request);
-        data.setLink(String.format(appConfigs.baseUrl, data.getCode()));
+        data.setLink(String.format(appConfigs.qrCodeBaseUrl, data.getCode()));
         return ResponseEntity.ok(new GenericResponse<>("00", "QrCode created successfully", data));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<QrCode>> getById(final @PathVariable UUID id) {
         final var data = qrCodeService.getById(id);
-        data.setLink(String.format(appConfigs.baseUrl, data.getCode()));
+        data.setLink(String.format(appConfigs.qrCodeBaseUrl, data.getCode()));
         return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully", data));
     }
 
@@ -56,7 +56,7 @@ public class QrCodeController implements ICrudController {
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
         final var records = PagedMapperUtil.map(qrCodeService.getAll(requestDTO, pageable));
-        ((List<QrCode>) records.getContent()).forEach(qrCode -> qrCode.setLink(String.format(appConfigs.baseUrl, qrCode.getCode())));
+        ((List<QrCode>) records.getContent()).forEach(qrCode -> qrCode.setLink(String.format(appConfigs.qrCodeBaseUrl, qrCode.getCode())));
         return ResponseEntity.ok(new GenericResponse<>("00", "Successfully fetched records", records));
     }
 

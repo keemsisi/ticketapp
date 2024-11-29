@@ -8,8 +8,8 @@ import java.util.UUID;
 
 @Configuration
 public class AppConfigs {
-    @Value(value = "${ticket.app.baseUrl}")
-    public String baseUrl;
+    @Value(value = "${ticket.app.qrcode.baseUrl}")
+    public String qrCodeBaseUrl;
     @Value(value = "${ticket.app.payment.callback_url}")
     public String paymentCallbackUrl;
     @Value("${system.payment.vendor.paystack.secret.api_key}")

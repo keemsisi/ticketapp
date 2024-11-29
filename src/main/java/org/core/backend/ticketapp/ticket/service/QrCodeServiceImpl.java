@@ -51,7 +51,7 @@ public class QrCodeServiceImpl implements QrCodeService {
         qrcode.setUserId(ticket.getUserId());
         qrcode.setTenantId(ticket.getTenantId());
         repository.save(qrcode);
-        qrcode.setLink(String.format(appConfigs.baseUrl, qrcode.getCode()));
+        qrcode.setLink(String.format(appConfigs.qrCodeBaseUrl, qrcode.getCode()));
         return qrcode;
 
     }

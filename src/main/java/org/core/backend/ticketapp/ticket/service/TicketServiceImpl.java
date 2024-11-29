@@ -14,6 +14,7 @@ import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.repository.OrderRepository;
 import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.core.backend.ticketapp.passport.dtos.core.UserDto;
+import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.PasswordUtil;
@@ -51,6 +52,7 @@ public class TicketServiceImpl implements TicketService {
     private final EventSeatSectionRepository eventSeatSectionRepository;
     private final OrderRepository orderRepository;
     private final QrCodeService qrCodeService;
+    private AppConfigs appConfigs;
 
     private EventDao eventDao;
 
@@ -115,7 +117,8 @@ public class TicketServiceImpl implements TicketService {
                 final var qrCode = createTicketQrCodeAndSendEmail(ticket);
                 log.info(">>> Successfully created ticketId: {} qrCodeId: {} and orderId: {}  processed",
                         ticket.getId(), qrCode.getId(), order.getId());
-                ticket.setQrCode(qrCode);
+                ticket.setQrCode(qrCode.getCode());
+                ticket.setQrCodeLink(qrCode.getLink());
                 return ticket;
             } catch (Exception e) {
                 event.setTicketsAvailable(event.getTicketsAvailable() + 1);
@@ -157,14 +160,14 @@ public class TicketServiceImpl implements TicketService {
     public Page<Ticket> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageRequest) {
         final var loggedInUser = jwtTokenUtil.getUser();
         var tenantId = jwtTokenUtil.getUser().getTenantId();
-        if (requestDTO.tenantId() != null && UserUtils.userHasRole(loggedInUser.getRoles(), AccountType.SUPER_ADMIN.getType())) {
+        Page<Ticket> response;
+        if (requestDTO.tenantId() != null && UserUtils.userHasRole(loggedInUser.getRoles(), AccountType.SUPER_ADMIN.getType()))
             tenantId = requestDTO.tenantId();
-        }
-        if (requestDTO.eventId() != null) {
-            return ticketRepository.findByEventIdAndTenantId(requestDTO.eventId(), tenantId, pageRequest);
-        } else {
-            return ticketRepository.findByTenantId(tenantId, pageRequest);
-        }
+        if (requestDTO.eventId() != null)
+            response = ticketRepository.findByEventIdAndTenantId(requestDTO.eventId(), tenantId, pageRequest);
+        else response = ticketRepository.findByTenantId(tenantId, pageRequest);
+        response.stream().forEach(ticket -> ticket.setQrCodeLink(String.format(appConfigs.qrCodeBaseUrl, ticket.getQrCode())));
+        return response;
     }
 
     @Transactional
