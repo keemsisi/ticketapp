@@ -47,6 +47,7 @@ VALUES
                     "processor": "PayStack",
                     "currency": "NGN",
                     "value": "7.5",
+                    "amount": "5",
                     "type": "PERCENTAGE"
                 }
             ],
@@ -54,8 +55,9 @@ VALUES
                 {
                     "processor": "PayStack",
                     "currency": "NGN",
+                    "amount": "5000",
                     "value": "2000",
-                    "percentage": null
+                    "type": "FIXED"
                 }
             ],
             "features": [
