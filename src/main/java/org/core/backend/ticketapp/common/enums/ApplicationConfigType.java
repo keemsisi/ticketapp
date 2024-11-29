@@ -1,5 +1,5 @@
 package org.core.backend.ticketapp.common.enums;
 
 public enum ApplicationConfigType {
-    PRICING
+    PRICING , STANDARD_PLAN, PRO_PLAN , PREMIUM_PLAN ,
 }

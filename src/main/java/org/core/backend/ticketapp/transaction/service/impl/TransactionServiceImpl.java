@@ -139,7 +139,7 @@ public class TransactionServiceImpl implements TransactionService {
             final var paymentFees = getConfiguredPaymentFees(request, paymentRequest);
             final var processorPaymentRequest = paymentRequest.clone();
             final var paymentToProcess = new BigDecimal(String.valueOf(paymentFees.getPrice()))
-                    .add(new BigDecimal(String.valueOf(paymentFees.getTotalFes())));
+                    .add(new BigDecimal(String.valueOf(paymentFees.getTotalFees())));
             processorPaymentRequest.setAmount(paymentToProcess.multiply(new BigDecimal(String.valueOf(100))).doubleValue());
             paymentRequest.setAmount(paymentToProcess.doubleValue());
             processorPaymentRequest.setCallback_url(String.format(CALLBACK_TEMPLATE, appConfigs.paymentCallbackUrl, orderId));
@@ -148,8 +148,10 @@ public class TransactionServiceImpl implements TransactionService {
             if (response.getStatusCode().isError()) {
                 throw new ApplicationException(400, "init_payment_failed", "Failed to init payment");
             }
-            return getOrders(orderId, eventSeatSectionMap, request, paymentRequest.getAmount(),
+            final var order = getOrders(orderId, eventSeatSectionMap, request, paymentRequest.getAmount(),
                     Objects.requireNonNull(response.getBody()), paymentRequest, isPlanPayment);
+            order.setTransactionFees(paymentFees);
+            return order;
         } catch (final Throwable e) {
             log.error(">>> Error Occurred while initiating transaction", e);
         }
@@ -160,7 +162,7 @@ public class TransactionServiceImpl implements TransactionService {
     private TransactionFeesDTO getConfiguredPaymentFees(final InitPaymentOrderRequestDTO request, final InitPaymentGateWayRequestDTO paymentRequest) {
         final var userDto = getOrCreateNewUser(request.getPrimary());
         final var plan = planService.getById(UUID.fromString(userDto.getPlanId()));//get the tenant, so we can retrieve the subscription plan id
-        final var planName = plan.getName().toUpperCase();
+        final var planName = String.format("%s%s", plan.getName().toUpperCase(), "_PLAN");
         final var applicationConfigs = applicationConfigRepository.findByName(planName).orElseThrow(ApplicationExceptionUtils::notFound);
         final var planConfig = objectMapper.convertValue(applicationConfigs.getData(), PlanConfig.class);
         return planConfig.getTransactionFeesDto(paymentRequest.getAmount(), PaymentProcessorType.PAYSTACK, "NGN");

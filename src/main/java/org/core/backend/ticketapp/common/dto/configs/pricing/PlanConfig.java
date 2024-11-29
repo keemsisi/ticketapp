@@ -50,7 +50,7 @@ public class PlanConfig {
                 .add(new BigDecimal(String.valueOf(additionalFee)))
                 .add(new BigDecimal(String.valueOf(amount)))
                 .doubleValue();
-        transactionProcessingFeesDTO.setTotalFes(totalFees);
+        transactionProcessingFeesDTO.setTotalFees(totalFees);
         transactionProcessingFeesDTO.setPrice(amount);
         return transactionProcessingFeesDTO;
     }

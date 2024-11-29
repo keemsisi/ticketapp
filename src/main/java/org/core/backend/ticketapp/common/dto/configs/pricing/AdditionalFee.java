@@ -11,7 +11,6 @@ public class AdditionalFee {
     private String processor;
     private FeeType type;
     private String amount;
-    private String additionalFeeType;
     private String additionalAmount;
     private String currency;
 }

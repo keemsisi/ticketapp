@@ -31,7 +31,6 @@ VALUES
                     "processor": "PayStack",
                     "type": "PERCENTAGE",
                     "amount": "5",
-                    "additionalFeeType": "FIXED",
                     "additionalAmount": "100",
                     "currency": "NGN"
                 },
@@ -39,7 +38,6 @@ VALUES
                     "processor": "PayStack",
                     "type": "PERCENTAGE",
                     "amount": "5",
-                    "additionalFeeType": "FIXED",
                     "additionalAmount": "100",
                     "currency": "foreign"
                 }
@@ -110,7 +108,6 @@ VALUES
                     "processor": "PayStack",
                     "type": "PERCENTAGE",
                     "amount": "4.5",
-                    "additionalFeeType": "FIXED",
                     "additionalAmount": "100",
                     "currency": "NGN"
                 },
@@ -118,8 +115,7 @@ VALUES
                     "processor": "PayStack",
                     "type": "PERCENTAGE",
                     "amount": "4.5",
-                    "additionalFeeType": "FIXED",
-                    "additionalAmount": "100",
+                    "additionalAmount": "5.4",
                     "currency": "foreign"
                 }
             ],
@@ -189,7 +185,6 @@ VALUES
                     "processor": "PayStack",
                     "type": "PERCENTAGE",
                     "amount": "4",
-                    "additionalFeeType": "FIXED",
                     "additionalAmount": "100",
                     "currency": "NGN"
                 },
@@ -197,8 +192,7 @@ VALUES
                     "processor": "PayStack",
                     "type": "PERCENTAGE",
                     "amount": "4",
-                    "additionalFeeType": "FIXED",
-                    "additionalAmount": "100",
+                    "additionalAmount": "2.5",
                     "currency": "foreign"
                 }
             ],
