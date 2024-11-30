@@ -5,7 +5,7 @@ import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.enums.AccountType;
-import org.core.backend.ticketapp.marketing.dto.sponsored_offer.UpdateSponsoredOfferRequest;
+import org.core.backend.ticketapp.passport.dtos.UpdateApplicationConfigRequest;
 import org.core.backend.ticketapp.passport.entity.ApplicationConfig;
 import org.core.backend.ticketapp.passport.service.core.apconfig.ApplicationConfigService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -54,7 +54,7 @@ public class ApplicationConfigController {
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<ApplicationConfig>> update(final @RequestBody UpdateSponsoredOfferRequest request) {
+    public ResponseEntity<GenericResponse<ApplicationConfig>> update(final @RequestBody UpdateApplicationConfigRequest request) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name());
         final var result = service.update(request);
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully updated resource!", result));
