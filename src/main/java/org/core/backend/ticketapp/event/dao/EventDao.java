@@ -161,14 +161,11 @@ public class EventDao extends BaseDao {
         final var counts = ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount();
         final var eventWishedList = ((ArrayList<EventWishedListDTO>) results.get("eventWishedList"));
         if (ObjectUtils.isNotEmpty(eventWishedList)) {
-            events.stream().map(event -> {
-                eventWishedList.forEach(eventWished -> {
-                    if (eventWished.getEventId().equals(event.getId())) {
-                        event.setWishedList(true);
-                    }
-                });
-                return event;
-            });
+            events.forEach(event -> eventWishedList.forEach(eventWished -> {
+                if (eventWished.getEventId().equals(event.getId())) {
+                    event.setWishedList(true);
+                }
+            }));
         }
         pagedResults.setContent(events);
         pagedResults.setCount(counts);

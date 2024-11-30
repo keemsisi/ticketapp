@@ -10,6 +10,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllowPrintStacktrace
 public class EventWishedListDTO {
+    private UUID id;
     private UUID eventId;
-    private UUID eventWishedListId;
 }
