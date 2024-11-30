@@ -19,8 +19,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ApplicationConfigServiceImpl implements ApplicationConfigService {
     private final ModelMapper modelMapper;
-    private final ApplicationConfigRepository repository;
     private final JwtTokenUtil jwtTokenUtil;
+    private final ApplicationConfigRepository repository;
 
     @Override
     public <R> ApplicationConfig create(final R request) {
