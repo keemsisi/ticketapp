@@ -69,7 +69,7 @@ public class QrCodeController implements ICrudController {
     @RequestMapping(value = "/stats/{eventId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<QrCodeStatsDTO>> stats(@PathVariable UUID eventId) {
         final var user = jwtTokenUtil.getUser();
-        if (!user.getUserType().isSeller() || !jwtTokenUtil.getUser().isAdmin()) {
+        if (!(user.getUserType().isSeller() || jwtTokenUtil.getUser().isAdmin())) {
             throw new ApplicationException(403, "forbidden", "Oops! Access not allowed");
         }
         final var record = qrCodeService.getStats(eventId);
