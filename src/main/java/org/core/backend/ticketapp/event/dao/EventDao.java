@@ -111,7 +111,7 @@ public class EventDao extends BaseDao {
             subQuery.append(" AND e.description iLIKE '%").append(request.getDescription()).append("%'");
         }
         if (Objects.nonNull(request.getIsPhysicalEvent())) {
-            subQuery.append(String.format(" AND e.description = '%s' ", request.getIsPhysicalEvent()));
+            subQuery.append(String.format(" AND e.physical_event = '%s' ", request.getIsPhysicalEvent()));
         }
         if (Objects.nonNull(request.getStartDate()) && Objects.nonNull(request.getEndDate())) {
             subQuery.append(String.format(" AND e.event_date BETWEEN '%s' AND '%s' ", request.getStartDate(), request.getEndDate()));
