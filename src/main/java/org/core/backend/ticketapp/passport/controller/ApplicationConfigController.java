@@ -39,7 +39,7 @@ public class ApplicationConfigController {
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched resource", result));
     }
 
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final Pageable pageable) throws Exception {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name());
         final var result = PagedMapperUtil.map(service.getAll(pageable));
