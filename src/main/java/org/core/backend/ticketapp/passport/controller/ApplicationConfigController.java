@@ -28,34 +28,35 @@ public class ApplicationConfigController {
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<ApplicationConfig>> create(@Validated @RequestBody ApplicationConfig request) throws Exception {
-        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name());
+        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name().toLowerCase());
         return new ResponseEntity<>(new GenericResponse<>("00", "Resource created successfully",
                 service.create(request)), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<ApplicationConfig>> getById(final @PathVariable UUID id) {
+        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name().toLowerCase());
         final var result = service.getById(id);
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched resource", result));
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final Pageable pageable) throws Exception {
-        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name());
+        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name().toLowerCase());
         final var result = PagedMapperUtil.map(service.getAll(pageable));
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched resource", result));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<ApplicationConfig>> deleteById(final @PathVariable UUID id) {
-        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name());
+        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name().toLowerCase());
         service.delete(id);
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully deleted resource!", null));
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse<ApplicationConfig>> update(final @RequestBody UpdateApplicationConfigRequest request) {
-        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name());
+        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name().toLowerCase());
         final var result = service.update(request);
         return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully updated resource!", result));
     }
