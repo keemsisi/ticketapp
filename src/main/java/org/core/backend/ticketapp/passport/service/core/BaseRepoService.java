@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.passport.service.core;
 
 import io.github.thecarisma.FatalObjCopierException;
 import io.github.thecarisma.ObjCopier;
+import org.apache.commons.lang3.NotImplementedException;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.passport.entity.Tenant;
 import org.springframework.beans.BeanUtils;
@@ -66,7 +67,7 @@ public abstract class BaseRepoService<T> {
         return originalData;
     }
 
-    public T update(T originalData){
+    public T update(T originalData) {
         return repository.saveAndFlush(originalData);
     }
 
@@ -87,8 +88,10 @@ public abstract class BaseRepoService<T> {
     }
 
     public Page<Tenant> getAll(Pageable pageable, String name) {
-        return null;
+        throw new NotImplementedException("Not Implemented");
     }
 
-    public abstract PagedResponse<?> getOrganizations(Pageable pageable, String name);
+    public PagedResponse<?> getOrganizations(Pageable pageable, String name) {
+        throw new NotImplementedException("Not Implemented");
+    }
 }

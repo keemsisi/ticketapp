@@ -84,7 +84,7 @@ public class TenantController {
         return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/organizations", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/search", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getOrganizations(@RequestParam(name = "name") String name, final Pageable pageable) {
         final var tenant = service.getOrganizations(pageable, name);
         return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);

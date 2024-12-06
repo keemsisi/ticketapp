@@ -8,6 +8,7 @@ import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.passport.dtos.core.TenantDto;
+import org.core.backend.ticketapp.passport.dtos.core.TenantLiteDto;
 import org.core.backend.ticketapp.passport.entity.SystemAlert;
 import org.core.backend.ticketapp.passport.entity.Tenant;
 import org.core.backend.ticketapp.passport.entity.User;
@@ -93,7 +94,7 @@ public class TenantService extends BaseRepoService<Tenant> {
     public PagedResponse<?> getOrganizations(final Pageable pageable, final String name) {
         final var response = repository.getAll(name, pageable);
         final var content = response.getContent()
-                .stream().map(tenant -> modelMapper.map(tenant, TenantDto.class))
+                .stream().map(tenant -> modelMapper.map(tenant, TenantLiteDto.class))
                 .collect(Collectors.toList());
         return PagedMapperUtil.map(response, content);
     }
