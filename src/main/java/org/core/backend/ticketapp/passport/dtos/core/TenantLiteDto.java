@@ -17,7 +17,6 @@ import java.util.UUID;
 
 @Builder
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
 @NoArgsConstructor
 public class TenantLiteDto {
