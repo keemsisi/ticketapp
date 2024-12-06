@@ -4,6 +4,8 @@ package org.core.backend.ticketapp.passport.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
+import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.passport.dtos.core.TenantDto;
 import org.core.backend.ticketapp.passport.entity.SystemAlert;
@@ -17,6 +19,7 @@ import org.core.backend.ticketapp.passport.service.core.blobstorage.BlobStorageS
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.StringUtil;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +31,7 @@ import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -40,6 +44,7 @@ public class TenantService extends BaseRepoService<Tenant> {
     private final ObjectMapper objectMapper;
     private final JwtTokenUtil jwtTokenUtil;
     private final AppConfigs appConfigs;
+    private final ModelMapper modelMapper;
 
     public Tenant getByTenantId(UUID tenantId) {
         return repository.findRegistrar(tenantId)
@@ -82,5 +87,14 @@ public class TenantService extends BaseRepoService<Tenant> {
     @Override
     public Page<Tenant> getAll(final Pageable pageable, final String name) {
         return repository.getAll(name, pageable);
+    }
+
+    @Override
+    public PagedResponse<?> getOrganizations(final Pageable pageable, final String name) {
+        final var response = repository.getAll(name, pageable);
+        final var content = response.getContent()
+                .stream().map(tenant -> modelMapper.map(tenant, TenantDto.class))
+                .collect(Collectors.toList());
+        return PagedMapperUtil.map(response, content);
     }
 }

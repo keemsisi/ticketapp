@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.passport.service.core;
 
 import io.github.thecarisma.FatalObjCopierException;
 import io.github.thecarisma.ObjCopier;
+import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.passport.entity.Tenant;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -88,4 +89,6 @@ public abstract class BaseRepoService<T> {
     public Page<Tenant> getAll(Pageable pageable, String name) {
         return null;
     }
+
+    public abstract PagedResponse<?> getOrganizations(Pageable pageable, String name);
 }

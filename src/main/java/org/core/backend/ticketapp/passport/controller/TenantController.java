@@ -8,6 +8,7 @@ import io.jsonwebtoken.lang.Assert;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
@@ -77,9 +78,15 @@ public class TenantController {
     }
 
     @RequestMapping(value = "/filter-search", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getTenants(@RequestHeader(name = "tenantName") String tenantName) {
+    public ResponseEntity<?> getTenants(@RequestParam(name = "name") String name, final Pageable pageable) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name());
-        final var tenant = service.getAll(Pageable.unpaged(), tenantName);
+        final var tenant = PagedMapperUtil.map(service.getAll(pageable, name));
+        return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/organizations", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getOrganizations(@RequestParam(name = "name") String name, final Pageable pageable) {
+        final var tenant = service.getOrganizations(pageable, name);
         return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
     }
 

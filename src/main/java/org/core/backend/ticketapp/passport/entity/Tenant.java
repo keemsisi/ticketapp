@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.passport.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,6 +34,7 @@ public class Tenant extends AbstractBaseEntity {
     @Column(name = "normalized_name")
     private String normalizedName;
 
+    @JsonIgnore
     @Column(name = "password_expiration_in_days", columnDefinition = "int default(90)")
     private int passwordExpirationInDays;
 
