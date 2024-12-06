@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.passport.dao;
 
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.dto.Page;
 import org.core.backend.ticketapp.passport.mapper.LongWrapper;
@@ -19,10 +20,11 @@ import javax.sql.DataSource;
 import java.util.*;
 
 @Component
+@AllArgsConstructor
 @Transactional
 public class QrCodeDAOImpl extends BaseDao implements QrCodeDAOService {
-    DataSource dataSource;
-    JwtTokenUtil jwtTokenUtil;
+    private final DataSource dataSource;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @PostConstruct
     private void initialize() {
@@ -38,14 +40,14 @@ public class QrCodeDAOImpl extends BaseDao implements QrCodeDAOService {
         int PAGE = pageable.getPageNumber();
 
         final var FIELDS = """
-                DISTINCT qr.*, e.name as event_name,
-                       e.banner as event_banner,
+                DISTINCT qr.*, e.title as event_name,
+                       e.event_banner as event_banner,
                        CONCAT(u.first_name, ' ', u.middle_name, ' ', u.last_name) as owner_name
                 """;
         String query = """
                 SELECT :fields FROM qr_code qr
                 INNER JOIN event e ON e.id = qr.event_id AND qr.tenant_id = e.tenant_id
-                INNER JOIN user u ON u.id = qr.user_id AND qr.tenant_id = u.tenant_id
+                INNER JOIN users u ON u.id = qr.user_id AND qr.tenant_id = u.tenant_id
                 WHERE qr.tenant_id IS NOT NULL :subQuery
                 ORDER BY qr.date_created DESC
                 """;
@@ -57,7 +59,7 @@ public class QrCodeDAOImpl extends BaseDao implements QrCodeDAOService {
         subQuery.append(String.format(" AND qr.tenant_id='%s' ", tenantId));
 
         final var mainQuery = query.replaceAll(":subQuery", subQuery.toString()).replaceAll(":fields", FIELDS);
-        final var countQuery = query.replaceAll(":subQuery", "COUNT(*)").replaceAll(":fields", FIELDS);
+        final var countQuery = query.replaceAll(":subQuery", subQuery.toString()).replaceAll(":fields", "COUNT(*)");
         final var finalQuery = String.format("%s;%s", mainQuery, countQuery);
         var cscFactory = new CallableStatementCreatorFactory(finalQuery);
         final var returnedParams = Arrays.<SqlParameter>asList(
@@ -66,15 +68,15 @@ public class QrCodeDAOImpl extends BaseDao implements QrCodeDAOService {
         final var csc = cscFactory.newCallableStatementCreator(new HashMap<>());
         final var results = getJdbcTemplate().call(csc, returnedParams);
         final var pagedResults = new Page<QrCode>();
-        final var events = (List<QrCode>) results.get("qrcode");
+        final var codes = (List<QrCode>) results.get("qrcode");
         final var counts = ((ArrayList<LongWrapper>) results.get("count")).get(0).getCount();
-        pagedResults.setContent(events);
+        pagedResults.setContent(codes);
         pagedResults.setCount(counts);
-        pagedResults.setSize(events.size());
+        pagedResults.setSize(codes.size());
         pagedResults.setPageNumber(PAGE);
         pagedResults.setReqSize(SIZE);
-        pagedResults.setLast(events.isEmpty());
-        pagedResults.setNumberOfElements(events.size());
+        pagedResults.setLast(codes.isEmpty());
+        pagedResults.setNumberOfElements(codes.size());
         pagedResults.setTotalElements(counts);
         return pagedResults;
     }
