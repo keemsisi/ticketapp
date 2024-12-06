@@ -36,11 +36,14 @@ public class QrCodeDAOImpl extends BaseDao implements QrCodeDAOService {
     @SuppressWarnings("unchecked")
     public Page<QrCode> getAll(final UUID tenantId, final UUID userId, final FilterTicketRequestDTO prp, final Pageable pageable) {
         assert getJdbcTemplate() != null;
+        final String order = "DESC";
+        final var limit = pageable.getPageSize();
         int SIZE = ObjectUtils.isEmpty(pageable.getPageSize()) ? 50 : pageable.getPageSize();
         int PAGE = pageable.getPageNumber();
+        final var skip = PAGE * SIZE;
 
         final var FIELDS = """
-                DISTINCT qr.*, e.title as event_name,
+                       qr.*, e.title as event_name,
                        e.event_banner as event_banner,
                        CONCAT(u.first_name, ' ', u.middle_name, ' ', u.last_name) as owner_name
                 """;
@@ -49,17 +52,25 @@ public class QrCodeDAOImpl extends BaseDao implements QrCodeDAOService {
                 INNER JOIN event e ON e.id = qr.event_id AND qr.tenant_id = e.tenant_id
                 INNER JOIN users u ON u.id = qr.user_id AND qr.tenant_id = u.tenant_id
                 WHERE qr.tenant_id IS NOT NULL :subQuery
-                ORDER BY qr.date_created DESC
+                :order
                 """;
         final var subQuery = new StringBuilder();
+        final var paginationQuery = String.format(" ORDER BY e.date_created %s OFFSET %s LIMIT %s ", order, skip, limit);
 
         if (ObjectUtils.isNotEmpty(prp.eventId())) {
             subQuery.append(String.format(" AND e.id='%s' ", prp.eventId()));
         }
+        if (ObjectUtils.isNotEmpty(userId)) {
+            subQuery.append(String.format(" AND qr.user_id='%s' ", userId));
+        }
         subQuery.append(String.format(" AND qr.tenant_id='%s' ", tenantId));
 
-        final var mainQuery = query.replaceAll(":subQuery", subQuery.toString()).replaceAll(":fields", FIELDS);
-        final var countQuery = query.replaceAll(":subQuery", subQuery.toString()).replaceAll(":fields", "COUNT(*)");
+        final var mainQuery = query.replaceAll(":subQuery", subQuery.toString())
+                .replaceAll(":fields", FIELDS)
+                .replace(":order", paginationQuery);
+        final var countQuery = query.replaceAll(":subQuery", subQuery.toString())
+                .replaceAll(":fields", "COUNT(*)")
+                .replaceAll(":order", "");
         final var finalQuery = String.format("%s;%s", mainQuery, countQuery);
         var cscFactory = new CallableStatementCreatorFactory(finalQuery);
         final var returnedParams = Arrays.<SqlParameter>asList(

@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.passport.service.core;
 
 import io.github.thecarisma.FatalObjCopierException;
 import io.github.thecarisma.ObjCopier;
+import org.core.backend.ticketapp.passport.entity.Tenant;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 import java.util.UUID;
 
-public class BaseRepoService<T> {
+public abstract class BaseRepoService<T> {
 
     public JpaRepository<T, UUID> repository;
 
@@ -84,4 +85,7 @@ public class BaseRepoService<T> {
         repository.deleteById(id);
     }
 
+    public Page<Tenant> getAll(Pageable pageable, String name) {
+        return null;
+    }
 }

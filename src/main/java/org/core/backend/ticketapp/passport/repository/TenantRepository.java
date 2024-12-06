@@ -2,6 +2,8 @@ package org.core.backend.ticketapp.passport.repository;
 
 import org.core.backend.ticketapp.passport.entity.Tenant;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -20,8 +22,11 @@ public interface TenantRepository extends JpaRepository<Tenant, UUID>, PagingAnd
     @Query(value = "SELECT * FROM tenant WHERE id = :tenantId LIMIT 1", nativeQuery = true)
     Optional<Tenant> findRegistrar(@Param("tenantId") UUID tenantId);
 
-    @Query(value = "SELECT * FROM tenant WHERE id = ?1 LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM tenant WHERE name LIKE CONCAT('%',:name,'%') AND deleted=false", nativeQuery = true)
+    Page<Tenant> getAll(@Param("name") String name, Pageable pageable);
+
     @NotNull
+    @Query(value = "SELECT * FROM tenant WHERE id = ?1 LIMIT 1", nativeQuery = true)
     Optional<Tenant> findById(@NotNull UUID id);
 
 }

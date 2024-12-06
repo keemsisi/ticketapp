@@ -18,6 +18,8 @@ import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.StringUtil;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,5 +77,10 @@ public class TenantService extends BaseRepoService<Tenant> {
     @Override
     public Tenant save(Tenant tenant) {
         return repository.save(tenant);
+    }
+
+    @Override
+    public Page<Tenant> getAll(final Pageable pageable, final String name) {
+        return repository.getAll(name, pageable);
     }
 }

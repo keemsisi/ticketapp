@@ -27,7 +27,7 @@ public class WorkflowLevelService extends BaseRepoService<WorkflowLevels> {
 
     public void create(List<CreateWorkflowLevelDTO> createWorkflowLevelDTO, UUID workflowId, LoggedInUserDto user) {
         var workflowLevels = createWorkflowLevelDTO.stream().map(cwl -> {
-            WorkflowLevels wl =  new WorkflowLevels();
+            WorkflowLevels wl = new WorkflowLevels();
             wl.setId(UUID.randomUUID());
             wl.setWorkflowId(workflowId);
             wl.setRoleId(cwl.getRoleId());
@@ -39,7 +39,7 @@ public class WorkflowLevelService extends BaseRepoService<WorkflowLevels> {
             wl.setCreatedBy(user.getUserId());
             return wl;
         }).collect(Collectors.toList());
-        if(!workflowLevels.isEmpty()){
+        if (!workflowLevels.isEmpty()) {
             repository.saveAll(workflowLevels);
         }
     }

@@ -102,13 +102,19 @@ public class QrCodeServiceImpl implements QrCodeService {
 
     @Override
     public org.core.backend.ticketapp.common.dto.Page<QrCode> getAllV2(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
-        final var userId = jwtTokenUtil.getUser().getUserId();
+        final var userType = jwtTokenUtil.getUser().getUserType();
+        var userId = jwtTokenUtil.getUser().getUserId();
         var tenantId = jwtTokenUtil.getUser().getTenantId();
         if (requestDTO.tenantId() != null) {
             UserUtils.containsActionName("event_view_qr");
             tenantId = requestDTO.tenantId();
         }
-        return qrCodeDAO.getAll(tenantId, ObjectUtils.defaultIfNull(requestDTO.userId(), userId), requestDTO, pageable);
+        if (Objects.nonNull(userType) && userType.equals(UserType.BUYER)) {
+            return qrCodeDAO.getAll(tenantId, userId, requestDTO, pageable);
+        }
+        //SELLER || Admin can search
+        return qrCodeDAO.getAll(tenantId, requestDTO.userId(), requestDTO, pageable);
+
     }
 
     @Override

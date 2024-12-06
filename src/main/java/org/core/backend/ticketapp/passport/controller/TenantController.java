@@ -77,9 +77,9 @@ public class TenantController {
     }
 
     @RequestMapping(value = "/filter-search", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getTenants(@RequestHeader(name = "Authorization", defaultValue = "Bearer ", required = true) String authorization) {
+    public ResponseEntity<?> getTenants(@RequestHeader(name = "tenantName") String tenantName) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name());
-        var tenant = service.getAll(Pageable.unpaged());
+        final var tenant = service.getAll(Pageable.unpaged(), tenantName);
         return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
     }
 
