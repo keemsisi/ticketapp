@@ -3,8 +3,7 @@ package org.core.backend.ticketapp.ticket.controller;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.dto.GenericResponse;
-import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
-import org.core.backend.ticketapp.common.dto.PagedResponse;
+import org.core.backend.ticketapp.common.dto.Page;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
@@ -54,9 +53,9 @@ public class QrCodeController implements ICrudController {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
-        final var records = PagedMapperUtil.map(qrCodeService.getAll(requestDTO, pageable));
-        ((List<QrCode>) records.getContent()).forEach(qrCode -> qrCode.setLink(String.format(appConfigs.qrCodeBaseUrl, qrCode.getCode())));
+    public ResponseEntity<GenericResponse<Page<?>>> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
+        final var records = qrCodeService.getAllV2(requestDTO, pageable);
+        records.getContent().forEach(qrCode -> qrCode.setLink(String.format(appConfigs.qrCodeBaseUrl, qrCode.getCode())));
         return ResponseEntity.ok(new GenericResponse<>("00", "Successfully fetched records", records));
     }
 

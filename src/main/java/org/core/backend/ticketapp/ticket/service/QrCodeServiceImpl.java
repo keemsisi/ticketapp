@@ -7,6 +7,7 @@ import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
 import org.core.backend.ticketapp.common.exceptions.ResourceNotFoundException;
 import org.core.backend.ticketapp.event.service.EventService;
+import org.core.backend.ticketapp.passport.dao.QrCodeDAOService;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -33,6 +34,7 @@ import java.util.concurrent.CompletableFuture;
 @AllArgsConstructor
 public class QrCodeServiceImpl implements QrCodeService {
     private final QrCodeRepository repository;
+    private final QrCodeDAOService qrCodeDAO;
     private final JwtTokenUtil jwtTokenUtil;
     private final TicketRepository ticketRepository;
     private final AppConfigs appConfigs;
@@ -72,7 +74,8 @@ public class QrCodeServiceImpl implements QrCodeService {
         repository.save(qrCode);
     }
 
-    @Override
+    @Deprecated
+//    @Override
     public Page<QrCode> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
         final var userType = jwtTokenUtil.getUser().getUserType();
         final var userId = jwtTokenUtil.getUser().getUserId();
@@ -94,6 +97,18 @@ public class QrCodeServiceImpl implements QrCodeService {
                     repository.findByTenantIdAndUserId(tenantId, userId, pageable);
         }
         return repository.findByUserId(ObjectUtils.defaultIfNull(requestDTO.userId(), userId), pageable);
+    }
+
+
+    @Override
+    public org.core.backend.ticketapp.common.dto.Page<QrCode> getAllV2(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
+        final var userId = jwtTokenUtil.getUser().getUserId();
+        var tenantId = jwtTokenUtil.getUser().getTenantId();
+        if (requestDTO.tenantId() != null) {
+            UserUtils.containsActionName("event_view_qr");
+            tenantId = requestDTO.tenantId();
+        }
+        return qrCodeDAO.getAll(tenantId, ObjectUtils.defaultIfNull(requestDTO.userId(), userId), requestDTO, pageable);
     }
 
     @Override

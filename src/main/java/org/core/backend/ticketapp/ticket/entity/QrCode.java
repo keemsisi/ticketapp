@@ -43,6 +43,13 @@ public class QrCode extends AbstractBaseEntity {
     @Column(name = "scanned", columnDefinition = "boolean default false")
     private Boolean scanned;
 
+    @Transient
+    private String ownerName;
+    @Transient
+    private String eventName;
+    @Transient
+    private String eventBanner;
+
     @PrePersist
     public void onCreate() {
         id = UUID.randomUUID();
