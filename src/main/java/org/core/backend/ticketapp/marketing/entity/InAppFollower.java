@@ -24,6 +24,7 @@ import java.util.UUID;
 })
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class InAppFollower extends AbstractBaseEntity {
+    // followedUserId ->> following userId
     @Column(name = "followed_user_id")
     private UUID followedUserId;
     @Column(columnDefinition = "bool default true")
