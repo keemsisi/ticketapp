@@ -49,7 +49,7 @@ public class QrCodeDAOImpl extends BaseDao implements QrCodeDAOService {
                 """;
         String query = """
                 SELECT :fields FROM qr_code qr
-                INNER JOIN event e ON e.id = qr.event_id AND qr.tenant_id = e.tenant_id
+                INNER JOIN event e ON e.id = qr.event_id
                 INNER JOIN users u ON u.id = qr.user_id AND qr.tenant_id = u.tenant_id
                 WHERE qr.tenant_id IS NOT NULL :subQuery
                 :order
