@@ -49,7 +49,7 @@ public class EventDao extends BaseDao {
         eventsQuery = eventsQuery.replaceAll(":eventWishedListSubQuery", "");
         countQuery = countQuery.replaceAll(":eventWishedListSubQuery", "");
         eventWistListQuery = eventWistListQuery.replaceAll(":eventWishedListSubQuery",
-                "RIGHT OUTER JOIN event_wishlist ew ON ew.event_id = e.id AND ew.user_id = u.id");
+                "RIGHT OUTER JOIN event_wishlist ew ON ew.event_id = e.id AND ew.user_id = u.id AND ew.deleted=false");
         final var finalQuery = ":eventsQuery;:countQuery;:eventWistListQuery;"
                 .replaceAll(":eventsQuery", eventsQuery)
                 .replaceAll(":countQuery", countQuery)

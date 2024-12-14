@@ -1,6 +1,6 @@
-package org.core.backend.ticketapp.marketing.repository;
+package org.core.backend.ticketapp.passport.repository;
 
-import org.core.backend.ticketapp.marketing.entity.InAppFollower;
+import org.core.backend.ticketapp.passport.entity.InAppFollower;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

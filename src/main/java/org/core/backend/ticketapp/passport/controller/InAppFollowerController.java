@@ -1,4 +1,4 @@
-package org.core.backend.ticketapp.marketing.controller;
+package org.core.backend.ticketapp.passport.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +7,8 @@ import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.marketing.dto.social.CreateInAppFollowerRequest;
 import org.core.backend.ticketapp.marketing.dto.social.UpdateInAppFollowerRequest;
-import org.core.backend.ticketapp.marketing.entity.InAppFollower;
-import org.core.backend.ticketapp.marketing.service.InAppFollowerService;
+import org.core.backend.ticketapp.passport.entity.InAppFollower;
+import org.core.backend.ticketapp.passport.service.InAppFollowerService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

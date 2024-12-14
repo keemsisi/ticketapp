@@ -25,5 +25,5 @@ public interface EventWishListRepository extends JpaRepository<EventWishList, UU
 
     @NotNull
     @Query(value = "SELECT e.* FROM event_wishlist e WHERE e.event_id = ?1 AND e.deleted=false AND e.user_id=?2 ORDER BY e.date_created DESC", nativeQuery = true)
-    List<EventWishList> getByEventIdAndUserId(final @NotNull UUID eventId, UUID userId);
+    Optional<EventWishList> getByEventIdAndUserId(final @NotNull UUID eventId, UUID userId);
 }

@@ -1,11 +1,13 @@
-package org.core.backend.ticketapp.marketing.service.impl;
+package org.core.backend.ticketapp.passport.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
+import org.core.backend.ticketapp.marketing.common.FollowerStatus;
+import org.core.backend.ticketapp.marketing.dao.InAppFollowerDAOService;
 import org.core.backend.ticketapp.marketing.dto.social.UpdateInAppFollowerRequest;
-import org.core.backend.ticketapp.marketing.entity.InAppFollower;
-import org.core.backend.ticketapp.marketing.repository.InAppFollowerRepository;
-import org.core.backend.ticketapp.marketing.service.InAppFollowerService;
+import org.core.backend.ticketapp.passport.entity.InAppFollower;
+import org.core.backend.ticketapp.passport.repository.InAppFollowerRepository;
+import org.core.backend.ticketapp.passport.service.InAppFollowerService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
@@ -22,6 +24,7 @@ import java.util.UUID;
 @Transactional
 @AllArgsConstructor
 public class InAppFollowerServiceImpl implements InAppFollowerService {
+    private final InAppFollowerDAOService inAppFollowerDAOService;
     private final InAppFollowerRepository repository;
     private final JwtTokenUtil jwtTokenUtil;
     private final ModelMapper modelMapper;
@@ -32,11 +35,18 @@ public class InAppFollowerServiceImpl implements InAppFollowerService {
         record.setUserId(jwtTokenUtil.getUser().getUserId());
         record.setTenantId(jwtTokenUtil.getUser().getTenantId());
         record.setDateCreated(LocalDateTime.now());
+        record.setStatus(FollowerStatus.FOLLOWED);
         return repository.save(record);
     }
 
     @Override
     public Page<InAppFollower> getAll(final Pageable pageable) {
+        final var userId = jwtTokenUtil.getUser().getUserId();
+        return Objects.nonNull(userId) ? repository.findAll(userId, pageable) : repository.findAll(pageable);
+    }
+
+    @Override
+    public Page<InAppFollower> getAllV2(final FilterInAppFollowerRequestDTO request, final Pageable pageable) {
         final var userId = jwtTokenUtil.getUser().getUserId();
         return Objects.nonNull(userId) ? repository.findAll(userId, pageable) : repository.findAll(pageable);
     }
