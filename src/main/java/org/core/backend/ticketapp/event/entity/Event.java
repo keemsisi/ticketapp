@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
@@ -124,8 +125,8 @@ public class Event extends AbstractBaseEntity {
 
     @PrePersist
     public void onCreate() {
-        if (approvalStatus == null) approvalStatus = ApprovalStatus.APPROVED;
-        if (id == null) id = UUID.randomUUID();
-        if (dateCreated == null) LocalDateTime.now();
+        this.id = ObjectUtils.defaultIfNull(this.id, UUID.randomUUID());
+        this.approvalStatus = ObjectUtils.defaultIfNull(this.approvalStatus, ApprovalStatus.APPROVED);
+        this.dateCreated = ObjectUtils.defaultIfNull(this.dateCreated, LocalDateTime.now());
     }
 }

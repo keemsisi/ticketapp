@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.ticket.entity;
 
 import lombok.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.Status;
 
@@ -53,7 +54,7 @@ public class Ticket extends AbstractBaseEntity {
 
     @PrePersist
     public void onCreate() {
-        id = UUID.randomUUID();
+        id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
     }
 
 

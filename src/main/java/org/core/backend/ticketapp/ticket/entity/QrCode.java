@@ -52,13 +52,9 @@ public class QrCode extends AbstractBaseEntity {
 
     @PrePersist
     public void onCreate() {
-        id = UUID.randomUUID();
-        if (dateCreated == null) {
-            dateCreated = LocalDateTime.now();
-        }
-        if (status == null) {
-            status = Status.ACTIVE;
-        }
+        id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
+        dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
+        status = Status.ACTIVE;
     }
 
     @PreUpdate

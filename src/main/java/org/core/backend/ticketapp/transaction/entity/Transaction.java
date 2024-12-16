@@ -6,7 +6,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.OrderType;
 import org.core.backend.ticketapp.common.enums.Status;
-import org.core.backend.ticketapp.common.enums.TransactionType;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -68,5 +67,6 @@ public class Transaction extends AbstractBaseEntity {
     public void onCreate() {
         id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
         dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
+
     }
 }

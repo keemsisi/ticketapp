@@ -53,9 +53,7 @@ public class ActivityLog {
 
     @PrePersist
     void onCreate() {
-        if (ObjectUtils.isEmpty(id))
-            id = UUID.randomUUID();
-        if (ObjectUtils.isEmpty(dateCreated))
-            dateCreated = LocalDateTime.now();
+        this.id = ObjectUtils.defaultIfNull(this.id, UUID.randomUUID());
+        this.dateCreated = ObjectUtils.defaultIfNull(this.dateCreated, LocalDateTime.now());
     }
 }

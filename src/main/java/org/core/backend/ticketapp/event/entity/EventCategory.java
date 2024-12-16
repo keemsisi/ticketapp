@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -37,8 +38,8 @@ public class EventCategory extends AbstractBaseEntity {
 
     @PrePersist
     public void onCreate() {
-        if (this.id == null) this.id = UUID.randomUUID();
-        if (this.dateCreated == null) this.dateCreated = LocalDateTime.now();
+        this.id = ObjectUtils.defaultIfNull(this.id, UUID.randomUUID());
+        this.dateCreated = ObjectUtils.defaultIfNull(this.dateCreated, LocalDateTime.now());
     }
 
 }
