@@ -36,6 +36,10 @@ public class SponsoredOffer extends AbstractBaseEntity {
     private String code;
     @Column(name = "image", nullable = false)
     private String image;
+    @Column(name = "event_id", nullable = false)
+    private UUID eventId;
+    @Column(name = "discount")
+    private Double discount;
 
     @PrePersist
     public void onCreate() {

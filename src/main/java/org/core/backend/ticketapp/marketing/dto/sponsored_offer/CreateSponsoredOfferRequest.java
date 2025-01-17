@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -21,6 +22,10 @@ public class CreateSponsoredOfferRequest {
     @NotNull(message = "details can't be blank")
     private String details;
     private String code;
+    @NotNull(message = "discount can't be null")
+    private Double discount;
     @NotNull(message = "image can't be blank")
     private String image;
+    @NotNull(message = "eventId can't be null")
+    private UUID eventId;
 }

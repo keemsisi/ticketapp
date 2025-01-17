@@ -37,8 +37,10 @@ public class EventPromotion extends AbstractBaseEntity {
     @NotBlank(message = "callToAction can't be blank")
     private String callToAction;
     @NotNull(message = "startDate can't be blank")
+    @Column(name = "start_date", columnDefinition = "timestamptz")
     private LocalDateTime startDate;
     @NotNull(message = "endDate can't be blank")
+    @Column(name = "end_date", columnDefinition = "timestamptz")
     private LocalDateTime endDate;
 
     @PrePersist

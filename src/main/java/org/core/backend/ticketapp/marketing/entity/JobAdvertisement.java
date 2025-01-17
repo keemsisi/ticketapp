@@ -36,7 +36,7 @@ public class JobAdvertisement extends AbstractBaseEntity {
     private String jobType;
     @Column(name = "deadline_date", columnDefinition = "timestamptz", nullable = false)
     private LocalDateTime deadlineDate;
-    @Column(name = "cvUrl", columnDefinition = "varchar(250)", nullable = false)
+    @Column(name = "cvUrl", columnDefinition = "varchar(250)")
     private String cvUrl;
     @Column(name = "overview", columnDefinition = "varchar(250)", nullable = false)
     private String overview;
