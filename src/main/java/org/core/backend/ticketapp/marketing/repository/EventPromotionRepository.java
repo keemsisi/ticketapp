@@ -17,6 +17,10 @@ public interface EventPromotionRepository extends JpaRepository<EventPromotion, 
     @Query(value = "SELECT * FROM event_promotion WHERE user_id = ?1 AND deleted = false ", nativeQuery = true)
     Page<EventPromotion> findAll(final @NotNull UUID userId, final @NotNull Pageable pageable);
 
+    @Query(value = "SELECT * FROM event_promotion WHERE user_id = ?1 AND deleted = false AND end_date >= now() ", nativeQuery = true)
+    @org.jetbrains.annotations.NotNull
+    Page<EventPromotion> findAll(@NotNull @org.jetbrains.annotations.NotNull Pageable pageable);
+
     @Query(value = "SELECT * FROM event_promotion WHERE id = ?1 AND user_id = ?2 AND deleted = false ", nativeQuery = true)
     Optional<EventPromotion> findById(UUID id, UUID userId);
 }
