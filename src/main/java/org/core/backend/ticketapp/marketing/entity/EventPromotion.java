@@ -8,10 +8,7 @@ import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -23,7 +20,10 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "event_promotion")
+@Table(name = "event_promotion", indexes = {
+        @Index(name = "ix_event_promotion__event_id_start_date_uq",
+                columnList = "event_id,start_date", unique = true)
+})
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class EventPromotion extends AbstractBaseEntity {
     @Column(name = "event_id", nullable = false)
