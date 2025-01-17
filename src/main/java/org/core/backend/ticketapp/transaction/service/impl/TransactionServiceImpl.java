@@ -252,7 +252,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (Objects.nonNull(loggedInUser.getUserId()) && loggedInUser.getEmail().equalsIgnoreCase(requestDTO.getEmail())) {
             return loggedInUser;
         }
-        final var optUser = coreUserService.getMemberByEmail(requestDTO.getEmail().strip());
+        final var optUser = coreUserService.getMemberByEmail(requestDTO.getEmail().toLowerCase().strip());
         if (optUser.isEmpty()) {
             final var userId = UUID.randomUUID();
             final var createUserRequestDto = new UserDto();
@@ -266,7 +266,7 @@ public class TransactionServiceImpl implements TransactionService {
             createUserRequestDto.setTenantId(appConfigs.defaultTenantId);
             createUserRequestDto.setPhone(StringUtils.defaultIfBlank(requestDTO.getPhoneNumber(),
                     RandomStringUtils.randomNumeric(11)));
-            createUserRequestDto.setEmail(requestDTO.getEmail());
+            createUserRequestDto.setEmail(requestDTO.getEmail().toLowerCase());
             createUserRequestDto.setFirstTimeLogin(true);
             CompletableFuture.runAsync(() -> {
                 try {
