@@ -13,12 +13,8 @@ import java.util.UUID;
 
 @Repository
 public interface JobAdvertisementRepository extends JpaRepository<JobAdvertisement, UUID> {
-    @Query(value = "SELECT * FROM job_ads WHERE user_id = ?1 AND deleted = false AND deadline_date >= now() ", nativeQuery = true)
+    @Query(value = "SELECT * FROM job_ads WHERE user_id = ?1 AND deleted = false ", nativeQuery = true)
     Page<JobAdvertisement> findAll(final @NotNull UUID userId, final @NotNull Pageable pageable);
-
-    @Query(value = "SELECT * FROM job_ads WHERE deleted = false AND deadline_date >= now() ", nativeQuery = true)
-    @org.jetbrains.annotations.NotNull
-    Page<JobAdvertisement> findAll(final @NotNull @org.jetbrains.annotations.NotNull Pageable pageable);
 
     @Query(value = "SELECT * FROM job_ads WHERE id = ?1 AND user_id = ?2 AND deleted = false ", nativeQuery = true)
     Optional<JobAdvertisement> findById(UUID id, UUID userId);
