@@ -40,10 +40,7 @@ import org.core.backend.ticketapp.transaction.service.TransactionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -86,6 +83,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public OrderResponseDto initializePayment(final InitPaymentOrderRequestDTO request) {
+        validateOrder(jwtTokenUtil.getUser());
         final var primary = request.getPrimary();
         final var secondary = request.getSecondary();
         final var eventSeatSectionMap = new HashMap<UUID, EventSeatSection>();
@@ -156,6 +154,12 @@ public class TransactionServiceImpl implements TransactionService {
             log.error(">>> Error Occurred while initiating transaction", e);
         }
         throw new ApplicationException(400, "init_payment_failed", "Failed to init payment with checkout link!");
+    }
+
+    private void validateOrder(final LoggedInUserDto loggedInUserDto) {
+        if (Objects.nonNull(loggedInUserDto.getUserId()) && loggedInUserDto.getUserType().isSeller()) {
+            throw new ApplicationException(HttpStatus.BAD_REQUEST.value(), "not_allowed", "Oops! Sellers can't buy thicket");
+        }
     }
 
 
@@ -289,6 +293,7 @@ public class TransactionServiceImpl implements TransactionService {
         modelMapper.map(user, createdUserDto);
         createdUserDto.setUserId(user.getId());
         createdUserDto.setPlanId(tenant.getPlanId().toString());
+        validateOrder(createdUserDto);
         return createdUserDto;
     }
 
