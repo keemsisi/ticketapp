@@ -27,6 +27,7 @@ import java.util.UUID;
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class JobAdvertisementApplication extends AbstractBaseEntity {
 
+    @Column(name = "job_id", columnDefinition = "UUID NOT NULL")
     @NotNull(message = "jobId can't be blank")
     private UUID jobId;
 
