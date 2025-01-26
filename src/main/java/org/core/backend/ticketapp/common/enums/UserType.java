@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.common.enums;
 
 public enum UserType {
-    SELLER, BUYER;
+    SELLER, BUYER, ADMIN;
 
     public boolean isBuyerOrSeller() {
         return this == SELLER || this == BUYER;
