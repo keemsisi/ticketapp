@@ -157,7 +157,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void validateOrder(final LoggedInUserDto loggedInUserDto) {
-        if (Objects.nonNull(loggedInUserDto.getUserId()) && loggedInUserDto.getUserType().isSeller()) {
+        if (Objects.nonNull(loggedInUserDto.getUserId())
+                && (Objects.nonNull(loggedInUserDto.getUserType()))
+                && loggedInUserDto.getUserType().isSeller()) {
             throw new ApplicationException(HttpStatus.BAD_REQUEST.value(), "not_allowed", "Oops! Sellers can't buy thicket");
         }
     }

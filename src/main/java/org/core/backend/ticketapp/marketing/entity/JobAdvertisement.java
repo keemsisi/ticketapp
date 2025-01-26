@@ -41,7 +41,7 @@ public class JobAdvertisement extends AbstractBaseEntity {
     @Column(name = "overview", columnDefinition = "varchar(250)", nullable = false)
     private String overview;
 
-    //TODO: remove later and get the information from Tenant
+    //TODO: remove later and get the information from Tenant ie make it @Transient
     @Column(name = "company_name", columnDefinition = "varchar(250)")
     private String companyName;
     @Column(name = "company_image", columnDefinition = "varchar(250)")
