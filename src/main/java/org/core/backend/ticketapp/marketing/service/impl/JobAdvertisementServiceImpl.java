@@ -6,6 +6,7 @@ import org.core.backend.ticketapp.marketing.dto.job_advertisement.UpdateJobAdver
 import org.core.backend.ticketapp.marketing.entity.JobAdvertisement;
 import org.core.backend.ticketapp.marketing.repository.JobAdvertisementRepository;
 import org.core.backend.ticketapp.marketing.service.JobAdvertisementService;
+import org.core.backend.ticketapp.passport.service.TenantService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
@@ -21,12 +22,17 @@ import java.util.UUID;
 @AllArgsConstructor
 public class JobAdvertisementServiceImpl implements JobAdvertisementService {
     private final JobAdvertisementRepository repository;
+    private final TenantService tenantService;
     private final JwtTokenUtil jwtTokenUtil;
     private final ModelMapper modelMapper;
 
     @Override
     public <R> JobAdvertisement create(final R request) {
         final var record = modelMapper.map(request, JobAdvertisement.class);
+        final var tenantId = jwtTokenUtil.getUser().getTenantId();
+        final var tenant = tenantService.getById(tenantId).orElseThrow();
+        record.setCompanyImage(tenant.getLogoUrl());
+        record.setCompanyName(tenant.getName());
         record.setUserId(jwtTokenUtil.getUser().getUserId());
         record.setTenantId(jwtTokenUtil.getUser().getTenantId());
         record.setDateCreated(LocalDateTime.now());

@@ -40,6 +40,11 @@ public class JobAdvertisement extends AbstractBaseEntity {
     private String cvUrl;
     @Column(name = "overview", columnDefinition = "varchar(250)", nullable = false)
     private String overview;
+    @Column(name = "company_name", columnDefinition = "varchar(250)")
+    private String companyName;
+    @Column(name = "company_image", columnDefinition = "varchar(250)")
+    private String companyImage;
+
 
     @PrePersist
     public void onCreate() {
