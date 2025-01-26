@@ -16,20 +16,15 @@ import java.util.UUID;
 public class CreateJobAdvertisementApplicationRequest {
     @NotNull(message = "jobId can't be null")
     private UUID jobId;
-
     @Email(message = "valid email address is required")
     private String email;
-
     @NotBlank(message = "fullName max is 250!")
     @Length(max = 5000, message = "resumeUlr max is 250!")
     private String fullName;
-
     @NotBlank(message = "resumeUlr max is 5000!")
     @Length(max = 5000, message = "resumeUlr max is 5000!")
     private String resumeUrl;
-
     @Length(max = 5000, min = 250, message = "coverLetter min and max is required!")
     private String coverLetter;
-
     private String linkedinProfile;
 }
