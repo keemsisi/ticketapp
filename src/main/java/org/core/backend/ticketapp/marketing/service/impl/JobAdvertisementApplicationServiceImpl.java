@@ -3,6 +3,7 @@ package org.core.backend.ticketapp.marketing.service.impl;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
+import org.core.backend.ticketapp.marketing.dto.job_advertisement.application.UpdateJobAdvertisementApplicationRequest;
 import org.core.backend.ticketapp.marketing.entity.JobAdvertisementApplication;
 import org.core.backend.ticketapp.marketing.repository.JobAdvertisementApplicationRepository;
 import org.core.backend.ticketapp.marketing.service.JobAdvertisementApplicationService;
