@@ -83,7 +83,11 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public OrderResponseDto initializePayment(final InitPaymentOrderRequestDTO request) {
-        validateOrder(jwtTokenUtil.getUser());
+        if (Objects.nonNull(jwtTokenUtil.getUser().getAccountType())
+                && jwtTokenUtil.getUser().getUserType().isSeller()
+                && StringUtils.isBlank(request.getPrimary().getPlan())) {
+            validateOrder(jwtTokenUtil.getUser());
+        }
         final var primary = request.getPrimary();
         final var secondary = request.getSecondary();
         final var eventSeatSectionMap = new HashMap<UUID, EventSeatSection>();
@@ -367,7 +371,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void processPaystackWebhook(final PaystackWebhookEvent request) throws JsonProcessingException {
         final var response = objectMapper.writeValueAsString(request);
-        log.error("->[CALLBACK] <- {}", response);
+        log.error("->[PayStack - CALLBACK] <- {}", response);
     }
 
     @Transactional
