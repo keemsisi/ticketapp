@@ -55,10 +55,4 @@ public class OrderController implements ICrudController {
         return ResponseEntity.ok(new GenericResponse<>("00", "Deleted successfully", null));
     }
 
-    @RequestMapping(value = "/paystack/callback", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> paymentCallback(final @RequestBody Map<String, Object> paymentCallback) {
-        log.info(">>> Vendor Payment Callback Received>>>> {} ", paymentCallback);
-        //call the verify payment here when order is successful
-        return ResponseEntity.ok().body("Callback received successfully");
-    }
 }
