@@ -1,9 +1,7 @@
 package org.core.backend.ticketapp.transaction.service;
 
-import org.core.backend.ticketapp.transaction.dto.InitPaymentOrderRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.OrderResponseDto;
-import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.SettlementRequestDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.core.backend.ticketapp.transaction.dto.*;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,4 +18,6 @@ public interface TransactionService {
     Transaction transfer(SettlementRequestDTO request);
 
     Transaction save(Transaction transaction);
+
+    void processPaystackWebhook(PaystackWebhookEvent request) throws JsonProcessingException;
 }

@@ -364,6 +364,12 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.save(transaction);
     }
 
+    @Override
+    public void processPaystackWebhook(final PaystackWebhookEvent request) throws JsonProcessingException {
+        final var response = objectMapper.writeValueAsString(request);
+        log.error("->[CALLBACK] <- {}", response);
+    }
+
     @Transactional
     public void updateUserSubscriptionPlan(final Transaction transaction, final Order order, final PaymentVerificationResponseDTO.Data data) {
         try {

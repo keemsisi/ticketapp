@@ -3,6 +3,7 @@ package org.core.backend.ticketapp.transaction.controller;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.dto.GenericResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
+import org.core.backend.ticketapp.transaction.dto.PaystackWebhookEvent;
 import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.core.backend.ticketapp.transaction.service.TransactionService;
@@ -39,9 +40,9 @@ public class TransactionController implements ICrudController {
 
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/paystack/webhook")
-    public ResponseEntity<GenericResponse<Transaction>> paystack(@RequestBody TransactionVerifyRequestDTO request) throws Exception {
-        final var verified = transactionService.verifyPayment(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Payment verified successfully", verified), HttpStatus.OK);
+    public ResponseEntity<GenericResponse<Object>> paystackWebhook(@RequestBody PaystackWebhookEvent request) throws Exception {
+        transactionService.processPaystackWebhook(request);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Paystack event processed successfully", null), HttpStatus.OK);
     }
 
 }
