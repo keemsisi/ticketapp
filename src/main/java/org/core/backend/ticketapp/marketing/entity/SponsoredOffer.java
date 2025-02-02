@@ -36,7 +36,7 @@ public class SponsoredOffer extends AbstractBaseEntity {
     private String code;
     @Column(name = "image", nullable = false)
     private String image;
-    @Column(name = "event_id", nullable = false)
+    @Column(name = "event_id")
     private UUID eventId;
     @Column(name = "discount")
     private Double discount;
