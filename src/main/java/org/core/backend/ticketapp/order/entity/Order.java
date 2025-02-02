@@ -3,7 +3,7 @@ package org.core.backend.ticketapp.order.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
-import org.apache.commons.lang3.ObjectUtils;
+import org.core.backend.ticketapp.common.dto.configs.pricing.TransactionFeesDTO;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.Gender;
 import org.core.backend.ticketapp.common.enums.OrderStatus;
@@ -99,6 +99,9 @@ public class Order extends AbstractBaseEntity {
     @Transient
     private Gender gender;
 
+    @Type(type = "JSONB")
+    @Column(name = "transaction_fees", columnDefinition = "JSONB")
+    private TransactionFeesDTO transactionFees;
 
 
     @PrePersist

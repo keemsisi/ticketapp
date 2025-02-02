@@ -151,8 +151,7 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new ApplicationException(400, "init_payment_failed", "Failed to init payment");
             }
             final var order = getOrders(orderId, eventSeatSectionMap, request, paymentRequest.getAmount(),
-                    Objects.requireNonNull(response.getBody()), paymentRequest, isPlanPayment);
-            order.setTransactionFees(paymentFees);
+                    Objects.requireNonNull(response.getBody()), paymentRequest, isPlanPayment, paymentFees);
             return order;
         } catch (final Throwable e) {
             log.error(">>> Error Occurred while initiating transaction", e);
@@ -184,7 +183,8 @@ public class TransactionServiceImpl implements TransactionService {
             final double totalAmountPaid,
             final PaymentInitResponseDTO response,
             final InitPaymentGateWayRequestDTO request,
-            final boolean isPlanTransaction) {
+            final boolean isPlanTransaction,
+            final TransactionFeesDTO transactionFeesDTO) {
         final var quantity = !initRequest.getSecondary().isEmpty() ? initRequest.getSecondary().size() + 1 : 1;
         final var primary = initRequest.getPrimary();
         final var secondary = initRequest.getSecondary();
@@ -213,6 +213,7 @@ public class TransactionServiceImpl implements TransactionService {
         order.setTenantId(primaryUserDto.getTenantId());
         order.setSeatSectionId(isPlanTransaction ? null : primary.getSeatSectionId());
         order.setPrimary(true);
+        order.setTransactionFees(transactionFeesDTO);
         orderService.save(order);
         order.setBatchOrderId(order.getId());
 
@@ -454,7 +455,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     public OrderResponseDto processFreeEvent(final Map<UUID, EventSeatSection> eventSeatSectionMap, final InitPaymentOrderRequestDTO request) {
-        final var orders = getOrders(UUID.randomUUID(), eventSeatSectionMap, request, 0.0, null, null, false);
+        final var orders = getOrders(UUID.randomUUID(), eventSeatSectionMap, request, 0.0, null, null, false, null);
         final var primaryOrder = orders.getPrimary();
         final var secondaryOrders = orders.getSecondary();
         final var ticketDto = new TicketCreateRequestDTO(
