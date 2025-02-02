@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -30,7 +31,7 @@ public class JobAdvertisementServiceImpl implements JobAdvertisementService {
     public <R> JobAdvertisement create(final R request) {
         final var record = modelMapper.map(request, JobAdvertisement.class);
         final var tenantId = jwtTokenUtil.getUser().getTenantId();
-        final var tenant = tenantService.getById(tenantId).orElseThrow();
+        final var tenant = Optional.ofNullable(tenantService.getByTenantId(tenantId)).orElseThrow();
         record.setCompanyImage(tenant.getLogoUrl());
         record.setCompanyName(tenant.getName());
         record.setUserId(jwtTokenUtil.getUser().getUserId());

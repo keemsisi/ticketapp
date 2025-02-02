@@ -24,8 +24,6 @@ public class CreateJobAdvertisementRequest {
     private String jobType;
     @NotNull(message = "deadlineDate can't be null")
     private LocalDateTime deadlineDate;
-    @NotBlank(message = "cvUrl can't be blank")
-    private String cvUrl;
     @NotBlank(message = "overview can't be blank")
     private String overview;
 }
