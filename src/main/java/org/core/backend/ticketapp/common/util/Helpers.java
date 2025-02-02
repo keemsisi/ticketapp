@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
@@ -14,7 +15,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -46,7 +49,7 @@ public class Helpers {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode json = (ObjectNode) mapper.readTree(ow.writeValueAsString(repoResp));
-        int pageNumber = json.get("number").intValue()+1;
+        int pageNumber = json.get("number").intValue() + 1;
         json.put("number", pageNumber);
         ((ObjectNode) json.get("pageable")).put("pageNumber", pageNumber);
         return json;
@@ -80,6 +83,12 @@ public class Helpers {
         byte[] messageDigest = md.digest(data.getBytes());
         BigInteger number = new BigInteger(1, messageDigest);
         return number.toString(16);
+    }
+
+    public static boolean hasActiveSubscription(final LoggedInUserDto user) {
+        return (Objects.nonNull(user.getSubscriptionStatus()) && user.getSubscriptionStatus().isActive())
+                || Objects.nonNull(user.getSubscriptionExpiryDate())
+                && user.getSubscriptionExpiryDate().isAfter(LocalDateTime.now());
     }
 
 }

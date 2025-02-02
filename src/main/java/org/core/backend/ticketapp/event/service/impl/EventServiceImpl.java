@@ -7,6 +7,7 @@ import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
 import org.core.backend.ticketapp.common.response.EventStatsResponseDTO;
 import org.core.backend.ticketapp.common.response.EventTicketStatsDTO;
+import org.core.backend.ticketapp.common.util.Helpers;
 import org.core.backend.ticketapp.event.dao.EventDao;
 import org.core.backend.ticketapp.event.dao.EventResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
@@ -23,7 +24,6 @@ import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.event.service.VirtualEventService;
 import org.core.backend.ticketapp.passport.dtos.NotificationRequestDto;
-import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.notification.NotificationServiceServiceImpl;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -105,7 +105,7 @@ public class EventServiceImpl implements EventService {
         event.setType(request.getEventType());
         event.setPublic(request.isPublic());
 
-        if (!hasActiveSubscription(jwtTokenUtil.getUser())) {
+        if (!Helpers.hasActiveSubscription(jwtTokenUtil.getUser())) {
             event.setPublic(false);
         }
 
@@ -156,12 +156,6 @@ public class EventServiceImpl implements EventService {
             }
         });
         return event;
-    }
-
-    private boolean hasActiveSubscription(final LoggedInUserDto user) {
-        return (Objects.nonNull(user.getSubscriptionStatus()) && user.getSubscriptionStatus().isActive())
-                || Objects.nonNull(user.getSubscriptionExpiryDate())
-                && user.getSubscriptionExpiryDate().isAfter(LocalDateTime.now());
     }
 
     public Event getById(UUID id) {
