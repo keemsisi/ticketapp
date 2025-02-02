@@ -22,7 +22,8 @@ public interface TenantRepository extends JpaRepository<Tenant, UUID>, PagingAnd
     @Query(value = "SELECT * FROM tenant WHERE id = :tenantId LIMIT 1", nativeQuery = true)
     Optional<Tenant> findRegistrar(@Param("tenantId") UUID tenantId);
 
-    @Query(value = "SELECT * FROM tenant WHERE name LIKE CONCAT('%',:name,'%') AND deleted=false", nativeQuery = true)
+    @Query(value = "SELECT * FROM tenant WHERE name LIKE CONCAT('%',:name,'%') " +
+            " AND deleted=false AND subscription_expiry_date >= now() ", nativeQuery = true)
     Page<Tenant> getAll(@Param("name") String name, Pageable pageable);
 
     @NotNull
