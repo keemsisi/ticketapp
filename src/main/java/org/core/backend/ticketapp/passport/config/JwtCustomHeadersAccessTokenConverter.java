@@ -37,8 +37,7 @@ public class JwtCustomHeadersAccessTokenConverter extends JwtAccessTokenConverte
         } catch (Exception ex) {
             throw new IllegalStateException("Cannot convert access token to JSON", ex);
         }
-        String token = JwtHelper.encode(content, this.signer, this.customHeaders)
-                .getEncoded();
+        String token = JwtHelper.encode(content, this.signer, this.customHeaders).getEncoded();
         return token;
     }
 
