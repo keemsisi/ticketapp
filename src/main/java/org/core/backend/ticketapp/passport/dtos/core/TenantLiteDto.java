@@ -1,11 +1,9 @@
 package org.core.backend.ticketapp.passport.dtos.core;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.core.backend.ticketapp.common.dto.OperationalHours;
 import org.core.backend.ticketapp.common.dto.SocialMediaDTO;
 import org.core.backend.ticketapp.passport.validation.annotation.CountryCode;
 
