@@ -86,7 +86,7 @@ public class Helpers {
     }
 
     public static boolean hasActiveSubscription(final LoggedInUserDto user) {
-        return (Objects.nonNull(user.getSubscriptionStatus()) && user.getSubscriptionStatus().isActive())
+        return !user.isAdmin() && (Objects.nonNull(user.getSubscriptionStatus()) && user.getSubscriptionStatus().isActive())
                 || Objects.nonNull(user.getSubscriptionExpiryDate())
                 && user.getSubscriptionExpiryDate().isAfter(LocalDateTime.now());
     }
