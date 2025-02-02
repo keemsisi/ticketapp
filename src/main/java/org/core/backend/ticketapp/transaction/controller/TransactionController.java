@@ -37,4 +37,11 @@ public class TransactionController implements ICrudController {
         return new ResponseEntity<>(new GenericResponse<>("00", "Payment verified successfully", verified), HttpStatus.OK);
     }
 
+
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/paystack/webhook")
+    public ResponseEntity<GenericResponse<Transaction>> paystack(@RequestBody TransactionVerifyRequestDTO request) throws Exception {
+        final var verified = transactionService.verifyPayment(request);
+        return new ResponseEntity<>(new GenericResponse<>("00", "Payment verified successfully", verified), HttpStatus.OK);
+    }
+
 }
