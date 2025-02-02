@@ -41,5 +41,5 @@ public class TenantLiteDto {
     private String secondaryPhoneNumber;
     private String description;
     private List<SocialMediaDTO> socialMediaHandles;
-    private OperationalHours operationalHours;
+    private List<String> services;
 }

@@ -102,6 +102,10 @@ public class Tenant extends AbstractBaseEntity {
     @Column(name = "operational_hours")
     private OperationalHours operationalHours;
 
+    @Type(type = "JSONB")
+    @Column(name = "services", columnDefinition = "JSONB default null")
+    private List<String> services;
+
     private String logoLocation;
 
     @PrePersist

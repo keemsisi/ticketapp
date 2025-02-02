@@ -50,4 +50,5 @@ public class TenantDto {
     private Integer inactivePeriodInMinutes;
     private Integer accountLockoutThresholdCount;
     private OperationalHours operationalHours;
+    private List<String> services;
 }
