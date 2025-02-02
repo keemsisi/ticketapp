@@ -8,11 +8,13 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.Gender;
+import org.core.backend.ticketapp.common.enums.SubscriptionStatus;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -77,6 +79,12 @@ public class LoggedInUserDto {
     @JsonProperty("account_type")
     @ExcelColumn(columnName = "account_type", failIfAbsent = false)
     private AccountType accountType;
+
+    @JsonProperty("subscription_status")
+    private SubscriptionStatus subscriptionStatus;
+
+    @JsonProperty("subscription_expiry_date")
+    private LocalDateTime subscriptionExpiryDate;
 
     @JsonProperty("user_type")
     @ExcelColumn(columnName = "user_type", failIfAbsent = false)

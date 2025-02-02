@@ -55,6 +55,8 @@ public class TokenEnhancerService implements TokenEnhancer {
             additionalInformation.put("email", user.getEmail());
             additionalInformation.put("user_id", user.getId());
             additionalInformation.put("tenant_id", user.getTenantId());
+            additionalInformation.put("subscription_status", tenant.getSubscriptionStatus().name());
+            additionalInformation.put("subscription_expiry_date", tenant.getSubscriptionExpiryDate());
             additionalInformation.put("idle_time", userIdleTime);
             additionalInformation.put("account_type", user.getAccountType());
             additionalInformation.put("user_type", user.getType());

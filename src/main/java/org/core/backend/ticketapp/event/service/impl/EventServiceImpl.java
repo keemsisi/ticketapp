@@ -23,6 +23,7 @@ import org.core.backend.ticketapp.event.repository.EventSeatSectionRepository;
 import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.event.service.VirtualEventService;
 import org.core.backend.ticketapp.passport.dtos.NotificationRequestDto;
+import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.notification.NotificationServiceServiceImpl;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -104,6 +105,10 @@ public class EventServiceImpl implements EventService {
         event.setType(request.getEventType());
         event.setPublic(request.isPublic());
 
+        if (!hasActiveSubscription(jwtTokenUtil.getUser())) {
+            event.setPublic(false);
+        }
+
         if (request.getBankAccountDetails() != null) {
             final var bankAccountDetails = bankAccountDetailsRepository.findByTenantId(event.getTenantId());
             if (bankAccountDetails.isEmpty() && Objects.nonNull(user.getAccountType()) &&
@@ -151,6 +156,12 @@ public class EventServiceImpl implements EventService {
             }
         });
         return event;
+    }
+
+    private boolean hasActiveSubscription(final LoggedInUserDto user) {
+        return (Objects.nonNull(user.getSubscriptionStatus()) && user.getSubscriptionStatus().isActive())
+                || Objects.nonNull(user.getSubscriptionExpiryDate())
+                && user.getSubscriptionExpiryDate().isAfter(LocalDateTime.now());
     }
 
     public Event getById(UUID id) {

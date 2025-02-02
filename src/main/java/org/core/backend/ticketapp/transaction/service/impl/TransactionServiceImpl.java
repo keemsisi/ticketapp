@@ -380,6 +380,7 @@ public class TransactionServiceImpl implements TransactionService {
                     tenant.setPlanId(newPlan.getId());
                     tenant.setDateModified(LocalDateTime.now());
                     tenant.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
+                    tenant.setSubscriptionExpiryDate(LocalDateTime.now().plusMonths(1));
                     tenantService.save(tenant);
                     final var newTenantData = objectMapper.writeValueAsString(tenant);
                     log.info(">>> Tenant Plan successfully upgraded {} tenantId: {} newPlanId: {} ",

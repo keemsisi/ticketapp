@@ -14,6 +14,7 @@ import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -65,6 +66,9 @@ public class Tenant extends AbstractBaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "subscription_status", columnDefinition = "varchar(255) default 'ACTIVE'")
     private SubscriptionStatus subscriptionStatus;
+
+    @Column(name = "subscription_expiry_date", columnDefinition = "timestamptz default null")
+    private LocalDateTime subscriptionExpiryDate;
 
     //business profile
     @Column(name = "website_url")
