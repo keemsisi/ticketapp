@@ -30,6 +30,7 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
         followerRecord.setFollowerUserId(request.getUserId());
         repository.save(followerRecord);
 
+        //later the transaction will be completely created and saved for tracking purpose
         final var transaction = Transaction.builder().amount(BigDecimal.ONE).build();
         walletService.creditWallet(transaction, wallet);
         return followerRecord;
