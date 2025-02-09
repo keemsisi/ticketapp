@@ -16,10 +16,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 
-@Table(name = "wallet", indexes = {@Index(name = "ix_wallet_reference_uq", columnList = "reference", unique = true), @Index(name = "ix_wallet_user_id_account_number_uq", columnList = "user_id, account_number", unique = true)})
 @Entity
 @Getter
 @Setter
+@Table(name = "wallet", indexes = {@Index(name = "ix_wallet_reference_uq", columnList = "reference", unique = true), @Index(name = "ix_wallet_user_id_account_number_uq", columnList = "user_id, account_number", unique = true)})
 @NoArgsConstructor
 @AllArgsConstructor
 @OptimisticLocking(type = OptimisticLockType.VERSION)

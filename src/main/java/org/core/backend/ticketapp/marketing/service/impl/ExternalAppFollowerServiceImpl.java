@@ -33,7 +33,7 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
     public ExternalAppFollower follow(final FollowUserSocialLinkRequest request) {
         validateRequest(request);
         final var record = advertisementService.getById(request.getId());
-        final var wallet = walletService.getOrCreateWallet(request.getUserId(), WalletType.COIN_WALLET);
+        final var wallet = walletService.getOrCreateWallet(request.getUserId(), WalletType.COIN_WALLET, "NGN");
         final var followerRecord = new ExternalAppFollower();
         followerRecord.setUserId(record.getUserId());
         followerRecord.setFollowerUserId(request.getId());
