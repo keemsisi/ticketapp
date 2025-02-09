@@ -11,21 +11,24 @@ public class RedisService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    public boolean storeDataAsString(String id, String stringData, Long expiryInMinutes) {
+    public void storeDataAsString(String id, String stringData, Long expiryInMinutes) {
         stringRedisTemplate.opsForValue().set(id, stringData);
         setExpire(id, expiryInMinutes, TimeUnit.MINUTES);
-        return true;
     }
 
-    public String fetchDataAsString(String id) {
+    public String fetchDataAsString(final String id) {
         return stringRedisTemplate.opsForValue().get(id);
     }
 
-    public Boolean deleteData(String id) {
-        return stringRedisTemplate.delete(id);
+    public void deleteData(final String id) {
+        stringRedisTemplate.delete(id);
     }
 
-    private void setExpire(String key, long expiry, TimeUnit timeUnit) {
+    private void setExpire(final String key, final long expiry, final TimeUnit timeUnit) {
         stringRedisTemplate.expire(key, expiry, timeUnit);
+    }
+
+    public void decrease(final String key, final int val) {
+        stringRedisTemplate.opsForValue().decrement(key, val);
     }
 }
