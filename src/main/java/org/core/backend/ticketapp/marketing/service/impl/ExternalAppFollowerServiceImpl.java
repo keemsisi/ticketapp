@@ -47,17 +47,17 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
 
     private void validateRequest(final FollowUserSocialLinkRequest request) {
         final var key = String.format(FOLLOWER_LIMIT_TEMPLATE, request.getUserId());
-        final var result = redisService.fetchDataAsString(key);
+        final var result = redisService.get(key);
         if (StringUtils.isNotBlank(result) && Integer.parseInt(result) == 0) {
             throw new ApplicationException(412, "max_reached", "Oops! You have reached maximum numbers of followers!");
         } else {
-            redisService.storeDataAsString(key, DEFAULT_FOLLOW_COUNT, TimeUnit.HOURS.toMinutes(1));
+            redisService.put(key, DEFAULT_FOLLOW_COUNT, TimeUnit.HOURS.toMinutes(1));
         }
     }
 
     private void decrement(final UUID userId) {
         final var key = String.format(FOLLOWER_LIMIT_TEMPLATE, userId);
-        final var result = redisService.fetchDataAsString(key);
+        final var result = redisService.get(key);
         if (StringUtils.isNotBlank(result) && Integer.parseInt(result) > 0) {
             redisService.decrease(key, 1);
         } else {

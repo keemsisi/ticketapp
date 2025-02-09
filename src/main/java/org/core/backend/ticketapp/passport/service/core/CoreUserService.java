@@ -603,7 +603,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
 
     public void validate2FAToken(TwoFaValidationDTO twoFaValidationDTO) throws JsonProcessingException {
         String key = twoFaValidationDTO.getUserId() + AUTH_2FA;
-        String fetchedData = redisService.fetchDataAsString(key);
+        String fetchedData = redisService.get(key);
         if (org.apache.commons.lang3.ObjectUtils.isNotEmpty(fetchedData)) {
             TwoFADTO otpData = objectMapper.readValue(fetchedData, TwoFADTO.class);
             if (Objects.equals(twoFaValidationDTO.getOtp(), otpData.getOtp())) {
@@ -620,7 +620,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         twoFADTO.setDateCreated(new Date());
         twoFADTO.setOtp(RandomStringUtils.randomNumeric(6));
         twoFADTO.setPurpose("Authentication");
-        redisService.storeDataAsString(userId + AUTH_2FA, objectMapper.writeValueAsString(twoFADTO), 1L);
+        redisService.put(userId + AUTH_2FA, objectMapper.writeValueAsString(twoFADTO), 1L);
 
         if (appConfigs.send2faSms) {
             smsService.sendSingleSms(

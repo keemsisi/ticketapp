@@ -11,12 +11,12 @@ public class RedisService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    public void storeDataAsString(String id, String stringData, Long expiryInMinutes) {
+    public void put(String id, String stringData, Long expiryInMinutes) {
         stringRedisTemplate.opsForValue().set(id, stringData);
         setExpire(id, expiryInMinutes, TimeUnit.MINUTES);
     }
 
-    public String fetchDataAsString(final String id) {
+    public String get(final String id) {
         return stringRedisTemplate.opsForValue().get(id);
     }
 
