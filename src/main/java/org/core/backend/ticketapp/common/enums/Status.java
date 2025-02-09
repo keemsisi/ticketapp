@@ -10,7 +10,10 @@ public enum Status {
     EXPIRED,
     COMPLETED,
     FAILED,
-    INVALID_AMOUNT_PAID;
+    INVALID_AMOUNT_PAID,
+    BLOCKED,
+    PND,
+    FRAUDULENT;
 
     public boolean isPaid() {
         return this == PAID;

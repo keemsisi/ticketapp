@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.transaction.controller;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.transaction.dto.PaystackWebhookEvent;
 import org.core.backend.ticketapp.transaction.dto.TransactionVerifyRequestDTO;
@@ -27,22 +27,22 @@ public class TransactionController implements ICrudController {
     TransactionService transactionService;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Page<Transaction>>> getAll(Pageable pageable) {
+    public ResponseEntity<GenericApiResponse<Page<Transaction>>> getAll(Pageable pageable) {
         final var transactions = transactionService.getAll(pageable);
-        return new ResponseEntity<>(new GenericResponse<>("00", "All transactions", transactions), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "All transactions", transactions), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/verify")
-    public ResponseEntity<GenericResponse<Transaction>> verifyPayment(@RequestBody TransactionVerifyRequestDTO request) throws Exception {
+    public ResponseEntity<GenericApiResponse<Transaction>> verifyPayment(@RequestBody TransactionVerifyRequestDTO request) throws Exception {
         final var verified = transactionService.verifyPayment(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Payment verified successfully", verified), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Payment verified successfully", verified), HttpStatus.OK);
     }
 
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/paystack/webhook")
-    public ResponseEntity<GenericResponse<Object>> paystackWebhook(@RequestBody PaystackWebhookEvent request) throws Exception {
+    public ResponseEntity<GenericApiResponse<Object>> paystackWebhook(@RequestBody PaystackWebhookEvent request) throws Exception {
         transactionService.processPaystackWebhook(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Paystack event processed successfully", null), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Paystack event processed successfully", null), HttpStatus.OK);
     }
 
 }

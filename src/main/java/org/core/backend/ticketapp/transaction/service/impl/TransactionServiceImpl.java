@@ -375,6 +375,11 @@ public class TransactionServiceImpl implements TransactionService {
         log.error("->[PayStack - CALLBACK] <- {}", response);
     }
 
+    @Override
+    public Transaction getById(final UUID transactionId) {
+        return transactionRepository.getById(transactionId);
+    }
+
     @Transactional
     public void updateUserSubscriptionPlan(final Transaction transaction, final Order order, final PaymentVerificationResponseDTO.Data data) {
         try {

@@ -7,7 +7,7 @@ import io.github.thecarisma.ObjCopier;
 import io.jsonwebtoken.lang.Assert;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
@@ -60,20 +60,20 @@ public class TenantController {
     public ResponseEntity<?> create(@Validated @RequestBody TenantDto tenantDto) throws JsonProcessingException {
         final var loggedInUserDto = jwtTokenUtil.getUser();
         if (!loggedInUserDto.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.UNAUTHORIZED);
         }
         final var user = new User();
         BeanUtils.copyProperties(loggedInUserDto, user);
         user.setId(loggedInUserDto.getUserId());
         final var tenant = tenantService.create(tenantDto, user, tenantDto.getOwnerId());
-        return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", tenant), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Tenant>> get(@PathVariable(required = false) UUID tenantId) {
+    public ResponseEntity<GenericApiResponse<Tenant>> get(@PathVariable(required = false) UUID tenantId) {
         final var _tenantId = Objects.nonNull(tenantId) ? tenantId : jwtTokenUtil.getUser().getTenantId();
         final var tenant = service.getByTenantId(_tenantId);
-        return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", tenant), HttpStatus.OK);
 
     }
 
@@ -81,13 +81,13 @@ public class TenantController {
     public ResponseEntity<?> getTenants(@RequestParam(name = "name") String name, final Pageable pageable) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name());
         final var tenant = PagedMapperUtil.map(service.getAll(pageable, name));
-        return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", tenant), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/search", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getOrganizations(@RequestParam(name = "name") String name, final Pageable pageable) {
         final var tenant = service.getOrganizations(pageable, name);
-        return new ResponseEntity<>(new GenericResponse<>("00", "", tenant), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", tenant), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -96,16 +96,16 @@ public class TenantController {
         Assert.notNull(tenantDto.getId());
         final var _tenant = service.getByTenantId(tenantDto.getId());
         if (!user.getTenantId().equals(tenantDto.getId()) && !user.getAccountType().isSuperAdmin()) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "Oops! Resource update not allowed!", ""), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "Oops! Resource update not allowed!", ""), HttpStatus.FORBIDDEN);
         } else if (!user.getAccountType().isSuperAdmin() && !user.getAccountType().isIndividualOrOrganizationMerchantOwner()) {
             //TODO: add checks for permission check here
-            return new ResponseEntity<>(new GenericResponse<>("01", "Oops! Resource update not allowed!", ""), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "Oops! Resource update not allowed!", ""), HttpStatus.FORBIDDEN);
         }
         final var oldDataJSON = objectMapper.writeValueAsString(_tenant);
         ObjCopier.copyFields(_tenant, tenantDto);
         final var newTenant = service.save(_tenant);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), objectMapper.writeValueAsString(oldDataJSON), objectMapper.writeValueAsString(newTenant), "Initiated a request to update a tenant");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully updated tenant's details", _tenant), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully updated tenant's details", _tenant), HttpStatus.OK);
 
     }
 
@@ -115,12 +115,12 @@ public class TenantController {
         var user = jwtTokenUtil.getUser();
         final var tenant = service.getByTenantId(user.getTenantId());
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.NOT_FOUND);
         }
         final var oldDataJSON = objectMapper.writeValueAsString(tenant);
         final Tenant newTenant = service.updateLogo(tenant, file);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(newTenant), "Initiated a request to update tenant logo");
-        return new ResponseEntity<>(new GenericResponse<>("00", "", newTenant), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", newTenant), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/settings", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -129,7 +129,7 @@ public class TenantController {
         String oldDataJSON;
         var user = jwtTokenUtil.getUser();
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""), HttpStatus.FORBIDDEN);
         }
 
         var _tenant = service.getByTenantId(settings.getTenantId());
@@ -138,7 +138,7 @@ public class TenantController {
         _tenant.setTwoFaEnabled(settings.getIsTwoFaEnabled());
         newTenant = service.save(_tenant);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(newTenant), "Initiated a request to update a tenant policy settings");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Settings updated successfully", null), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Settings updated successfully", null), HttpStatus.OK);
     }
 
 
@@ -149,11 +149,11 @@ public class TenantController {
         UserUtils.assertUserHasRole(loggedInUserDto.getRoles(), ConstantUtil.SUPER_ADMIN);
         users = userService.createUserFromExcel(loggedInUserDto, file);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Tenant.class.getTypeName(), null, objectMapper.writeValueAsString(users), "Initiated a request to create new users from uploaded excel sheet");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Settings updated successfully", null), HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Settings updated successfully", null), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/bank-account-details", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<List<BankAccountDetails>>> getBankAccountDetails(@RequestParam(required = false) UUID tenantId) {
+    public ResponseEntity<GenericApiResponse<List<BankAccountDetails>>> getBankAccountDetails(@RequestParam(required = false) UUID tenantId) {
         final var user = jwtTokenUtil.getUser();
         if (Objects.nonNull(user.getAccountType()) && !user.getAccountType().isIndividualOrOrganizationMerchantOwner()) {
             UserUtils.assertUserHasRole(user.getRoles(), AccountType.SUPER_ADMIN.getType());
@@ -161,6 +161,6 @@ public class TenantController {
             throw new ApplicationException(403, "forbidden", "Access not allowed!");
         }
         final var response = bankAccountDetailsService.getByTenantId(ObjectUtils.defaultIfNull(tenantId, user.getTenantId()));
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully fetched details!", response), HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully fetched details!", response), HttpStatus.CREATED);
     }
 }

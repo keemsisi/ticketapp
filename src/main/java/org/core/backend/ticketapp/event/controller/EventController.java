@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.event.controller;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.Page;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
@@ -30,63 +30,63 @@ public class EventController implements ICrudController {
     private final EventService eventService;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Event>> create(@Valid @RequestBody CreateEventRequestDTO request) throws Exception {
+    public ResponseEntity<GenericApiResponse<Event>> create(@Valid @RequestBody CreateEventRequestDTO request) throws Exception {
         final var event = eventService.create(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Created successfully", event), HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Created successfully", event), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/{id}")
-    public ResponseEntity<GenericResponse<Event>> getById(UUID id) {
+    public ResponseEntity<GenericApiResponse<Event>> getById(UUID id) {
         final var event = eventService.getById(id);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Created successfully", event), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Created successfully", event), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/filter-search")
-    public ResponseEntity<GenericResponse<Page<?>>> filterSearch(final EventFilterRequestDTO filter) {
+    public ResponseEntity<GenericApiResponse<Page<?>>> filterSearch(final EventFilterRequestDTO filter) {
         final var data = eventService.searchEvents(filter);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Event fetched successfully", data), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Event fetched successfully", data), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "/fetch-by-ids")
-    public ResponseEntity<GenericResponse<List<Event>>> fetchEventByIds(final @RequestParam List<UUID> ids) {
+    public ResponseEntity<GenericApiResponse<List<Event>>> fetchEventByIds(final @RequestParam List<UUID> ids) {
         final var event = eventService.getAllByIds(ids);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Fetched successfully", event), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Fetched successfully", event), HttpStatus.OK);
     }
 
 
     //    @PreAuthorize("hasAuthority('SCOPE_update_event')")
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Event>> update(@RequestBody EventUpdateRequestDTO request) {
+    public ResponseEntity<GenericApiResponse<Event>> update(@RequestBody EventUpdateRequestDTO request) {
         final var event = eventService.update(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Updated successfully", event),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Updated successfully", event),
                 HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
         final var events = eventService.getAll();
-        return new ResponseEntity<>(new GenericResponse<>("00", "All events", events), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "All events", events), HttpStatus.OK);
     }
 
     //    @PreAuthorize("hasAuthority('SCOPE_delete_event')")
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Event>> delete(@PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<Event>> delete(@PathVariable UUID id) {
         eventService.delete(id);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Deleted successfully", null),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Deleted successfully", null),
                 HttpStatus.OK);
     }
 
     //    @PreAuthorize("hasAuthority('SCOPE_assign_event_category')")
     @RequestMapping(value = "/assign-category", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Event>> assignCategory(@RequestBody AssignCategoryToEventRequestDTO request) {
+    public ResponseEntity<GenericApiResponse<Event>> assignCategory(@RequestBody AssignCategoryToEventRequestDTO request) {
         final var event = eventService.assignCategory(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully assigned category to event", event),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully assigned category to event", event),
                 HttpStatus.OK);
     }
 
     @RequestMapping(value = "/stats", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<EventStatsResponseDTO>> getTotalAvailableTickets(final EventStatRequestDTO request) {
+    public ResponseEntity<GenericApiResponse<EventStatsResponseDTO>> getTotalAvailableTickets(final EventStatRequestDTO request) {
         final var totalTickets = eventService.getEventStats(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully fetched events stats!", totalTickets), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully fetched events stats!", totalTickets), HttpStatus.OK);
     }
 }

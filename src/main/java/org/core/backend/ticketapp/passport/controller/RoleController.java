@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.passport.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dao.RoleDao;
 import org.core.backend.ticketapp.passport.dao.UserDao;
@@ -62,19 +62,19 @@ public class RoleController {
         } else {
             roles = roleRepository.getAll(name.toLowerCase(), ResponsePageRequest.createPageRequest(pageNumber, pageSize, order, sortBy, true, "created_on"));
         }
-        return new ResponseEntity<>(new GenericResponse<>("00", "", roles), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", roles), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getById(@PathVariable(value = "id") UUID roleId) {
         var role = roleRepository.getById(roleId);
         if (Objects.isNull(role)) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "No role with the specified id found", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "No role with the specified id found", ""), HttpStatus.NOT_FOUND);
         }
         var roleUsers = roleDao.getRoleUsersByRoleId(roleId);
 
         var response = RoleUsersResponse.builder().id(role.getId()).code(role.getCode()).name(role.getName()).description(role.getDescription()).users(roleUsers).build();
-        return new ResponseEntity<>(new GenericResponse<>("00", "", response), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", response), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -85,7 +85,7 @@ public class RoleController {
 
         newRole = userService.createRole(roleDto, loggedInUser);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Role.class.getTypeName(), null, objectMapper.writeValueAsString(newRole), "Initiated a request to get a unique role");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully added the new roles", newRole), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully added the new roles", newRole), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -97,12 +97,12 @@ public class RoleController {
         Optional<Role> roleResult = roleRepository.findById(roleId);
 
         if (!roleResult.isPresent()) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "The role does not exist", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "The role does not exist", ""), HttpStatus.NOT_FOUND);
         }
         oldDataJSON = objectMapper.writeValueAsString(roleResult.get());
         newRole = userService.updateRole(roleResult.get(), role);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Role.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(newRole), "Initiated a request to update a unique role");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully updated the role", role), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully updated the role", role), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -112,26 +112,26 @@ public class RoleController {
         Optional<Role> roleResult = userService.getRoleByRoleId(roleId);
 
         if (!roleResult.isPresent()) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "No role with the specified id found", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "No role with the specified id found", ""), HttpStatus.NOT_FOUND);
         }
 
         Set<UserRole> userRole = userRoleRepository.findAllByRoleId(roleResult.get().getId());
 
         if (userRole.size() > 0) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "Role cannot be deleted \n" + "because users are still mapped to the role", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "Role cannot be deleted \n" + "because users are still mapped to the role", ""), HttpStatus.NOT_FOUND);
         }
 
         List<WorkflowLevels> levels = workflowLevelRepository.findByRoleId(roleResult.get().getId());
 
         if (levels.size() > 0) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "Workflow cannot be deleted \n" + "because users are still mapped to the workflow", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "Workflow cannot be deleted \n" + "because users are still mapped to the workflow", ""), HttpStatus.NOT_FOUND);
         }
 
         roleRepository.deleteById(roleId);
         role = roleResult.get();
         isDeleted = true;
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Role.class.getTypeName(), objectMapper.writeValueAsString(role), String.format("{\"roleId\": %s,\"isDeleted\": %s}", roleId, isDeleted), "Initiated a request to delete a role");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully deleted the role", roleResult.get()), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully deleted the role", roleResult.get()), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -140,26 +140,26 @@ public class RoleController {
         boolean isDeleted;
         Optional<UserRole> foundUserRole = userRoleRepository.findByUserIdAndRoleId(userRoleDto.getUserId(), userRoleDto.getRoleId());
         if (foundUserRole.isEmpty())
-            return new ResponseEntity<>(new GenericResponse<>("01", "User role does not exists.", userRoleDto), HttpStatus.OK);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "User role does not exists.", userRoleDto), HttpStatus.OK);
         userRole = foundUserRole.get();
         userRoleRepository.deleteUserRoleById(userRole.getRoleId(), userRole.getUserId());
         isDeleted = true;
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), UserRole.class.getTypeName(), objectMapper.writeValueAsString(userRole), String.format("{\"roleId\": %s,\"userId\": %s, \"isDeleted\":%s}", userRoleDto.getRoleId(), userRoleDto.getUserId(), isDeleted), "Initiated a request to delete a user role");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully deleted user role", null), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully deleted user role", null), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> rolesForLoggedInUsers() {
         var userId = UUID.fromString((String) jwtTokenUtil.getClaimByKey("user_id"));
         Optional<Set<UserRole>> roleResult = userDao.getUserRolesById(userId);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully retrieved the user roles", roleResult.get()), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully retrieved the user roles", roleResult.get()), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> userRoles(@PathVariable(value = "userId") UUID userId) {
         UserUtils.canAccessResource(userId);
         Optional<Set<UserRole>> roleResult = userDao.getUserRolesById(userId);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully retrieved the user roles", roleResult.get()), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully retrieved the user roles", roleResult.get()), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -169,6 +169,6 @@ public class RoleController {
         UserUtils.assertUserHasRole(loggedInUserDto.getRoles(), ConstantUtil.SUPER_ADMIN);
         userRole = userService.assignRoleToUser(userRoleDto, loggedInUserDto);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), UserRole.class.getTypeName(), objectMapper.writeValueAsString(userRole), null, "Initiated a request to assign role to a user");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully added the new roles", ""), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully added the new roles", ""), HttpStatus.OK);
     }
 }

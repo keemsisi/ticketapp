@@ -1,8 +1,10 @@
 package org.core.backend.ticketapp.transaction.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import org.apache.commons.lang3.ObjectUtils;
+import org.core.backend.ticketapp.common.dto.configs.pricing.TransactionFeesDTO;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.OrderType;
 import org.core.backend.ticketapp.common.enums.Status;
@@ -62,6 +64,15 @@ public class Transaction extends AbstractBaseEntity {
 
     @Enumerated(EnumType.STRING)
     private OrderType type;
+
+    @Type(type = "JSONB")
+    @Column(name = "transaction_fees", columnDefinition = "JSONB")
+    private TransactionFeesDTO transactionFees;
+
+    @JsonIgnore
+    @Transient
+    @Column(name = "sender_account_id")
+    private String senderAccountId;
 
     @PrePersist
     public void onCreate() {

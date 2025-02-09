@@ -3,7 +3,7 @@ package org.core.backend.ticketapp.passport.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.passport.dao.ModuleDao;
 import org.core.backend.ticketapp.passport.dao.UserDao;
 import org.core.backend.ticketapp.passport.dtos.core.ModuleDto;
@@ -57,17 +57,17 @@ public class ModuleController {
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
         List<Module> modules = moduleRepository.findAll();
-        return new ResponseEntity<>(new GenericResponse<>("00", "", modules), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", modules), HttpStatus.OK);
     }
 
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getById(@PathVariable(value = "id") UUID moduleId) {
         Optional<Module> module = moduleRepository.findById(moduleId);
         if (!module.isPresent()) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "No module with the specified id found", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "No module with the specified id found", ""), HttpStatus.NOT_FOUND);
         }
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Module.class.getTypeName(), null, null, "User performed get module resource by id");
-        return new ResponseEntity<>(new GenericResponse<>("00", "", module.get()), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", module.get()), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -85,7 +85,7 @@ public class ModuleController {
         module.setNormalizedName(StringUtil.normalizeString(moduleDto.getName()));
         newModuleCreated = moduleRepository.saveAndFlush(module);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Module.class.getTypeName(), null, objectMapper.writeValueAsString(newModuleCreated), "Initiated a request to create a module");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully added the new module", newModuleCreated), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully added the new module", newModuleCreated), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -96,7 +96,7 @@ public class ModuleController {
 
         Optional<Module> module = moduleRepository.findById(moduleId);
         if (!module.isPresent()) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "The module does not exist", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "The module does not exist", ""), HttpStatus.NOT_FOUND);
         }
         _module = module.get();
         oldDataJSON = objectMapper.writeValueAsString(_module);
@@ -108,7 +108,7 @@ public class ModuleController {
         _module.setNormalizedName(StringUtil.normalizeString(moduleDto.getName()));
         moduleRepository.saveAndFlush(_module);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Module.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(_module), "Initiated a request to update an existing module details");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully updated the module", _module), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully updated the module", _module), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -117,13 +117,13 @@ public class ModuleController {
         boolean isDeleted = false;
         Optional<Module> module = moduleRepository.findById(moduleId);
         if (!module.isPresent()) {
-            return new ResponseEntity<>(new GenericResponse<>("01", "No module with the specified id found", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new GenericApiResponse<>("01", "No module with the specified id found", ""), HttpStatus.NOT_FOUND);
         }
         oldModule = module.get();
         moduleRepository.deleteById(moduleId);
         isDeleted = true;
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Module.class.getTypeName(), objectMapper.writeValueAsString(oldModule), String.format("{\"moduleId\": %s,\"isDeleted\": %s}", moduleId, isDeleted), "Initiated a request to update an existing module details");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully deleted the role", module.get()), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully deleted the role", module.get()), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -139,13 +139,13 @@ public class ModuleController {
         module = userModuleRepository.saveAndFlush(module);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Module.class.getTypeName(), null, objectMapper.writeValueAsString(module), "Initiated a request to assign users to a module");
 
-        return new ResponseEntity<>(new GenericResponse<>("00", "Successfully added the new module", null), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully added the new module", null), HttpStatus.OK);
     }
 
     @RequestMapping(value = "{moduleId}/users", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> GetUsersUnderGivenModule(@PathVariable(value = "moduleId") UUID moduleId) {
         var userModules = moduleDao.getUserModulesByModuleId(moduleId);
-        return new ResponseEntity<>(new GenericResponse<>("00", "User modules retrieved successfully.", userModules), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "User modules retrieved successfully.", userModules), HttpStatus.OK);
     }
 
 }

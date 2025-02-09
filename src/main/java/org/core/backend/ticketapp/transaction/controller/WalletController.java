@@ -1,0 +1,51 @@
+package org.core.backend.ticketapp.transaction.controller;
+
+import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
+import org.core.backend.ticketapp.transaction.dto.wallet.request.CreateWalletDTO;
+import org.core.backend.ticketapp.transaction.dto.wallet.request.WalletUpdateRequestDTO;
+import org.core.backend.ticketapp.transaction.entity.wallet.Wallet;
+import org.core.backend.ticketapp.transaction.service.wallet.WalletService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.UUID;
+
+@AllArgsConstructor
+@RestController
+@RequestMapping(value = "/v1/api/wallets")
+public class WalletController {
+    private final WalletService walletService;
+
+    @PreAuthorize("hasAuthority('CREATE_WALLET')")
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericApiResponse<Wallet>> createWallet(@Valid @RequestBody CreateWalletDTO request) {
+        final var wallet = walletService.createWallet(request);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Successfully created wallet", wallet), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{walletId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericApiResponse<Wallet>> getById(@PathVariable(value = "walletId") UUID walletId) {
+        final var wallet = walletService.getWalletById(walletId);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Resource was found", wallet), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('DELETE_WALLET')")
+    @RequestMapping(value = "/{walletId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericApiResponse<Wallet>> delete(@PathVariable(value = "walletId") UUID walletId) {
+        final var wallet = walletService.deleteWalletById(walletId);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Wallet delete was successful", wallet), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('UPDATE_WALLET')")
+    @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericApiResponse<Wallet>> update(@Valid @RequestBody WalletUpdateRequestDTO request) {
+        final var wallet = walletService.updateWallet(request);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Wallet update was successful", wallet), HttpStatus.OK);
+
+    }
+}

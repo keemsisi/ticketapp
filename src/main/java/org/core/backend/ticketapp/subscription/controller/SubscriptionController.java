@@ -1,6 +1,6 @@
 package org.core.backend.ticketapp.subscription.controller;
 
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.subscription.entity.Subscription;
 import org.core.backend.ticketapp.subscription.service.SubscriptionService;
@@ -22,20 +22,20 @@ public class SubscriptionController implements ICrudController {
     SubscriptionService subscriptionService;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<List<Subscription>>> getAll() throws Exception {
+    public ResponseEntity<GenericApiResponse<List<Subscription>>> getAll() throws Exception {
         final var subscriptions = subscriptionService.getAll();
-        return new ResponseEntity<>(new GenericResponse<>("00", "All subscriptions", subscriptions), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "All subscriptions", subscriptions), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Subscription>> getById(@PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<Subscription>> getById(@PathVariable UUID id) {
         final var subscription = subscriptionService.getById(id);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully", subscription));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Fetched successfully", subscription));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> delete(@PathVariable UUID id) {
         subscriptionService.delete(id);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Deleted successfully", null));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Deleted successfully", null));
     }
 }

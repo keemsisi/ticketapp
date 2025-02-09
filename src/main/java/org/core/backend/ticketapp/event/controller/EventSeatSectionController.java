@@ -1,6 +1,6 @@
 package org.core.backend.ticketapp.event.controller;
 
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.event.dto.CreateEventSeatSectionDTO;
 import org.core.backend.ticketapp.event.dto.EventSeatSectionUpdateRequestDTO;
@@ -20,33 +20,33 @@ import java.util.UUID;
 public record EventSeatSectionController(EventSeatSectionService service) implements ICrudController {
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<List<EventSeatSection>>> create(@RequestBody CreateEventSeatSectionDTO request) {
+    public ResponseEntity<GenericApiResponse<List<EventSeatSection>>> create(@RequestBody CreateEventSeatSectionDTO request) {
         final var data = service.create(request);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Created successfully", data));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Created successfully", data));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<EventSeatSection>> getById(@PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<EventSeatSection>> getById(@PathVariable UUID id) {
         final var data = service.getById(id);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully", data));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Fetched successfully", data));
     }
 
     @RequestMapping(value = "/event/{eventId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<List<EventSeatSection>>> getByEventId(@PathVariable UUID eventId) {
+    public ResponseEntity<GenericApiResponse<List<EventSeatSection>>> getByEventId(@PathVariable UUID eventId) {
         final var data = service.getByEventId(eventId);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully", data));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Fetched successfully", data));
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<EventSeatSection>> update(@RequestBody @Valid EventSeatSectionUpdateRequestDTO request) {
+    public ResponseEntity<GenericApiResponse<EventSeatSection>> update(@RequestBody @Valid EventSeatSectionUpdateRequestDTO request) {
         final var data = service.update(request);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Updated successfully", data));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Updated successfully", data));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> delete(@PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Deleted successfully", null));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Deleted successfully", null));
     }
 
 }

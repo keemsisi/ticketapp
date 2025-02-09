@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.thecarisma.FatalObjCopierException;
 import io.github.thecarisma.ObjCopier;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dtos.notification.CreateWorkflowDTO;
@@ -60,7 +60,7 @@ public class WorkflowController {
 
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.UNAUTHORIZED);
         }
         if (createWorkflowDTO.getLevels().isEmpty()) {
@@ -69,7 +69,7 @@ public class WorkflowController {
         workflowService.createWorkflow(createWorkflowDTO, user);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Workflow.class.getTypeName(), null, null, "Initiated a request to view a user");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Workflow created successfully.",
+                new GenericApiResponse<>("00", "Workflow created successfully.",
                         ""),
                 HttpStatus.OK);
     }
@@ -83,20 +83,20 @@ public class WorkflowController {
     ) throws ParseException {
         String _name = name != null ? name.toLowerCase() : null;
         Page<Workflow> workflows = workflowService.getAll(_name, ResponsePageRequest.createPageRequest(pageNumber, pageSize, order, sortBy, true, "created_on"));
-        return new ResponseEntity<>(new GenericResponse<>("00", "", workflows),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", workflows),
                 HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getById(@PathVariable(value = "id") UUID workflowId, Pageable pageable) {
         Optional<Workflow> workflow = workflowService.getById(workflowId);
-        return new ResponseEntity<>(new GenericResponse<>("00", "", workflow), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", workflow), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}/actions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getWorkflowActionsById(@PathVariable(value = "id") UUID workflowId) {
         var actions = workflowService.getWorkflowActionById(workflowId);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Workflow actions retrieved.", actions),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Workflow actions retrieved.", actions),
                 HttpStatus.OK);
     }
 
@@ -108,7 +108,7 @@ public class WorkflowController {
         var user = jwtTokenUtil.getUser();
         actionWorkflows = workflowService.createWorkflowActions(actionIds, workflowId, user);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), ActionWorkflow.class.getTypeName(), null, objectMapper.writeValueAsString(actionWorkflows), "Initiated a request to add actions to a workflow");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Workflow actions added successfully.", null),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Workflow actions added successfully.", null),
                 HttpStatus.OK);
     }
 
@@ -119,7 +119,7 @@ public class WorkflowController {
             throw new ApplicationException(400, "bad_request", "Kindly provide the list of actions to be deleted.");
         actionWorkflows = workflowService.deleteActionsByWorkflowId(actionIds, workflowId);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), ActionWorkflow.class.getTypeName(), objectMapper.writeValueAsString(actionWorkflows), null, "Initiated a request to delete set of action workflow");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Workflow actions deleted.", null),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Workflow actions deleted.", null),
                 HttpStatus.OK);
     }
 
@@ -133,7 +133,7 @@ public class WorkflowController {
         } else {
             workflows = workflowService.getByModuleId(moduleId);
         }
-        return new ResponseEntity<>(new GenericResponse<>("00", "", workflows), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", workflows), HttpStatus.OK);
     }
 
     @Transactional
@@ -145,7 +145,7 @@ public class WorkflowController {
 
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.UNAUTHORIZED);
         }
 
@@ -167,7 +167,7 @@ public class WorkflowController {
         }
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Workflow.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(_updatedWorkflow), "Initiated a request to get a workflow by moduleId");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Workflow updated successfully.", ""),
+                new GenericApiResponse<>("00", "Workflow updated successfully.", ""),
                 HttpStatus.OK);
     }
 
@@ -179,7 +179,7 @@ public class WorkflowController {
 
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.UNAUTHORIZED);
         }
 
@@ -196,7 +196,7 @@ public class WorkflowController {
         updatedWorkflowLevel = workflowLevelService.update(levels.get(), level);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), WorkflowLevels.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedWorkflowLevel), "Initiated a request to edit a workflow level");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Workflow level updated successfully.", ""),
+                new GenericApiResponse<>("00", "Workflow level updated successfully.", ""),
                 HttpStatus.OK);
     }
 
@@ -207,18 +207,18 @@ public class WorkflowController {
         Optional<WorkflowLevels> optionalWorkflowLevels = workflowLevelService.getById(levelId);
         if (optionalWorkflowLevels.isEmpty())
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Workflow level does not exists", null),
+                    new GenericApiResponse<>("01", "Workflow level does not exists", null),
                     HttpStatus.BAD_REQUEST);
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.UNAUTHORIZED);
         }
         oldWorkflowLevels = optionalWorkflowLevels.get();
         workflowLevelService.deleteById(oldWorkflowLevels.getId());
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), WorkflowLevels.class.getTypeName(), objectMapper.writeValueAsString(oldWorkflowLevels), null, "Initiated a request to delete a a unique workflow level");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Workflow level deleted successfully.", ""),
+                new GenericApiResponse<>("00", "Workflow level deleted successfully.", ""),
                 HttpStatus.OK);
     }
 
@@ -229,7 +229,7 @@ public class WorkflowController {
         workflowLevelService.create(List.of(levelDTO), levelDTO.getWorkflowId(), user);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), WorkflowLevels.class.getTypeName(), objectMapper.writeValueAsString(levelDTO), null, "You created a new workflow level");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Workflow level added successfully.", ""),
+                new GenericApiResponse<>("00", "Workflow level added successfully.", ""),
                 HttpStatus.OK);
     }
 
@@ -238,7 +238,7 @@ public class WorkflowController {
         var user = jwtTokenUtil.getUser();
         var levels = workflowLevelService.getByWorkflow(workflowId);
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Workflow level retrieved successfully.", levels),
+                new GenericApiResponse<>("00", "Workflow level retrieved successfully.", levels),
                 HttpStatus.OK);
     }
 
@@ -250,7 +250,7 @@ public class WorkflowController {
 
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.UNAUTHORIZED);
         }
 
@@ -258,7 +258,7 @@ public class WorkflowController {
 
         if (!isForced && workflowLevels.size() > 0) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "This WORKFLOW cannot be deleted because it has LEVEL(s) attached.", ""),
+                    new GenericApiResponse<>("01", "This WORKFLOW cannot be deleted because it has LEVEL(s) attached.", ""),
                     HttpStatus.NOT_ACCEPTABLE);
         }
 
@@ -269,7 +269,7 @@ public class WorkflowController {
         isDeleted = true;
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), WorkflowLevels.class.getTypeName(), null, String.format("{\"workflowId\": %s,\"isDeleted\": %s}", workflowId, isDeleted), "You initiated a request to delete a workflow");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Workflow has been deleted successfully.", ""),
+                new GenericApiResponse<>("00", "Workflow has been deleted successfully.", ""),
                 HttpStatus.OK);
     }
 }

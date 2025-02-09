@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.passport.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.passport.dtos.core.FileTemplateDto;
 import org.core.backend.ticketapp.passport.entity.FileTemplate;
@@ -53,7 +53,7 @@ public class FileStorageController {
                 "folder", folder
         );
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), FileTemplate.class.getTypeName(), null, objectMapper.writeValueAsString(map), "Initiated a request to upload a file into a folder");
-        return new ResponseEntity<>(new GenericResponse<>("00", "File uploaded successfully", url), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "File uploaded successfully", url), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/api/v1/uploads", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
@@ -66,7 +66,7 @@ public class FileStorageController {
     @RequestMapping(value = "/api/v1/uploads", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteFile(@RequestParam @NotNull String fileName) {
         storageService.deleteFile(fileName);
-        return new ResponseEntity<>(new GenericResponse<>("00", "File deleted successfully", null), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "File deleted successfully", null), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/api/v1/templates", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,7 +76,7 @@ public class FileStorageController {
             var url = storageService.uploadFile("templates", file);
             template.setUrl(url);
             fileTemplateService.create(template, user);
-            return new ResponseEntity<>(new GenericResponse<>("00", "File uploaded successfully", url), HttpStatus.OK);
+            return new ResponseEntity<>(new GenericApiResponse<>("00", "File uploaded successfully", url), HttpStatus.OK);
         } finally {
             Map<String, Object> map = Map.of("originalFileName", Objects.requireNonNull(file.getOriginalFilename()),
                     "name", file.getName(),
@@ -99,7 +99,7 @@ public class FileStorageController {
                 throw new ApplicationException(400, "invalid_request", "Template with specified name doesn't exist.");
             existingTemplate.get().setUrl(url);
             fileTemplateService.save(existingTemplate.get());
-            return new ResponseEntity<>(new GenericResponse<>("00", "File updated successfully", url), HttpStatus.OK);
+            return new ResponseEntity<>(new GenericApiResponse<>("00", "File updated successfully", url), HttpStatus.OK);
         } finally {
             activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), FileTemplate.class.getTypeName(), null, null, "Initiated a request to update a template");
         }
@@ -107,6 +107,6 @@ public class FileStorageController {
 
     @RequestMapping(value = "/api/v1/templates", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getTemplateByName(@RequestParam String name) {
-        return new ResponseEntity<>(new GenericResponse<>("00", "Template retrieved successfully", fileTemplateService.getTemplateByName(name)), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Template retrieved successfully", fileTemplateService.getTemplateByName(name)), HttpStatus.OK);
     }
 }

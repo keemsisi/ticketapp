@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.passport.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.marketing.dto.social.CreateInAppFollowerRequest;
@@ -29,33 +29,33 @@ public class InAppFollowerController {
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<InAppFollower>> create(@Validated @RequestBody CreateInAppFollowerRequest request) throws Exception {
+    public ResponseEntity<GenericApiResponse<InAppFollower>> create(@Validated @RequestBody CreateInAppFollowerRequest request) throws Exception {
         final var result = service.create(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Resource created successfully", result), HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Resource created successfully", result), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<InAppFollower>> getById(final @PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<InAppFollower>> getById(final @PathVariable UUID id) {
         final var result = service.getById(id);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched social link", result));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched social link", result));
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
+    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
         final var result = PagedMapperUtil.map(service.getAll(pageable));
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched resource", result));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched resource", result));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<InAppFollower>> deleteById(final @PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<InAppFollower>> deleteById(final @PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully deleted resource!", null));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully deleted resource!", null));
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<InAppFollower>> update(final @RequestBody UpdateInAppFollowerRequest request) {
+    public ResponseEntity<GenericApiResponse<InAppFollower>> update(final @RequestBody UpdateInAppFollowerRequest request) {
         final var result = service.update(request);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully updated resource!", result));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully updated resource!", result));
     }
 
 }

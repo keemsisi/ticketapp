@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.plan.controller;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.controller.ICrudController;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.enums.AccountType;
@@ -29,15 +29,15 @@ public class PlanController implements ICrudController {
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Plan>> create(@Validated @RequestBody PlanCreateRequestDTO request) throws Exception {
+    public ResponseEntity<GenericApiResponse<Plan>> create(@Validated @RequestBody PlanCreateRequestDTO request) throws Exception {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var plan = planService.createPlan(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Plan created successfully", plan), HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Plan created successfully", plan), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
+    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
         final var plans = PagedMapperUtil.map(planService.getAllPlans(pageable));
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched plans", plans));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched plans", plans));
     }
 }

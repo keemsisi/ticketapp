@@ -3,16 +3,16 @@ package org.core.backend.ticketapp.common.dto;
 
 import java.util.Date;
 
-public class GenericResponse<T> {
+public class GenericApiResponse<T> {
 
     private String status, message;
     private T data;
     private Date date = new Date();
 
-    public GenericResponse() {
+    public GenericApiResponse() {
     }
 
-    public GenericResponse(String status, String message, T data) {
+    public GenericApiResponse(String status, String message, T data) {
         this.status = status;
         this.message = message;
         this.data = data;

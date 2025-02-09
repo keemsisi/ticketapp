@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.marketing.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.marketing.dto.social.CreateSocialLinksRequest;
@@ -31,40 +31,40 @@ public class SocialMediaLinksAdvertisementController {
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> create(@Validated @RequestBody CreateSocialLinksRequest request) throws Exception {
+    public ResponseEntity<GenericApiResponse<SocialMediaLinkAdvertisement>> create(@Validated @RequestBody CreateSocialLinksRequest request) throws Exception {
 //        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var result = service.create(request);
-        return new ResponseEntity<>(new GenericResponse<>("00", "Social links created successfully", result), HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Social links created successfully", result), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> getById(final @PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<SocialMediaLinkAdvertisement>> getById(final @PathVariable UUID id) {
         final var result = service.getById(id);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched social link", result));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched social link", result));
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
+    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
         final var result = PagedMapperUtil.map(service.getAll(pageable));
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched social links", result));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched social links", result));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> deleteById(final @PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<SocialMediaLinkAdvertisement>> deleteById(final @PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully deleted social link!", null));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully deleted social link!", null));
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<SocialMediaLinkAdvertisement>> update(final @RequestBody UpdateSocialLinksRequest request) {
+    public ResponseEntity<GenericApiResponse<SocialMediaLinkAdvertisement>> update(final @RequestBody UpdateSocialLinksRequest request) {
         final var result = service.update(request);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully updated social link!", result));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully updated social link!", result));
     }
 
 
     @RequestMapping(value = "/follow", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<ExternalAppFollower>> follow(final @RequestBody FollowUserSocialLinkRequest request) {
+    public ResponseEntity<GenericApiResponse<ExternalAppFollower>> follow(final @RequestBody FollowUserSocialLinkRequest request) {
         final var result = service.follow(request);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Follow user social link was successful", result));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Follow user social link was successful", result));
     }
 }

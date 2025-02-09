@@ -29,26 +29,35 @@ public abstract class AbstractBaseEntity {
     @Id
     @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4() NOT NULL")
     protected UUID id;
+
     @CreationTimestamp
     @Column(name = "date_created", columnDefinition = "timestamptz DEFAULT CURRENT_DATE NOT NULL", updatable = false)
     protected LocalDateTime dateCreated;
+
     @Column(updatable = false, name = "user_id")
     protected UUID userId;
+
     @Column(columnDefinition = "timestamptz")
     protected LocalDateTime dateModified;
+
     protected UUID modifiedBy;
+
     @NotNull
     @Column(columnDefinition = "SERIAL UNIQUE", insertable = false, updatable = false)
     protected long index;
+
     @NotNull
     @Column(columnDefinition = "bool default false")
     protected boolean deleted;
+
     @JsonIgnore
     @Column(columnDefinition = "bigint default(0)")
     private long version;
+
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Column(name = "tenant_id", columnDefinition = "uuid default null")
     private UUID tenantId;
+
     @JsonIgnore
     @Transient
     private String qrCodeLink;

@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.passport.controller;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.enums.AccountType;
@@ -27,37 +27,37 @@ public class ApplicationConfigController {
     private final ApplicationConfigService service;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<ApplicationConfig>> create(@Validated @RequestBody ApplicationConfig request) throws Exception {
+    public ResponseEntity<GenericApiResponse<ApplicationConfig>> create(@Validated @RequestBody ApplicationConfig request) throws Exception {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name().toLowerCase());
-        return new ResponseEntity<>(new GenericResponse<>("00", "Resource created successfully",
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Resource created successfully",
                 service.create(request)), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<ApplicationConfig>> getById(final @PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<ApplicationConfig>> getById(final @PathVariable UUID id) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name().toLowerCase());
         final var result = service.getById(id);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched resource", result));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched resource", result));
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final Pageable pageable) throws Exception {
+    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final Pageable pageable) throws Exception {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name().toLowerCase());
         final var result = PagedMapperUtil.map(service.getAll(pageable));
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully fetched resource", result));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched resource", result));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<ApplicationConfig>> deleteById(final @PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<ApplicationConfig>> deleteById(final @PathVariable UUID id) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name().toLowerCase());
         service.delete(id);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully deleted resource!", null));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully deleted resource!", null));
     }
 
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<ApplicationConfig>> update(final @RequestBody UpdateApplicationConfigRequest request) {
+    public ResponseEntity<GenericApiResponse<ApplicationConfig>> update(final @RequestBody UpdateApplicationConfigRequest request) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.name().toLowerCase());
         final var result = service.update(request);
-        return ResponseEntity.ok().body(new GenericResponse<>("00", "Successfully updated resource!", result));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully updated resource!", result));
     }
 }

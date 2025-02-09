@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.passport.controller;
 
 
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.passport.service.core.activitylog.IActivityLog;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -26,7 +26,7 @@ public class ActivityLogController {
     private JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, value = "")
-    public ResponseEntity<GenericResponse<?>> getAll(
+    public ResponseEntity<GenericApiResponse<?>> getAll(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
             @RequestParam(required = false) Sort.Direction order,
@@ -36,7 +36,7 @@ public class ActivityLogController {
                 iActivityLog.getUserActivitiesPaged(ResponsePageRequest.createPageRequest(page, size, order, sortBy, paged, "date_created")) :
                 iActivityLog.getUserActivities();
         return ResponseEntity.ok().body(new
-                GenericResponse<>(
+                GenericApiResponse<>(
                 "00",
                 "data fetched successfully", result)
         );

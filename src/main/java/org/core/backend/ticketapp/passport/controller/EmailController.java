@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.passport.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.passport.service.core.mail.mailchimp.dto.MailRequest;
 import org.core.backend.ticketapp.passport.service.core.mail.EmailService;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
@@ -34,6 +34,6 @@ public class EmailController {
     public ResponseEntity<?> send(@RequestBody MailRequest request) throws JsonProcessingException {
         emailService.send(request);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), EmailController.class.getTypeName(), objectMapper.writeValueAsString(request), null, "Initiated a request to send mail");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Email sent successfully", null), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Email sent successfully", null), HttpStatus.OK);
     }
 }

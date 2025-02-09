@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,7 +41,7 @@ public class Helpers {
     public static void WriteError(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, HttpStatus httpStatus, String message) throws IOException {
         httpServletResponse.setStatus(httpStatus.value());
         httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        GenericResponse<String> resp = new GenericResponse<>(httpStatus.name(), httpServletRequest.getServletPath(), message);
+        GenericApiResponse<String> resp = new GenericApiResponse<>(httpStatus.name(), httpServletRequest.getServletPath(), message);
         new ObjectMapper().writeValue(httpServletResponse.getWriter(), resp);
     }
 

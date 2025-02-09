@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.passport.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dao.ActionDao;
 import org.core.backend.ticketapp.passport.dao.UserDao;
@@ -67,7 +67,7 @@ public class ActionController {
         action.setNormalizedName(StringUtil.normalizeString(model.getName()));
         actionService.save(action);
         activityLogProcessorUtils.processActivityLog(loggedInUser.getUserId(), Action.class.getTypeName(), null, objectMapper.writeValueAsString(action), String.format("Initiated a request to create a new action(%s)", action.getDescription()));
-        return new ResponseEntity<>(new GenericResponse<>("00", "Action created successfully.", action), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Action created successfully.", action), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,7 +76,7 @@ public class ActionController {
         UserUtils.assertUserHasRole(user.getRoles(), ConstantUtil.SUPER_ADMIN);
         actionService.saveAllUserActions(model, user);
         activityLogProcessorUtils.processActivityLog(user.getUserId(), Action.class.getTypeName(), null, objectMapper.writeValueAsString(model), "Initiated a request to assign a list of actions to a yourself.");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Action created successfully.", ""), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Action created successfully.", ""), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -90,7 +90,7 @@ public class ActionController {
         var user = jwtTokenUtil.getUser();
         activityLogProcessorUtils.processActivityLog(user.getUserId(), Action.class.getTypeName(), null, null, "Initiated a request to get a list of assigned actions");
         return new ResponseEntity<>(
-                new GenericResponse<>(
+                new GenericApiResponse<>(
                         "00",
                         "",
                         actionService.getAllActions(ResponsePageRequest.createPageRequest(page, size, order, sortBy, paged, "createdOn"))),
@@ -105,11 +105,11 @@ public class ActionController {
         Optional<Action> action = actionService.getById(actionId);
         if (action.isEmpty()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "No Action was found with this Id", ""),
+                    new GenericApiResponse<>("01", "No Action was found with this Id", ""),
                     HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(
-                new GenericResponse<>(
+                new GenericApiResponse<>(
                         "00",
                         "",
                         actionService.getById(actionId)
@@ -124,13 +124,13 @@ public class ActionController {
         Optional<UserAction> userAction = userActionRepository.findByUserIdAndActionId(userActionDto.getUserId(), userActionDto.getActionId());
         if (!userAction.isPresent()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "No Action was found with this Id", ""),
+                    new GenericApiResponse<>("01", "No Action was found with this Id", ""),
                     HttpStatus.CONFLICT);
         }
         userActionRepository.delete(userAction.get());
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Action.class.getTypeName(), null, null, "Initiated a request to unassigned an action(%s) from a user.");
         return new ResponseEntity<>(
-                new GenericResponse<>(
+                new GenericApiResponse<>(
                         "00",
                         "User action has been deleted successfully",
                         ""
@@ -145,13 +145,13 @@ public class ActionController {
         Optional<Action> action = actionService.getById(actionId);
         if (!action.isPresent()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "No Action was found with this Id", ""),
+                    new GenericApiResponse<>("01", "No Action was found with this Id", ""),
                     HttpStatus.CONFLICT);
         }
         actionService.delete(actionId);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Action.class.getTypeName(), null, null, "You deleted a unique action.");
         return new ResponseEntity<>(
-                new GenericResponse<>(
+                new GenericApiResponse<>(
                         "00",
                         "Action has been deleted successfully",
                         ""
@@ -163,7 +163,7 @@ public class ActionController {
     public ResponseEntity<?> getUsersByActionId(@PathVariable(value = "actionId") UUID actionId) {
         var userActions = actionDao.getUsersByActionId(actionId);
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "User actions retrieved successfully.", userActions),
+                new GenericApiResponse<>("00", "User actions retrieved successfully.", userActions),
                 HttpStatus.OK);
     }
 }

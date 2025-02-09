@@ -67,5 +67,4 @@ public class PlanConfig {
         }
         return 0;
     }
-
 }

@@ -1,7 +1,7 @@
 package org.core.backend.ticketapp.ticket.controller;
 
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.controller.ICrudController;
@@ -34,24 +34,24 @@ public class TicketController implements ICrudController {
     public ResponseEntity<?> create(TicketCreateRequestDTO ticketRequest, OrderCreateRequestDTO orderRequest) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var data = ticketService.create(ticketRequest, null);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Ticket created successfully", data));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Ticket created successfully", data));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Ticket>> getById(final @PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<Ticket>> getById(final @PathVariable UUID id) {
         final var data = ticketService.getById(id);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully", data));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Fetched successfully", data));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> delete(final @PathVariable UUID id) {
         ticketService.delete(id);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Deleted successfully", null));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Deleted successfully", null));
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<PagedResponse<?>>> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
+    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
         final var records = PagedMapperUtil.map(ticketService.getAll(requestDTO, pageable));
-        return ResponseEntity.ok(new GenericResponse<>("00", "Successfully fetched records", records));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Successfully fetched records", records));
     }
 }

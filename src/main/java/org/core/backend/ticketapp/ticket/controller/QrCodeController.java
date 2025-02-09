@@ -2,7 +2,7 @@ package org.core.backend.ticketapp.ticket.controller;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.controller.ICrudController;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.Page;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
@@ -20,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RequestMapping(value = "/api/v1/qrcode")
@@ -32,46 +31,46 @@ public class QrCodeController implements ICrudController {
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<QrCode>> create(final @RequestBody QrCodeCreateRequestDTO request) {
+    public ResponseEntity<GenericApiResponse<QrCode>> create(final @RequestBody QrCodeCreateRequestDTO request) {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var data = qrCodeService.create(request);
         data.setLink(String.format(appConfigs.qrCodeBaseUrl, data.getCode()));
-        return ResponseEntity.ok(new GenericResponse<>("00", "QrCode created successfully", data));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "QrCode created successfully", data));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<QrCode>> getById(final @PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<QrCode>> getById(final @PathVariable UUID id) {
         final var data = qrCodeService.getById(id);
         data.setLink(String.format(appConfigs.qrCodeBaseUrl, data.getCode()));
-        return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully", data));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Fetched successfully", data));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<?>> delete(final @PathVariable UUID id) {
+    public ResponseEntity<GenericApiResponse<?>> delete(final @PathVariable UUID id) {
         qrCodeService.delete(id);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Deleted successfully", null));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Deleted successfully", null));
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<Page<?>>> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
+    public ResponseEntity<GenericApiResponse<Page<?>>> getAll(final FilterTicketRequestDTO requestDTO, final Pageable pageable) {
         final var records = qrCodeService.getAllV2(requestDTO, pageable);
         records.getContent().forEach(qrCode -> qrCode.setLink(String.format(appConfigs.qrCodeBaseUrl, qrCode.getCode())));
-        return ResponseEntity.ok(new GenericResponse<>("00", "Successfully fetched records", records));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Successfully fetched records", records));
     }
 
     @RequestMapping(value = "/scan/{code}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<ScannedQrCodeResponse>> scanQrCode(@PathVariable String code) {
+    public ResponseEntity<GenericApiResponse<ScannedQrCodeResponse>> scanQrCode(@PathVariable String code) {
         final var record = qrCodeService.scanQr(code);
-        return ResponseEntity.ok(new GenericResponse<>("00", "QrCode Scanned successfully!", record));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "QrCode Scanned successfully!", record));
     }
 
     @RequestMapping(value = "/stats/{eventId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse<QrCodeStatsDTO>> stats(@PathVariable UUID eventId) {
+    public ResponseEntity<GenericApiResponse<QrCodeStatsDTO>> stats(@PathVariable UUID eventId) {
         final var user = jwtTokenUtil.getUser();
         if (!(user.getUserType().isSeller() || jwtTokenUtil.getUser().isAdmin())) {
             throw new ApplicationException(403, "forbidden", "Oops! Access not allowed");
         }
         final var record = qrCodeService.getStats(eventId);
-        return ResponseEntity.ok(new GenericResponse<>("00", "Fetched successfully!", record));
+        return ResponseEntity.ok(new GenericApiResponse<>("00", "Fetched successfully!", record));
     }
 }

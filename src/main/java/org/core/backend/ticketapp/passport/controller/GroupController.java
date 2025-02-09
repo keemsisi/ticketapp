@@ -4,7 +4,7 @@ package org.core.backend.ticketapp.passport.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.thecarisma.FatalObjCopierException;
-import org.core.backend.ticketapp.common.dto.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dao.GroupDao;
 import org.core.backend.ticketapp.passport.dtos.core.CreateGroupActionDto;
@@ -72,7 +72,7 @@ public class GroupController {
 
         if (!loggedInUser.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.NOT_FOUND);
         }
 
@@ -84,12 +84,12 @@ public class GroupController {
             groupUserService.create(createGroupDTO.getUserIds(), response.getId(), loggedInUser);
         } else {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Error creating group actions", ""),
+                    new GenericApiResponse<>("01", "Error creating group actions", ""),
                     HttpStatus.BAD_REQUEST);
         }
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Group.class.getTypeName(), null, objectMapper.writeValueAsString(response), "Initiated a request to create a group");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Group created successfully.",
+                new GenericApiResponse<>("00", "Group created successfully.",
                         response),
                 HttpStatus.OK);
     }
@@ -100,7 +100,7 @@ public class GroupController {
 
         Page<Group> groups = groupService.getAll(_name, pageable);
 
-        return new ResponseEntity<>(new GenericResponse<>("00", "", groups),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", groups),
                 HttpStatus.OK);
     }
 
@@ -109,14 +109,14 @@ public class GroupController {
         var loggedInUser = jwtTokenUtil.getUser();
         if (!loggedInUser.getRoles().contains((ConstantUtil.SUPER_ADMIN))) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.NOT_FOUND);
         }
 
         Optional<Group> group = groupService.getById(groupId);
         if (!group.isPresent()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "No group exist with the given ID", ""),
+                    new GenericApiResponse<>("01", "No group exist with the given ID", ""),
                     HttpStatus.NOT_FOUND);
         }
         var response = new GroupDto();
@@ -126,7 +126,7 @@ public class GroupController {
         response.setActions(groupActions);
         response.setUsers(groupUsers);
 
-        return new ResponseEntity<>(new GenericResponse<>("00", "", response),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", response),
                 HttpStatus.OK);
     }
 
@@ -138,7 +138,7 @@ public class GroupController {
 
         if (!loggedInUser.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("403", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("403", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.FORBIDDEN);
         }
 
@@ -146,7 +146,7 @@ public class GroupController {
 
         if (!group.isPresent()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "No group exist with the given ID", ""),
+                    new GenericApiResponse<>("01", "No group exist with the given ID", ""),
                     HttpStatus.NOT_FOUND);
         }
         _group = group.get();
@@ -163,12 +163,12 @@ public class GroupController {
             groupUserService.create(createGroupDTO.getUserIds(), groupId, loggedInUser);
         } else {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Error creating module actions", ""),
+                    new GenericApiResponse<>("01", "Error creating module actions", ""),
                     HttpStatus.BAD_REQUEST);
         }
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Group.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(_group), "Initiated a request to update a group");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Group updated successfully.", ""),
+                new GenericApiResponse<>("00", "Group updated successfully.", ""),
                 HttpStatus.OK);
     }
 
@@ -182,7 +182,7 @@ public class GroupController {
 
         if (!loggedInUser.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("403", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("403", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.FORBIDDEN);
         }
 
@@ -194,12 +194,12 @@ public class GroupController {
             isDeleted = true;
             activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Group.class.getTypeName(), oldDataJSON, String.format("{\"groupId\": %s,\"isDeleted\": %s}", groupId, isDeleted), "Initiated a request to delete a group");
             return new ResponseEntity<>(
-                    new GenericResponse<>("00", "Group has been successfully deleted.", ""),
+                    new GenericApiResponse<>("00", "Group has been successfully deleted.", ""),
                     HttpStatus.OK);
         } else {
             activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Group.class.getTypeName(), oldDataJSON, String.format("{\"groupId\": %s,\"isDeleted\": %s}", groupId, isDeleted), "Initiated a request to delete a group");
             return new ResponseEntity<>(
-                    new GenericResponse<>("400", "Group does not exists.", ""),
+                    new GenericApiResponse<>("400", "Group does not exists.", ""),
                     HttpStatus.OK);
         }
     }
@@ -222,7 +222,7 @@ public class GroupController {
         groupUserRepository.saveAllAndFlush(userGroups);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Group.class.getTypeName(), null, objectMapper.writeValueAsString(userGroups), "Initiated a request to delete a group");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Successfully added user to new groups",
+                new GenericApiResponse<>("00", "Successfully added user to new groups",
                         null),
                 HttpStatus.OK);
     }
@@ -234,7 +234,7 @@ public class GroupController {
         var loggedInUser = jwtTokenUtil.getUser();
         if (!loggedInUser.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.NOT_FOUND);
         }
 
@@ -245,7 +245,7 @@ public class GroupController {
         List<GroupUsers> groupUsers = groupUserRepository.findByGroupId(userGroupDtos.getGroupId());
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), GroupUsers.class.getTypeName(), objectMapper.writeValueAsString(groupUsers), String.format("{\"groupId\": %s,\"isDeleted\": %s, \"deletedGroupUsers\":%s}", userGroupDtos.getGroupId(), isDeleted, groupUsers), "Initiated a request to delete a group");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Successfully removed user(s) from group",
+                new GenericApiResponse<>("00", "Successfully removed user(s) from group",
                         null),
                 HttpStatus.OK);
 
@@ -259,7 +259,7 @@ public class GroupController {
             var loggedInUser = jwtTokenUtil.getUser();
             newActionsAssignedToGroups = groupActionService.create(groupAction.getActionIds(), groupAction.getGroupId(), loggedInUser);
             return new ResponseEntity<>(
-                    new GenericResponse<>("00", "Successfully added actions to group",
+                    new GenericApiResponse<>("00", "Successfully added actions to group",
                             null),
                     HttpStatus.OK);
         } finally {
@@ -276,7 +276,7 @@ public class GroupController {
         var loggedInUser = jwtTokenUtil.getUser();
         if (!loggedInUser.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.NOT_FOUND);
         }
 
@@ -286,7 +286,7 @@ public class GroupController {
         isDeleted = true;
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), GroupActions.class.getTypeName(), objectMapper.writeValueAsString(groupActionDto), String.format("{\"groupId\": %s,\"isDeleted\": %s, \"actionIds\":%s}", groupActionDto.getGroupId(), isDeleted, groupActionDto.getActionIds()), "Initiated a request to delete a group");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Successfully removed actions(s) from group",
+                new GenericApiResponse<>("00", "Successfully removed actions(s) from group",
                         null),
                 HttpStatus.OK);
     }
