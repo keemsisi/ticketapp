@@ -31,7 +31,7 @@ public class Wallet extends AbstractBaseEntity {
     @Column(name = "account_name", columnDefinition = "varchar(250)")
     private String accountName;
 
-    @Column(name = "balance", columnDefinition = "varchar(10) not null default 0")
+    @Column(name = "balance", columnDefinition = "numeric(19,2) not null default 0")
     private BigDecimal balance;
 
     @Column(name = "balance_before", columnDefinition = "numeric(19,2) not null default 0")

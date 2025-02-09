@@ -36,6 +36,8 @@ public class WalletServiceImpl implements WalletService {
         coreUserService.getUserById(request.getUserId()).orElseThrow(ApplicationException::notFoundException);
         wallet.setType(request.getWalletType());
         wallet.setReference(ref);
+        wallet.setBalance(BigDecimal.ZERO);
+        wallet.setBalanceBefore(BigDecimal.ZERO);
         wallet.setAccountName(request.getName());
         wallet.setUserId(request.getUserId());
         wallet.setDateCreated(LocalDateTime.now());
@@ -100,7 +102,9 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public Wallet getOrCreateWallet(final UUID userId, final WalletType walletType) {
         return walletRepository.findByUserIdAndType(userId, walletType.name()).orElseGet(() -> {
-            final var request = CreateWalletDTO.builder().userId(userId).name(RandomStringUtils.randomAlphanumeric(10) + "_" + WalletType.COIN_WALLET).build();
+            final var request = CreateWalletDTO.builder()
+                    .walletType(walletType)
+                    .userId(userId).name(RandomStringUtils.randomAlphanumeric(10) + "_" + walletType).build();
             return createWallet(request);
         });
     }
