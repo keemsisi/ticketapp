@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.Status;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
 
@@ -24,6 +26,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @OptimisticLocking(type = OptimisticLockType.VERSION)
 public class Wallet extends AbstractBaseEntity {
+    @Generated(GenerationTime.INSERT)
     @Column(name = "account_number", columnDefinition = "VARCHAR(10) DEFAULT generate_account_number()",
             unique = true, updatable = false)
     private String accountNumber;
