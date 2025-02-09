@@ -24,6 +24,7 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
     private static final String DEFAULT_FOLLOW_COUNT = "16";
     private static final String FOLLOWER_LIMIT_TEMPLATE = "follower_limit_user_id_%s";
     private final WalletService walletService;
+    private final SocialMediaLinkAdvertisementServiceImpl advertisementService;
     private final ExternalAppFollowerRepository repository;
     private final RedisService redisService;
 
@@ -31,7 +32,7 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
     @Transactional
     public ExternalAppFollower follow(final FollowUserSocialLinkRequest request) {
         validateRequest(request);
-        final var record = getById(request.getId());
+        final var record = advertisementService.getById(request.getId());
         final var wallet = walletService.getOrCreateWallet(request.getUserId(), WalletType.COIN_WALLET);
         final var followerRecord = new ExternalAppFollower();
         followerRecord.setUserId(record.getUserId());

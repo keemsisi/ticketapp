@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.Status;
 import org.hibernate.annotations.OptimisticLockType;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.OptimisticLocking;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @Table(name = "wallet", indexes = {@Index(name = "ix_wallet_reference_uq", columnList = "reference", unique = true), @Index(name = "ix_wallet_user_id_account_number_uq", columnList = "user_id, account_number", unique = true)})
@@ -22,7 +24,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @OptimisticLocking(type = OptimisticLockType.VERSION)
 public class Wallet extends AbstractBaseEntity {
-    @Column(name = "account_number", columnDefinition = "varchar(10)")
+    @Column(name = "account_number", columnDefinition = "VARCHAR(10) NOT NULL DEFAULT generate_account_number()",
+            unique = true, updatable = false)
     private String accountNumber;
 
     @Column(name = "account_name", columnDefinition = "varchar(250)")
@@ -56,4 +59,10 @@ public class Wallet extends AbstractBaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", columnDefinition = "varchar(100) not null")
     private WalletType type;
+
+    @PrePersist
+    public void onCreate() {
+        id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
+        dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
+    }
 }
