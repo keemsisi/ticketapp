@@ -5,8 +5,10 @@ import org.core.backend.ticketapp.marketing.dto.social.FollowUserSocialLinkReque
 import org.core.backend.ticketapp.marketing.entity.ExternalAppFollower;
 import org.core.backend.ticketapp.marketing.repository.ExternalAppFollowerRepository;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
+import org.core.backend.ticketapp.transaction.entity.wallet.WalletType;
 import org.core.backend.ticketapp.transaction.service.wallet.WalletService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -17,9 +19,10 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
     private final ExternalAppFollowerRepository repository;
 
     @Override
+    @Transactional
     public ExternalAppFollower follow(final FollowUserSocialLinkRequest request) {
         final var record = getById(request.getId());
-        final var wallet = walletService.getOrCreatedWallet(request.getUserId());
+        final var wallet = walletService.getOrCreatedWallet(request.getUserId(), WalletType.COIN_WALLET);
 
         final var followerRecord = new ExternalAppFollower();
         followerRecord.setUserId(record.getUserId());

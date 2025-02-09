@@ -6,6 +6,7 @@ import org.core.backend.ticketapp.transaction.dto.wallet.request.CreateWalletDTO
 import org.core.backend.ticketapp.transaction.dto.wallet.request.WalletUpdateRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.core.backend.ticketapp.transaction.entity.wallet.Wallet;
+import org.core.backend.ticketapp.transaction.entity.wallet.WalletType;
 
 import java.util.UUID;
 
@@ -24,5 +25,5 @@ public interface WalletService extends IService<Wallet> {
 
     void debitWallet(Transaction transaction, Wallet wallet);
 
-    Wallet getOrCreatedWallet(UUID userId);
+    Wallet getOrCreatedWallet(UUID userId, WalletType walletType);
 }

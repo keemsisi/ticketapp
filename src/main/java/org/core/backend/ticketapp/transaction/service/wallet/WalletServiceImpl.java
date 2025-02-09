@@ -13,6 +13,7 @@ import org.core.backend.ticketapp.transaction.entity.wallet.Wallet;
 import org.core.backend.ticketapp.transaction.entity.wallet.WalletType;
 import org.core.backend.ticketapp.transaction.repository.WalletRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@Transactional
 @AllArgsConstructor
 public class WalletServiceImpl implements WalletService {
     private static final String REF_TEMPLATE = "WAL_REF_%s";
@@ -97,8 +99,8 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public Wallet getOrCreatedWallet(final UUID userId) {
-        return walletRepository.findByUserIdAndType(userId, WalletType.COIN_WALLET).orElseGet(() -> {
+    public Wallet getOrCreatedWallet(final UUID userId, final WalletType walletType) {
+        return walletRepository.findByUserIdAndType(userId, walletType).orElseGet(() -> {
             final var request = CreateWalletDTO.builder().userId(userId).name(RandomStringUtils.randomAlphanumeric(10) + "_" + WalletType.COIN_WALLET).build();
             return createWallet(request);
         });
