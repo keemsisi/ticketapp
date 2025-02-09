@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 @Service
 @AllArgsConstructor
 public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerService {
+    private static final String DEFAULT_POINT = "2.00";
     private final WalletService walletService;
     private final ExternalAppFollowerRepository repository;
 
@@ -31,7 +32,7 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
         repository.save(followerRecord);
 
         //later the transaction will be completely created and saved for tracking purpose
-        final var transaction = Transaction.builder().amount(BigDecimal.ONE).build();
+        final var transaction = Transaction.builder().amount(new BigDecimal(DEFAULT_POINT)).build();
         walletService.creditWallet(transaction, wallet);
         return followerRecord;
     }
