@@ -99,7 +99,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public Wallet getOrCreatedWallet(final UUID userId, final WalletType walletType) {
+    public Wallet getOrCreateWallet(final UUID userId, final WalletType walletType) {
         return walletRepository.findByUserIdAndType(userId, walletType).orElseGet(() -> {
             final var request = CreateWalletDTO.builder().userId(userId).name(RandomStringUtils.randomAlphanumeric(10) + "_" + WalletType.COIN_WALLET).build();
             return createWallet(request);

@@ -25,5 +25,5 @@ public interface WalletService extends IService<Wallet> {
 
     void debitWallet(Transaction transaction, Wallet wallet);
 
-    Wallet getOrCreatedWallet(UUID userId, WalletType walletType);
+    Wallet getOrCreateWallet(UUID userId, WalletType walletType);
 }
