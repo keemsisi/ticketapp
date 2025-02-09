@@ -50,7 +50,7 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
         final var result = redisService.get(key);
         if (StringUtils.isNotBlank(result) && Integer.parseInt(result) == 0) {
             throw new ApplicationException(412, "max_reached", "Oops! You have reached maximum numbers of followers!");
-        } else {
+        } else if (StringUtils.isBlank(result)) {
             redisService.put(key, DEFAULT_FOLLOW_COUNT, TimeUnit.HOURS.toMinutes(1));
         }
     }
@@ -60,8 +60,8 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
         final var result = redisService.get(key);
         if (StringUtils.isNotBlank(result) && Integer.parseInt(result) > 0) {
             redisService.decrease(key, 1);
-        } else {
-            throw new ApplicationException(400, "error", "Failed to decrease follower counts...");
+            return;
         }
+        throw new ApplicationException(400, "error", "Failed to decrease follower counts...");
     }
 }
