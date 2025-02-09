@@ -24,7 +24,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @OptimisticLocking(type = OptimisticLockType.VERSION)
 public class Wallet extends AbstractBaseEntity {
-    @Column(name = "account_number", columnDefinition = "VARCHAR(10) NOT NULL DEFAULT generate_account_number()",
+    @Column(name = "account_number", columnDefinition = "VARCHAR(10) DEFAULT generate_account_number()",
             unique = true, updatable = false)
     private String accountNumber;
 
@@ -63,6 +63,11 @@ public class Wallet extends AbstractBaseEntity {
     @PrePersist
     public void onCreate() {
         id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
+        status = ObjectUtils.defaultIfNull(status, Status.ACTIVE);
+        balance = ObjectUtils.defaultIfNull(balance, BigDecimal.ZERO);
+        currency = ObjectUtils.defaultIfNull(currency, "NGN");
+        lienedAmount = ObjectUtils.defaultIfNull(lienedAmount, BigDecimal.ZERO);
+        lastTransactionAmount = ObjectUtils.defaultIfNull(lastTransactionAmount, BigDecimal.ZERO);
         dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
     }
 }

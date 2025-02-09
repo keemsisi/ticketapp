@@ -36,6 +36,7 @@ public class WalletServiceImpl implements WalletService {
         coreUserService.getUserById(request.getUserId()).orElseThrow(ApplicationException::notFoundException);
         wallet.setType(request.getWalletType());
         wallet.setReference(ref);
+        wallet.setLastTransactionAmount(BigDecimal.ZERO);
         wallet.setCurrency(request.getCurrency());
         wallet.setBalance(BigDecimal.ZERO);
         wallet.setBalanceBefore(BigDecimal.ZERO);
