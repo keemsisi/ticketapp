@@ -76,8 +76,10 @@ public class SocialMediaLinksAdvertisementController {
 
     @RequestMapping(value = "/follow", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericApiResponse<ExternalAppFollower>> follow(final @RequestBody FollowUserSocialLinkRequest request) throws JsonProcessingException {
+        final var user = jwtTokenUtil.getUser();
+        request.setUserId(user.getUserId());
         final var result = followerService.follow(request);
-        activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), ExternalAppFollower.class.getTypeName(), null, objectMapper.writeValueAsString(result),
+        activityLogProcessorUtils.processActivityLog(user.getUserId(), ExternalAppFollower.class.getTypeName(), null, objectMapper.writeValueAsString(result),
                 "Initiated a request to follow a user");
         return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Follow user social link was successful", result));
     }
