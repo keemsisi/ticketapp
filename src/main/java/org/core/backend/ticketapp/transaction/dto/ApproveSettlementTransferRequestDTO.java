@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SettlementRequestDTO {
+public class ApproveSettlementTransferRequestDTO {
     @NotNull(message = "eventId can't be null")
     private UUID eventId;
     @NotNull(message = "userId can't be null")

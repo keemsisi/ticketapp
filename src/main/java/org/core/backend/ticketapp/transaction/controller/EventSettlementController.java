@@ -6,7 +6,8 @@ import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
-import org.core.backend.ticketapp.transaction.dto.SettlementRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.ApproveSettlementTransferRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.SettlementTransferRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.core.backend.ticketapp.transaction.service.SettlementService;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class EventSettlementController {
 
     @PreAuthorize("hasAuthority('SCOPE_settlement_transfer')")
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/transfer")
-    public ResponseEntity<GenericApiResponse<Transaction>> transfer(@RequestBody SettlementRequestDTO request) throws JsonProcessingException {
+    public ResponseEntity<GenericApiResponse<Transaction>> transfer(@RequestBody ApproveSettlementTransferRequestDTO request) throws JsonProcessingException {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var verified = settlementService.transfer(request);
         return new ResponseEntity<>(new GenericApiResponse<>("00", "Transfer was done successfully!", verified), HttpStatus.OK);
@@ -36,9 +37,7 @@ public class EventSettlementController {
 
     @PreAuthorize("hasAuthority('SCOPE_settlement_transfer_request')")
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/request")
-    public ResponseEntity<GenericApiResponse<Transaction>> request(@RequestBody SettlementRequestDTO request) throws JsonProcessingException {
-        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
-        final var verified = settlementService.transfer(request);
-        return new ResponseEntity<>(new GenericApiResponse<>("00", "Transfer was done successfully!", verified), HttpStatus.OK);
+    public ResponseEntity<GenericApiResponse<Transaction>> request(@RequestBody SettlementTransferRequestDTO request) throws JsonProcessingException {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(null);
     }
 }

@@ -360,7 +360,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction transfer(SettlementRequestDTO request) {
+    public Transaction transfer(ApproveSettlementTransferRequestDTO request) {
         return null;
     }
 

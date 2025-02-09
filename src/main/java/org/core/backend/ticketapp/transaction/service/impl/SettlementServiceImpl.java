@@ -14,7 +14,7 @@ import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.service.core.PaymentProcessorType;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.ticket.service.TicketService;
-import org.core.backend.ticketapp.transaction.dto.SettlementRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.ApproveSettlementTransferRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
 import org.core.backend.ticketapp.transaction.entity.PaymentGatewayMeta;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
@@ -47,14 +47,14 @@ public class SettlementServiceImpl implements SettlementService {
     private final JwtTokenUtil jwtTokenUtil;
 
     @Override
-    public Transaction transfer(final SettlementRequestDTO request) throws JsonProcessingException {
+    public Transaction transfer(final ApproveSettlementTransferRequestDTO request) throws JsonProcessingException {
         final var bankAccountDetails = bankAccountDetailsService.getByUserId(request.getUserId());
         return switch (appConfigs.defaultPaymentProcessor) {
             case PAYSTACK -> processAndBuildPayStackTransaction(bankAccountDetails, request);
         };
     }
 
-    private Transaction processAndBuildPayStackTransaction(final BankAccountDetails bankAccountDetails, final SettlementRequestDTO request) throws JsonProcessingException {
+    private Transaction processAndBuildPayStackTransaction(final BankAccountDetails bankAccountDetails, final ApproveSettlementTransferRequestDTO request) throws JsonProcessingException {
         final var user = jwtTokenUtil.getUser();
         final var transferRequest = getTransferRequestDTO(bankAccountDetails, request);
         final var processorResponse = paymentProcessorService.transfer(transferRequest, bankAccountDetails);
@@ -74,7 +74,7 @@ public class SettlementServiceImpl implements SettlementService {
         return transactionService.save(transaction);
     }
 
-    private @NotNull TransferRequestDTO getTransferRequestDTO(final BankAccountDetails bankAccountDetails, final SettlementRequestDTO request) {
+    private @NotNull TransferRequestDTO getTransferRequestDTO(final BankAccountDetails bankAccountDetails, final ApproveSettlementTransferRequestDTO request) {
         final var event = Objects.nonNull(request.getEventId()) ? eventService.getById(request.getEventId()) : null;
         final var user = coreUserService.getUserById(bankAccountDetails.getUserId())
                 .orElseThrow(() -> new ApplicationException(404, "not_found", "User not found!"));
@@ -85,7 +85,7 @@ public class SettlementServiceImpl implements SettlementService {
         return getRequestDTO(bankAccountDetails, request);
     }
 
-    private @NotNull TransferRequestDTO getRequestDTO(BankAccountDetails bankAccountDetails, SettlementRequestDTO request) {
+    private @NotNull TransferRequestDTO getRequestDTO(BankAccountDetails bankAccountDetails, ApproveSettlementTransferRequestDTO request) {
         final var transferRequest = new TransferRequestDTO();
         transferRequest.setAmount(request.getAmount());
         transferRequest.setRecipient(bankAccountDetails.getReference());
