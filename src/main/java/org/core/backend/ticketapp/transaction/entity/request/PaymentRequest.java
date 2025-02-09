@@ -19,8 +19,7 @@ import java.util.UUID;
 
 
 @Table(name = "payment_request",
-        indexes = {@Index(name = "ix_payment_request_reference_uq", columnList = "reference", unique = true),
-                @Index(name = "ix_payment_request_user_id_uq", columnList = "user_id, account_number", unique = true)})
+        indexes = {@Index(name = "ix_payment_request_user_id_event_id_uq", columnList = "user_id, event_id", unique = true)})
 @Entity
 @Getter
 @Setter

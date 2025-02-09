@@ -47,7 +47,7 @@ public class Wallet extends AbstractBaseEntity {
     private BigDecimal lienedAmount;
 
     @Column(name = "currency", columnDefinition = "varchar(10) not null 'NGN'")
-    private BigDecimal currency;
+    private String currency;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", columnDefinition = "varchar(100) not null")
