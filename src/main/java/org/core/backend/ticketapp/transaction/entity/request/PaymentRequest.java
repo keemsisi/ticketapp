@@ -51,7 +51,7 @@ public class PaymentRequest extends AbstractBaseEntity {
     @Column(name = "status", columnDefinition = "varchar(10) default 'PENDING'")
     private PaymentRequestStatus status;
 
-    @Column(name = "type", columnDefinition = "JSONB default null")
+    @Column(name = "meta", columnDefinition = "JSONB default null")
     @Type(type = "JSONB")
     private Map<String, Object> meta; // this can contain the track records of the payment
 }
