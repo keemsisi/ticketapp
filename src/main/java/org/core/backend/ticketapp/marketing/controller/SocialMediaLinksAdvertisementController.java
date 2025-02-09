@@ -11,6 +11,7 @@ import org.core.backend.ticketapp.marketing.dto.social.UpdateSocialLinksRequest;
 import org.core.backend.ticketapp.marketing.entity.ExternalAppFollower;
 import org.core.backend.ticketapp.marketing.entity.SocialMediaLinkAdvertisement;
 import org.core.backend.ticketapp.marketing.service.SocialMediaLinkAdvertisementService;
+import org.core.backend.ticketapp.marketing.service.impl.ExternalAppFollowerService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class SocialMediaLinksAdvertisementController {
     private final SocialMediaLinkAdvertisementService service;
+    private final ExternalAppFollowerService followerService;
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -64,7 +66,7 @@ public class SocialMediaLinksAdvertisementController {
 
     @RequestMapping(value = "/follow", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericApiResponse<ExternalAppFollower>> follow(final @RequestBody FollowUserSocialLinkRequest request) {
-        final var result = service.follow(request);
+        final var result = followerService.follow(request);
         return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Follow user social link was successful", result));
     }
 }

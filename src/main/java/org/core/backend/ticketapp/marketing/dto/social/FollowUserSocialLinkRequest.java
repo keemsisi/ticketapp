@@ -15,4 +15,6 @@ import java.util.UUID;
 public class FollowUserSocialLinkRequest {
     @NotNull(message = "id can't be null")
     private UUID id;
+    @NotNull(message = "userId can't be null")
+    private UUID userId;
 }

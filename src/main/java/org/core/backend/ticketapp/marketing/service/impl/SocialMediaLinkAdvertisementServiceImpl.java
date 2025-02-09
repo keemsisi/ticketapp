@@ -2,13 +2,13 @@ package org.core.backend.ticketapp.marketing.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
-import org.core.backend.ticketapp.marketing.dto.social.FollowUserSocialLinkRequest;
 import org.core.backend.ticketapp.marketing.dto.social.UpdateSocialLinksRequest;
-import org.core.backend.ticketapp.marketing.entity.ExternalAppFollower;
 import org.core.backend.ticketapp.marketing.entity.SocialMediaLinkAdvertisement;
+import org.core.backend.ticketapp.marketing.repository.ExternalAppFollowerRepository;
 import org.core.backend.ticketapp.marketing.repository.SocialMediaLinksAdvertisementRepository;
 import org.core.backend.ticketapp.marketing.service.SocialMediaLinkAdvertisementService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.transaction.service.wallet.WalletService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -66,10 +66,5 @@ public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkA
     @Override
     public SocialMediaLinkAdvertisement getById(final UUID id) {
         return repository.findById(id).orElseThrow(ApplicationExceptionUtils::notFound);
-    }
-
-    @Override
-    public ExternalAppFollower follow(FollowUserSocialLinkRequest request) {
-        return null;
     }
 }
