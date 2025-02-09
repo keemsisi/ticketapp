@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.marketing.dto.social.FollowUserSocialLinkRequest;
 import org.core.backend.ticketapp.marketing.entity.ExternalAppFollower;
 import org.core.backend.ticketapp.marketing.repository.ExternalAppFollowerRepository;
+import org.core.backend.ticketapp.passport.service.RedisService;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.core.backend.ticketapp.transaction.entity.wallet.WalletType;
 import org.core.backend.ticketapp.transaction.service.wallet.WalletService;
@@ -18,6 +19,7 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
     private static final String DEFAULT_POINT = "2.00";
     private final WalletService walletService;
     private final ExternalAppFollowerRepository repository;
+    private final RedisService redisService;
 
     @Override
     @Transactional
