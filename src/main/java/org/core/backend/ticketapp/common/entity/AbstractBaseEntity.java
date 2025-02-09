@@ -61,4 +61,5 @@ public abstract class AbstractBaseEntity {
     @JsonIgnore
     @Transient
     private String qrCodeLink;
+
 }

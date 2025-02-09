@@ -3,6 +3,7 @@ package org.core.backend.ticketapp.marketing.service.impl;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.marketing.common.FollowerStatus;
 import org.core.backend.ticketapp.marketing.dto.social.FollowUserSocialLinkRequest;
 import org.core.backend.ticketapp.marketing.entity.ExternalAppFollower;
 import org.core.backend.ticketapp.marketing.repository.ExternalAppFollowerRepository;
@@ -32,12 +33,13 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
     @Transactional
     public ExternalAppFollower follow(final FollowUserSocialLinkRequest request) {
         validateRequest(request);
-        final var record = advertisementService.getById(request.getId());
+        final var socialMediaLinkAdvertisement = advertisementService.getById(request.getId());
         final var wallet = walletService.getOrCreateWallet(request.getUserId(), WalletType.COIN_WALLET, "NGN");
         final var followerRecord = new ExternalAppFollower();
-        followerRecord.setUserId(record.getUserId());
-        followerRecord.setFollowerUserId(request.getId());
         followerRecord.setFollowerUserId(request.getUserId());
+        followerRecord.setUserId(socialMediaLinkAdvertisement.getUserId());
+        followerRecord.setSocialMediaLinkAdId(socialMediaLinkAdvertisement.getId());
+        followerRecord.setStatus(FollowerStatus.FOLLOWED);
         repository.save(followerRecord);
         //later the transaction will be completely created and saved for tracking purpose
         final var transaction = Transaction.builder().amount(new BigDecimal(DEFAULT_POINT)).build();
