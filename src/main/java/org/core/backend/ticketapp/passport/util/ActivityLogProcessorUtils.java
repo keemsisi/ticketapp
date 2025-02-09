@@ -1,7 +1,6 @@
 package org.core.backend.ticketapp.passport.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.core.backend.ticketapp.passport.dtos.HttpServletRequestProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +19,12 @@ public class ActivityLogProcessorUtils {
     private ActivityLogPublisherUtil activityLogPublisherUtil;
 
     public void processActivityLog(UUID userId, String classTypeName, String oldDataJSON, String newDataJSON, String activityDescription) {
-        HttpServletRequestProperty httpServletRequestProperty = activityLogPublisherUtil.getHttpServletRequestProperty(httpServletRequest);
+        final var httpServletRequestProperty = activityLogPublisherUtil.getHttpServletRequestProperty(httpServletRequest);
         executorService.submit(() -> activityLogPublisherUtil.publishActivityLog(httpServletRequestProperty, oldDataJSON, newDataJSON, userId, classTypeName, activityDescription));
     }
 
     public void processActivityLog(UUID tenantId, UUID userId, String classTypeName, String oldDataJSON, String newDataJSON, String activityDescription) {
-        HttpServletRequestProperty httpServletRequestProperty = activityLogPublisherUtil.getHttpServletRequestProperty(httpServletRequest);
+        final var httpServletRequestProperty = activityLogPublisherUtil.getHttpServletRequestProperty(httpServletRequest);
         executorService.submit(() -> activityLogPublisherUtil.publishActivityLog(httpServletRequestProperty, oldDataJSON, newDataJSON, userId, classTypeName, activityDescription, tenantId));
     }
 }
