@@ -26,4 +26,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID>, PagingAnd
 
     @Query(value = "SELECT * FROM ticket t WHERE t.tenant_id = ?1 ", nativeQuery = true)
     Page<Ticket> findByTenantId(final UUID tenantId, final Pageable pageRequest);
+
+    @Query(value = "SELECT * FROM ticket t WHERE t.user_id = ?1 AND t.tenant_id = ?2 ", nativeQuery = true)
+    Page<Ticket> findByUserIdAndTenantId(final UUID userId, final UUID tenantId, final Pageable pageRequest);
 }

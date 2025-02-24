@@ -161,11 +161,18 @@ public class TicketServiceImpl implements TicketService {
         final var loggedInUser = jwtTokenUtil.getUser();
         var tenantId = jwtTokenUtil.getUser().getTenantId();
         Page<Ticket> response;
-        if (requestDTO.tenantId() != null && UserUtils.userHasRole(loggedInUser.getRoles(), AccountType.SUPER_ADMIN.getType()))
+
+        if (requestDTO.tenantId() != null && UserUtils.userHasRole(loggedInUser.getRoles(), AccountType.SUPER_ADMIN.getType())) {
             tenantId = requestDTO.tenantId();
+            return Objects.nonNull(requestDTO.userId()) ?
+                    ticketRepository.findByUserIdAndTenantId(requestDTO.userId(), tenantId, pageRequest) :
+                    ticketRepository.findByTenantId(tenantId, pageRequest);
+        }
+
         if (requestDTO.eventId() != null)
             response = ticketRepository.findByEventIdAndTenantId(requestDTO.eventId(), tenantId, pageRequest);
-        else response = ticketRepository.findByTenantId(tenantId, pageRequest);
+        else response = ticketRepository.findByUserIdAndTenantId(loggedInUser.getUserId(), tenantId, pageRequest);
+
         response.stream().forEach(ticket -> ticket.setQrCodeLink(String.format(appConfigs.qrCodeBaseUrl, ticket.getQrCode())));
         return response;
     }
