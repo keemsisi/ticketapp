@@ -8,6 +8,7 @@ import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.marketing.dto.social.CreateSocialLinksRequest;
+import org.core.backend.ticketapp.marketing.dto.social.FilterSearchSocialMediaLinksRequest;
 import org.core.backend.ticketapp.marketing.dto.social.FollowUserSocialLinkRequest;
 import org.core.backend.ticketapp.marketing.dto.social.UpdateSocialLinksRequest;
 import org.core.backend.ticketapp.marketing.entity.ExternalAppFollower;
@@ -52,8 +53,8 @@ public class SocialMediaLinksAdvertisementController {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
-        final var result = PagedMapperUtil.map(service.getAll(pageable));
+    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final FilterSearchSocialMediaLinksRequest request, final Pageable pageable) {
+        final var result = PagedMapperUtil.map(service.getAll(request, pageable));
         return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched social links", result));
     }
 

@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.marketing.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
+import org.core.backend.ticketapp.marketing.dto.social.FilterSearchSocialMediaLinksRequest;
 import org.core.backend.ticketapp.marketing.dto.social.UpdateSocialLinksRequest;
 import org.core.backend.ticketapp.marketing.entity.SocialMediaLinkAdvertisement;
 import org.core.backend.ticketapp.marketing.repository.SocialMediaLinksAdvertisementRepository;
@@ -36,6 +37,15 @@ public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkA
     @Override
     public Page<SocialMediaLinkAdvertisement> getAll(final Pageable pageable) {
         final var userId = jwtTokenUtil.getUser().getUserId();
+        return Objects.nonNull(userId) ? repository.findAll(userId, pageable) : repository.findAll(pageable);
+    }
+
+    @Override
+    public Page<SocialMediaLinkAdvertisement> getAll(final FilterSearchSocialMediaLinksRequest request, final Pageable pageable) {
+        final var userId = jwtTokenUtil.getUser().getUserId();
+        if (Objects.nonNull(request.tenantId())) {
+            return repository.findAllByTenantId(request.tenantId(), pageable);
+        }
         return Objects.nonNull(userId) ? repository.findAll(userId, pageable) : repository.findAll(pageable);
     }
 

@@ -27,4 +27,7 @@ public interface SocialMediaLinksAdvertisementRepository extends JpaRepository<S
     @NotNull
     @Query(value = "SELECT * FROM social_media_link_advertisement WHERE deleted = false ", nativeQuery = true)
     Page<SocialMediaLinkAdvertisement> findAll(final @NotNull Pageable pageable);
+
+    @Query(value = "SELECT * FROM social_media_link_advertisement WHERE deleted = false AND tenant_id=?1", nativeQuery = true)
+    Page<SocialMediaLinkAdvertisement> findAllByTenantId(UUID tenantId, Pageable pageable);
 }
