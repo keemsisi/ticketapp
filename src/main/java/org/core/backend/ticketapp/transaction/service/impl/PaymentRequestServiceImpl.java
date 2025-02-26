@@ -1,7 +1,6 @@
 package org.core.backend.ticketapp.transaction.service.impl;
 
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.transaction.dto.CreatePaymentRequestDTO;
@@ -21,7 +20,6 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
-@RequiredArgsConstructor
 public class PaymentRequestServiceImpl implements PaymentRequestService {
     private final PaymentRequestRepository repository;
     private final JwtTokenUtil jwtTokenUtil;
