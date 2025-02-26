@@ -19,5 +19,5 @@ public class CreatePaymentRequestDTO {
     private UUID id; // could be wallet_id or event_id
     @NotNull(message = "amount can't be null")
     private BigDecimal amount;
-    private PaymentRequestType requestType = PaymentRequestType.EVENT_SETTLEMENT;
+    private PaymentRequestType type = PaymentRequestType.EVENT_SETTLEMENT;
 }

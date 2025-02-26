@@ -1,7 +1,9 @@
 package org.core.backend.ticketapp.transaction.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
+import org.core.backend.ticketapp.event.service.EventService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.transaction.dto.CreatePaymentRequestDTO;
 import org.core.backend.ticketapp.transaction.dto.payment_request.UpdatePaymentRequestRequestDTO;
@@ -24,15 +26,26 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
     private final PaymentRequestRepository repository;
     private final JwtTokenUtil jwtTokenUtil;
     private final ModelMapper modelMapper;
+    private final EventService eventService;
 
     @Override
     public <R> PaymentRequest create(final R request) {
+        final var user = jwtTokenUtil.getUser();
         final var record = modelMapper.map(request, PaymentRequest.class);
+        final var requestDto = ((CreatePaymentRequestDTO) (request));
+        if (record.getType().isEventSettlement()) {
+            final var event = eventService.getById(requestDto.getId());
+            if (!event.getUserId().equals(user.getUserId()) || !event.getTenantId().equals(user.getTenantId())) {
+                throw new ApplicationException(403, "not_allowed", "Only event owner can request");
+            }
+            record.setEventId(event.getId());
+        }
         record.setId(UUID.randomUUID());
         record.setWalletId(((CreatePaymentRequestDTO) (request)).getId());
-        record.setUserId(jwtTokenUtil.getUser().getUserId());
-        record.setTenantId(jwtTokenUtil.getUser().getTenantId());
+        record.setUserId(user.getUserId());
+        record.setTenantId(user.getTenantId());
         record.setDateCreated(LocalDateTime.now());
+        record.setRequestDate(LocalDateTime.now());
         return repository.save(record);
     }
 

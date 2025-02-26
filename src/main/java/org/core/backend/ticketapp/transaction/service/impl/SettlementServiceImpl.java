@@ -84,7 +84,7 @@ public class SettlementServiceImpl implements SettlementService {
             final var paymentRequestDTO = new CreatePaymentRequestDTO();
             paymentRequestDTO.setId(request.getWalletId());
             paymentRequestDTO.setAmount(request.getAmount());
-            paymentRequestDTO.setRequestType(request.getPaymentRequestType());
+            paymentRequestDTO.setType(request.getPaymentRequestType());
             final var bankAccountDetails = bankAccountDetailsService.getByUserId(userId);
             final var paymentRequest = paymentRequestService.create(paymentRequestDTO);
             paymentRequest.setWallet(wallet);
