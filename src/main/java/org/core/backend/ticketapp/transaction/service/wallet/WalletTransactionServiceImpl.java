@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.enums.Status;
-import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.transaction.dto.wallet.request.WalletTransactionRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.core.backend.ticketapp.transaction.entity.wallet.Wallet;
@@ -13,7 +12,6 @@ import org.core.backend.ticketapp.transaction.service.impl.TransactionServiceImp
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -35,10 +33,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     public Transaction initAndProcess(final WalletTransactionRequestDTO request) throws JsonProcessingException {
         final var senderWallet = walletService.getWalletById(request.getSenderWalletId());
         final var receiverWallet = walletService.getWalletById(request.getReceiverWalletId());
-        if (senderWallet.getBalance().compareTo(BigDecimal.ZERO) <= 0
-                || senderWallet.getBalance().compareTo(request.getAmount()) <= 0) {
-            throw new ApplicationException(400, "insufficient_wallet_balance", "Wallet has insufficient balance to process transaction");
-        }
         final var transaction = create(request, senderWallet, receiverWallet);
         walletService.debitWallet(transaction, senderWallet);
         walletService.creditWallet(transaction, receiverWallet);

@@ -16,7 +16,7 @@ import org.core.backend.ticketapp.passport.service.core.PaymentProcessorType;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.ticket.service.TicketService;
 import org.core.backend.ticketapp.transaction.dto.ApprovePaymentRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.PaymentRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.CreatePaymentRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.BankAccountDetails;
 import org.core.backend.ticketapp.transaction.entity.PaymentGatewayMeta;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
@@ -81,7 +81,7 @@ public class SettlementServiceImpl implements SettlementService {
             if (wallet.getAvailableBalance().doubleValue() < request.getAmount().doubleValue()) {
                 throw new ApplicationException(400, "insufficient_balance", "debit unsuccessful due to insufficient balance!");
             }
-            final var paymentRequestDTO = new PaymentRequestDTO();
+            final var paymentRequestDTO = new CreatePaymentRequestDTO();
             paymentRequestDTO.setId(request.getWalletId());
             paymentRequestDTO.setAmount(request.getAmount());
             paymentRequestDTO.setRequestType(request.getPaymentRequestType());
@@ -91,11 +91,6 @@ public class SettlementServiceImpl implements SettlementService {
             return processTransactionThroughProvider(bankAccountDetails, paymentRequest);
         }
         throw new ApplicationException(400, "not_allowed", "Request can't be processed at the moment!");
-    }
-
-    @Override
-    public PaymentRequest createPaymentRequest(final PaymentRequestDTO request) {
-        return paymentRequestService.create(request);
     }
 
 

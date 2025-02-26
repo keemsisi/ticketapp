@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdatePaymentRequestRequest {
+public class UpdatePaymentRequestRequestDTO {
     @NotNull
     private UUID id;
     @NotNull

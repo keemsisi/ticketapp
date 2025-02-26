@@ -7,9 +7,7 @@ import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.transaction.dto.ApprovePaymentRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.PaymentRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
-import org.core.backend.ticketapp.transaction.entity.request.PaymentRequest;
 import org.core.backend.ticketapp.transaction.service.SettlementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,20 +33,6 @@ public class EventSettlementController {
         final var verified = settlementService.processApprovedTransfer(request);
         return new ResponseEntity<>(new GenericApiResponse<>("00",
                 "Transfer was done successfully!", verified),
-                HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasAuthority('SCOPE_settlement_transfer_request')")
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/request")
-    public ResponseEntity<GenericApiResponse<PaymentRequest>> request(@RequestBody PaymentRequestDTO request) throws JsonProcessingException {
-        if (!request.getRequestType().isEventSettlement()) {
-            return new ResponseEntity<>(new GenericApiResponse<>("01",
-                    "Payment request type not allowed", null),
-                    HttpStatus.FORBIDDEN);
-        }
-        final var response = settlementService.createPaymentRequest(request);
-        return new ResponseEntity<>(new GenericApiResponse<>("00",
-                "Payment request created successfully, please hold for processing!", response),
                 HttpStatus.OK);
     }
 }

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.core.backend.ticketapp.transaction.dto.payment_request.UpdatePaymentRequestRequest;
+import org.core.backend.ticketapp.transaction.dto.payment_request.UpdatePaymentRequestRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.request.PaymentRequest;
 import org.core.backend.ticketapp.transaction.repository.PaymentRequestRepository;
 import org.core.backend.ticketapp.transaction.service.PaymentRequestService;
@@ -43,7 +43,7 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
 
     @Override
     public <R> PaymentRequest update(final R request) {
-        final var requestData = modelMapper.map(request, UpdatePaymentRequestRequest.class);
+        final var requestData = modelMapper.map(request, UpdatePaymentRequestRequestDTO.class);
         final var id = requestData.getId();
         final var userId = jwtTokenUtil.getUser().getUserId();
         final var record = repository.findByIdAndUserId(id, userId).orElseThrow(ApplicationExceptionUtils::notFound);
