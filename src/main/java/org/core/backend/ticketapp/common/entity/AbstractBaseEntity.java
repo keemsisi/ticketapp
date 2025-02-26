@@ -10,10 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -57,6 +54,9 @@ public abstract class AbstractBaseEntity {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Column(name = "tenant_id", columnDefinition = "uuid default null")
     private UUID tenantId;
+
+    @Version
+    private Long versionId;
 
     @JsonIgnore
     @Transient

@@ -27,8 +27,7 @@ import java.util.UUID;
 @OptimisticLocking(type = OptimisticLockType.VERSION)
 public class Wallet extends AbstractBaseEntity {
     @Generated(GenerationTime.INSERT)
-    @Column(name = "account_number", columnDefinition = "VARCHAR(10) DEFAULT generate_account_number()",
-            unique = true, updatable = false)
+    @Column(name = "account_number", columnDefinition = "VARCHAR(10) DEFAULT generate_account_number()", unique = true, updatable = false)
     private String accountNumber;
 
     @Column(name = "account_name", columnDefinition = "varchar(250)")
@@ -72,5 +71,28 @@ public class Wallet extends AbstractBaseEntity {
         lienedAmount = ObjectUtils.defaultIfNull(lienedAmount, BigDecimal.ZERO);
         lastTransactionAmount = ObjectUtils.defaultIfNull(lastTransactionAmount, BigDecimal.ZERO);
         dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
+    }
+
+    public boolean hasLienedAmount() {
+        return lienedAmount.doubleValue() > 0;
+    }
+
+    public BigDecimal getAvailableBalance() {
+        if (balance.doubleValue() < 0 || lienedAmount.doubleValue() < 0) {
+            return BigDecimal.ZERO;
+        }
+        return balance.subtract(lienedAmount);
+    }
+
+    //it can be addition or subtraction
+    public void lienAdditionAmount(final BigDecimal amount) {
+        lienedAmount = lienedAmount.add(amount);
+    }
+
+    //it can be addition or subtraction
+    public void unLienAdditionAmount(final BigDecimal amount) {
+        if (lienedAmount.doubleValue() > 0) {
+            lienedAmount = lienedAmount.subtract(amount);
+        }
     }
 }

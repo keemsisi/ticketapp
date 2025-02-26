@@ -6,11 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
-import org.hibernate.annotations.*;
+import org.core.backend.ticketapp.transaction.entity.wallet.Wallet;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,17 +25,19 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@OptimisticLocking(type = OptimisticLockType.VERSION)
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class PaymentRequest extends AbstractBaseEntity {
 
-    @Column(name = "event_id", columnDefinition = "uuid not null")
+    @Column(name = "event_id", columnDefinition = "uuid")
     private UUID eventId;
 
-    @Column(name = "total_amount", columnDefinition = "numeric(19,2) not null")
+    @Column(name = "wallet_id", columnDefinition = "uuid")
+    private UUID walletId;
+
+    @Column(name = "total_amount", columnDefinition = "numeric(19,2) not 0.0")
     private BigDecimal totalAmount;
 
-    @Column(name = "total_paid", columnDefinition = "numeric(19,2) null")
+    @Column(name = "total_paid", columnDefinition = "numeric(19,2) 0.0")
     private BigDecimal totalPaid;
 
     @Column(name = "request_date", columnDefinition = "timestamptz not null default now()")
@@ -54,4 +56,10 @@ public class PaymentRequest extends AbstractBaseEntity {
     @Column(name = "meta", columnDefinition = "JSONB default null")
     @Type(type = "JSONB")
     private Map<String, Object> meta; // this can contain the track records of the payment
+
+    @Column(name = "unique_reference", columnDefinition = "varchar(255)")
+    private String uniqueReference;
+
+    @Transient
+    private Wallet wallet;
 }

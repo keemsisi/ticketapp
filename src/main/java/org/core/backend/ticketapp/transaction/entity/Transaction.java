@@ -8,13 +8,14 @@ import org.core.backend.ticketapp.common.dto.configs.pricing.TransactionFeesDTO;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.OrderType;
 import org.core.backend.ticketapp.common.enums.Status;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -44,6 +45,10 @@ public class Transaction extends AbstractBaseEntity {
     @Type(type = "JSONB")
     @Column(name = "gateway_meta", columnDefinition = "JSON DEFAULT NULL")
     private PaymentGatewayMeta gateWayMeta;
+
+    @Type(type = "JSONB")
+    @Column(name = "meta", columnDefinition = "JSON DEFAULT NULL")
+    private Map<String, Object> meta;
 
     @Column(name = "created_by", columnDefinition = "UUID DEFAULT NULL")
     private UUID createdBy;

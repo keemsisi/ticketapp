@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.core.backend.ticketapp.common.enums.TransactionType;
+import org.core.backend.ticketapp.transaction.entity.request.PaymentRequestType;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -12,12 +13,10 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApproveSettlementTransferRequestDTO {
-    @NotNull(message = "eventId can't be null")
-    private UUID eventId;
-    @NotNull(message = "userId can't be null")
-    private UUID userId;
+public class PaymentRequestDTO {
+    @NotNull(message = "id can't be null")
+    private UUID id; // could be wallet_id or event_id
     @NotNull(message = "amount can't be null")
     private BigDecimal amount;
-    private TransactionType transactionType = TransactionType.SETTLEMENT;
+    private PaymentRequestType requestType = PaymentRequestType.EVENT_SETTLEMENT;
 }

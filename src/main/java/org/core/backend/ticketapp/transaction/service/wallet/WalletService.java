@@ -15,6 +15,8 @@ public interface WalletService extends IService<Wallet> {
 
     Wallet getWalletById(UUID walletId);
 
+    Wallet getWalletByIdAndUserId(UUID walletId, UUID userId);
+
     Wallet deleteWalletById(final UUID id);
 
     Wallet updateWallet(final WalletUpdateRequestDTO updateRequestDTO);
@@ -23,7 +25,7 @@ public interface WalletService extends IService<Wallet> {
 
     void creditWallet(Transaction transaction, Wallet wallet);
 
-    void debitWallet(Transaction transaction, Wallet wallet);
+    Wallet debitWallet(Transaction transaction, Wallet wallet);
 
     Wallet getOrCreateWallet(UUID userId, WalletType walletType, String currency);
 }

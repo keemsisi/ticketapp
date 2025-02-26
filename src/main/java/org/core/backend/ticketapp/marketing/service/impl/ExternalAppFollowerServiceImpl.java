@@ -44,7 +44,7 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
         //later the transaction will be completely created and saved for tracking purpose
         final var transaction = Transaction.builder().amount(new BigDecimal(DEFAULT_POINT)).build();
         walletService.creditWallet(transaction, wallet);
-        decrement(request.getUserId());
+        decrementMaxFollowerAsPerConfig(request.getUserId());
         return followerRecord;
     }
 
@@ -58,7 +58,7 @@ public class ExternalAppFollowerServiceImpl implements ExternalAppFollowerServic
         }
     }
 
-    private void decrement(final UUID userId) {
+    private void decrementMaxFollowerAsPerConfig(final UUID userId) {
         final var key = String.format(FOLLOWER_LIMIT_TEMPLATE, userId);
         final var result = redisService.get(key);
         if (StringUtils.isNotBlank(result) && Integer.parseInt(result) > 0) {

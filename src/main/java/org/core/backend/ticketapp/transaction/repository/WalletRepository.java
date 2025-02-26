@@ -13,5 +13,8 @@ import java.util.UUID;
 public interface WalletRepository extends JpaRepository<Wallet, UUID>, PagingAndSortingRepository<Wallet, UUID> {
     @Query(value = "SELECT e.* FROM wallet e WHERE e.user_id = ?1 AND e.type=?2 AND e.deleted=false ", nativeQuery = true)
     Optional<Wallet> findByUserIdAndType(final UUID userId, final String walletType);
+
+    @Query(value = "SELECT e.* FROM wallet e WHERE e.id = ?1 AND e.user_id=?2 AND e.deleted=false ", nativeQuery = true)
+    Optional<Wallet> findByIdAndUserId(final UUID id, final UUID userId);
 }
 

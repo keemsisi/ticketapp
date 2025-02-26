@@ -57,6 +57,15 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    public Wallet getWalletByIdAndUserId(final UUID walletId, final UUID userId) {
+        final var wallet = walletRepository.findByIdAndUserId(walletId, userId).orElse(null);
+        if (Objects.isNull(wallet)) {
+            throw new ApplicationException(404, "not_found", "Oops! Wallet not found!");
+        }
+        return wallet;
+    }
+
+    @Override
     public Wallet deleteWalletById(final UUID id) {
         final var wallet = getWalletById(id);
         walletRepository.delete(wallet);
@@ -89,16 +98,22 @@ public class WalletServiceImpl implements WalletService {
         log.info(">>> User wallet account[accountNumber: {}] credited with {} ", wallet.getAccountNumber(), transaction.getAmount());
     }
 
+    //TODO: Later make this wallet transaction idempotent, so double debit won't occur!
     @Override
-    public void debitWallet(final Transaction transaction, final Wallet wallet) {
+    public Wallet debitWallet(final Transaction transaction, final Wallet wallet) {
+        if (wallet.getAvailableBalance().doubleValue() < transaction.getAmount().doubleValue()) {
+            throw new ApplicationException(400, "insufficient_balance", "debit unsuccessful due to insufficient balance!");
+        }
+        lienAmount(wallet, transaction.getAmount());
         final var balanceBefore = wallet.getBalance();
         final var balanceAfter = wallet.getBalance().subtract(transaction.getAmount()).add(BigDecimal.ZERO);
         wallet.setBalance(balanceAfter);
         wallet.setBalanceBefore(balanceBefore);
         wallet.setDateModified(LocalDateTime.now());
         wallet.setLastTransactionDate(LocalDateTime.now());
-        walletRepository.save(wallet);
+        unLienAmount(wallet, transaction.getAmount());//unlien the amount and save
         log.info(">>> User wallet account[accountNumber: {}] debited with {} ", wallet.getAccountNumber(), transaction.getAmount());
+        return wallet;
     }
 
     @Override
@@ -110,5 +125,17 @@ public class WalletServiceImpl implements WalletService {
                     .userId(userId).name(RandomStringUtils.randomAlphanumeric(10) + "_" + walletType).build();
             return createWallet(request);
         });
+    }
+
+    private Wallet lienAmount(final Wallet wallet, final BigDecimal amount) {
+        wallet.lienAdditionAmount(amount);
+        wallet.setDateModified(LocalDateTime.now());
+        return walletRepository.save(wallet);
+    }
+
+    private Wallet unLienAmount(final Wallet wallet, final BigDecimal amount) {
+        wallet.unLienAdditionAmount(amount);
+        wallet.setDateModified(LocalDateTime.now());
+        return walletRepository.save(wallet);
     }
 }

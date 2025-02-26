@@ -1,5 +1,7 @@
 package org.core.backend.ticketapp.transaction.service.payment.dto;
 
+import org.core.backend.ticketapp.transaction.service.payment.paystack.dto.TransferResponseDTO;
+
 public interface ProcessorPaymentResponseDTO {
     default boolean isStatus() {
         throw new UnsupportedOperationException("Method is not supported at the moment");
@@ -9,7 +11,7 @@ public interface ProcessorPaymentResponseDTO {
         throw new UnsupportedOperationException("Method is not supported at the moment");
     }
 
-    default Object getData() {
+    default TransferResponseDTO.Data getData() {
         throw new UnsupportedOperationException("Method is not supported at the moment");
     }
 }

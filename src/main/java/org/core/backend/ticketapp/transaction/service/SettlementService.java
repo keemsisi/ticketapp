@@ -1,15 +1,13 @@
 package org.core.backend.ticketapp.transaction.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.commons.lang3.NotImplementedException;
-import org.core.backend.ticketapp.transaction.dto.ApproveSettlementTransferRequestDTO;
-import org.core.backend.ticketapp.transaction.dto.SettlementTransferRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.ApprovePaymentRequestDTO;
+import org.core.backend.ticketapp.transaction.dto.PaymentRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
+import org.core.backend.ticketapp.transaction.entity.request.PaymentRequest;
 
 public interface SettlementService {
-    Transaction transfer(final ApproveSettlementTransferRequestDTO request) throws JsonProcessingException;
+    Transaction processApprovedTransfer(final ApprovePaymentRequestDTO request) throws JsonProcessingException;
 
-    default Object processRequest(SettlementTransferRequestDTO request) {
-        throw new NotImplementedException();
-    }
+    PaymentRequest createPaymentRequest(final PaymentRequestDTO request);
 }

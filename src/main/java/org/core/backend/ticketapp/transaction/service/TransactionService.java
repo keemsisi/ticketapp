@@ -17,7 +17,7 @@ public interface TransactionService {
 
     Transaction verifyPayment(TransactionVerifyRequestDTO verifyRequestDTO) throws Exception;
 
-    Transaction transfer(ApproveSettlementTransferRequestDTO request);
+    Transaction transfer(ApprovePaymentRequestDTO request);
 
     Transaction save(Transaction transaction);
 

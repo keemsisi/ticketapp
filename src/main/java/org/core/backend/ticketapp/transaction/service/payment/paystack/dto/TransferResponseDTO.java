@@ -21,7 +21,7 @@ public class TransferResponseDTO implements ProcessorPaymentResponseDTO {
     public static class Data {
         private int integration;
         private String domain;
-        private int amount;
+        private double amount;
         private String currency;
         private String source;
         private String reason;
