@@ -1,5 +1,6 @@
 package org.core.backend.ticketapp.transaction.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreatePaymentRequestDTO {
     @NotNull(message = "id can't be null")
+    @JsonAlias({"eventId", "walletId"})
     private UUID id; // could be wallet_id or event_id
     @NotNull(message = "amount can't be null")
     private BigDecimal amount;
