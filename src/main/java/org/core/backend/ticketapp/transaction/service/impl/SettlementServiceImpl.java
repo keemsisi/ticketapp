@@ -129,6 +129,7 @@ public class SettlementServiceImpl implements SettlementService {
         transaction.setUserId(bankAccountDetails.getUserId());
         transaction.setTenantId(bankAccountDetails.getTenantId());
         if (processorResponse.isStatus()
+                && processorResponse.getData().getStatus().equalsIgnoreCase("success")
                 && request.getType().isWalletWithdrawal()
                 && isPayStackValidAmount(processorResponse.getData().getAmount(), transaction.getAmount())) {
             final var walletDebitResponse = walletService.debitWallet(transaction, request.getWallet());
