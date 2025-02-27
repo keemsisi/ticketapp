@@ -15,8 +15,8 @@ import java.util.UUID;
 public class ApprovePaymentRequestDTO {
     private UUID paymentRequestId;
     @NotNull(message = "paymentRequestType can't be null")
-    private PaymentRequestType paymentRequestType;
-    @NotNull(message = "amount to be approved is required!")
+    private PaymentRequestType type;
+    //wallet withdrawal request will require this
     private BigDecimal amount;
     private UUID walletId;
 }

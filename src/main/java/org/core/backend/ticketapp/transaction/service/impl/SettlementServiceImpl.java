@@ -60,10 +60,11 @@ public class SettlementServiceImpl implements SettlementService {
     @Override
     @Transactional
     public Transaction processApprovedTransfer(final ApprovePaymentRequestDTO request) throws JsonProcessingException {
-        if (request.getPaymentRequestType().isEventSettlement()) {
+        if (request.getType().isEventSettlement()) {
             final var paymentRequest = paymentRequestService.getById(request.getPaymentRequestId());
             final var event = eventService.getById(paymentRequest.getEventId());
             final var bankAccountDetails = bankAccountDetailsService.getByUserId(event.getUserId());
+            paymentRequest.setEvent(event);
             final var transaction = processTransactionThroughProvider(bankAccountDetails, paymentRequest);
             if (transaction.getStatus().isCompleted()) {
                 paymentRequest.setStatus(PaymentRequestStatus.COMPLETED_PAYMENT);
@@ -72,7 +73,7 @@ public class SettlementServiceImpl implements SettlementService {
                 paymentRequestService.update(paymentRequest);
                 return transaction;
             }
-        } else if (request.getPaymentRequestType().isWalletWithdrawal()) {
+        } else if (request.getType().isWalletWithdrawal()) {
             if (Objects.isNull(request.getWalletId())) {
                 throw new ApplicationException(400, "wallet_required", "Oops! wallet is required to process transaction");
             }
@@ -84,7 +85,7 @@ public class SettlementServiceImpl implements SettlementService {
             final var paymentRequestDTO = new CreatePaymentRequestDTO();
             paymentRequestDTO.setId(request.getWalletId());
             paymentRequestDTO.setAmount(request.getAmount());
-            paymentRequestDTO.setType(request.getPaymentRequestType());
+            paymentRequestDTO.setType(request.getType());
             final var bankAccountDetails = bankAccountDetailsService.getByUserId(userId);
             final var paymentRequest = paymentRequestService.create(paymentRequestDTO);
             paymentRequest.setWallet(wallet);
@@ -133,13 +134,11 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     private @NotNull TransferRequestDTO getTransferRequestDTO(final BankAccountDetails bankAccountDetails, final PaymentRequest request) {
-        final var event = Objects.nonNull(request.getEventId()) ? eventService.getById(request.getEventId()) : null;
-        final var user = coreUserService.getUserById(bankAccountDetails.getUserId())
-                .orElseThrow(() -> new ApplicationException(404, "not_found", "User not found!"));
+        final var event = Objects.nonNull(request.getEventId()) ? request.getEvent() : null;
+        final var user = jwtTokenUtil.getUser();
         if (Objects.nonNull(event) && !event.getTenantId().equals(bankAccountDetails.getTenantId()))
             throw new ApplicationException(400, "bad_request", "Recipient is not the owner of the resource!");
-        if (Objects.nonNull(event)
-                && !user.getAccountType().isIndividualOrOrganizationMerchantOwner())
+        if (Objects.nonNull(event) && !user.getAccountType().isIndividualOrOrganizationMerchantOwner())
             throw new ApplicationException(400, "bad_request", "Oops! Only Owner can request for event settlement payment!");
         return getRequestDTO(bankAccountDetails, request);
     }

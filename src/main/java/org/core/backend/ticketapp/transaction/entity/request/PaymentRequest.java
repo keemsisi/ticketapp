@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
+import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.transaction.entity.wallet.Wallet;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -63,6 +64,8 @@ public class PaymentRequest extends AbstractBaseEntity {
 
     @Transient
     private Wallet wallet;
+    @Transient
+    private Event event;
 
     @PrePersist
     public void onCreate() {
