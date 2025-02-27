@@ -39,9 +39,12 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
         if (record.getType().isEventSettlement()) {
             final var event = eventService.getById(requestDto.getId());
             if (!event.getUserId().equals(user.getUserId()) || !event.getTenantId().equals(user.getTenantId())) {
-//                throw new ApplicationException(403, "not_allowed", "Only event owner can request");
+                throw new ApplicationException(403, "not_allowed", "Only event owner can request");
             }
             final var totalEventAmount = getTotalEventOrderAmount(event.getId());
+            if (totalEventAmount.doubleValue() <= 0) {
+                throw new ApplicationException(403, "not_allowed", "No Order for this event!");
+            }
             record.setEventId(event.getId());
             record.setTotalAmount(totalEventAmount);
         } else if (requestDto.getType().isWalletWithdrawal()) {
