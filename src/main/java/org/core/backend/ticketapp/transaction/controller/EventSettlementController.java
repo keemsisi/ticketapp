@@ -26,9 +26,10 @@ public class EventSettlementController {
     private final JwtTokenUtil jwtTokenUtil;
 
 
-//    @PreAuthorize("hasAuthority('SCOPE_settlement_transfer')")
+    @PreAuthorize("hasAuthority('SCOPE_settlement_transfer')")
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, value = "/transfer")
     public ResponseEntity<GenericApiResponse<Transaction>> transfer(@RequestBody ApprovePaymentRequestDTO request) throws JsonProcessingException {
+        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var verified = settlementService.processApprovedTransfer(request);
         return new ResponseEntity<>(new GenericApiResponse<>("00",
                 "Transfer was done successfully!", verified),
