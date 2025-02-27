@@ -49,11 +49,11 @@ public class PayStackPaymentProcessorImpl implements PaymentProcessorService {
             transactionRecipientRequest.setBankCode(bankAccountDetails.getBankCode());
             final var createdRecipientResponse = payStackApiServiceProxy.createTransferRecipient(transactionRecipientRequest, getToken());
             final var responseBody = Objects.requireNonNull(createdRecipientResponse.getBody());
-            if (!responseBody.isStatus()) {
+            if (!responseBody.isStatus() || responseBody.getData().isEmpty()) {
                 log.info(">>> Failed request response from paystack payment create transaction recipient {} ", createdRecipientResponse.getBody());
                 throw new ApplicationException(createdRecipientResponse.getStatusCodeValue(), "error", "Unprocessed from payment processor");
             }
-            transactionRequest.setRecipient(responseBody.getData().getRecipientCode());
+            transactionRequest.setRecipient(responseBody.getData().get(0).getRecipientCode());
         }
         final var response = payStackApiServiceProxy.transfer((TransferRequestDTO) request, BEARER + appConfigs.payStackApiKey);
         Objects.requireNonNull(response.getBody());

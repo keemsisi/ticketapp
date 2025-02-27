@@ -133,17 +133,6 @@ public class SettlementServiceImpl implements SettlementService {
         return transactionService.save(transaction);
     }
 
-    @Deprecated
-    private @NotNull TransferRequestDTO getTransferRequestDTO(final BankAccountDetails bankAccountDetails, final PaymentRequest request) {
-        final var event = Objects.nonNull(request.getEventId()) ? request.getEvent() : null;
-        final var user = jwtTokenUtil.getUser();
-        if (Objects.nonNull(event) && !event.getTenantId().equals(bankAccountDetails.getTenantId()))
-            throw new ApplicationException(400, "bad_request", "Recipient is not the owner of the resource!");
-        if (Objects.nonNull(event) && !user.getAccountType().isIndividualOrOrganizationMerchantOwner())
-            throw new ApplicationException(400, "bad_request", "Oops! Only Owner can request for event settlement payment!");
-        return getRequestDTO(bankAccountDetails, request);
-    }
-
     private @NotNull TransferRequestDTO getRequestDTO(final BankAccountDetails bankAccountDetails, final PaymentRequest request) {
         final var transferRequest = new TransferRequestDTO();
         transferRequest.setAmount(request.getTotalAmount());
@@ -161,4 +150,16 @@ public class SettlementServiceImpl implements SettlementService {
                 .divide(new BigDecimal(100))).doubleValue() >= transactionAmount.doubleValue());
         return isValidAmount;
     }
+
+    @Deprecated
+    private @NotNull TransferRequestDTO getTransferRequestDTO(final BankAccountDetails bankAccountDetails, final PaymentRequest request) {
+        final var event = Objects.nonNull(request.getEventId()) ? request.getEvent() : null;
+        final var user = jwtTokenUtil.getUser();
+        if (Objects.nonNull(event) && !event.getTenantId().equals(bankAccountDetails.getTenantId()))
+            throw new ApplicationException(400, "bad_request", "Recipient is not the owner of the resource!");
+        if (Objects.nonNull(event) && !user.getAccountType().isIndividualOrOrganizationMerchantOwner())
+            throw new ApplicationException(400, "bad_request", "Oops! Only Owner can request for event settlement payment!");
+        return getRequestDTO(bankAccountDetails, request);
+    }
+
 }
