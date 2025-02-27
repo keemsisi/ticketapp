@@ -15,6 +15,7 @@ import org.core.backend.ticketapp.transaction.service.payment.paystack.dto.Trans
 import org.core.backend.ticketapp.transaction.service.payment.paystack.dto.TransferRequestDTO;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -37,6 +38,7 @@ public class PayStackPaymentProcessorImpl implements PaymentProcessorService {
         return payStackApiServiceProxy.getBanks(getToken()).getBody();
     }
 
+    @SuppressWarnings("unchecked")
     private ProcessorPaymentResponseDTO initPaymentWithPayStack(final ProcessorPaymentRequestDTO request, final BankAccountDetails bankAccountDetails) {
         final var transactionRequest = (TransferRequestDTO) request;
         final var recipient = transactionRequest.getRecipient();
@@ -49,11 +51,12 @@ public class PayStackPaymentProcessorImpl implements PaymentProcessorService {
             transactionRecipientRequest.setBankCode(bankAccountDetails.getBankCode());
             final var createdRecipientResponse = payStackApiServiceProxy.createTransferRecipient(transactionRecipientRequest, getToken());
             final var responseBody = Objects.requireNonNull(createdRecipientResponse.getBody());
-            if (!responseBody.isStatus() || responseBody.getData().isEmpty()) {
+            final var recipientData = Objects.requireNonNull(createdRecipientResponse.getBody().getData());
+            if (!responseBody.isStatus()) {
                 log.info(">>> Failed request response from paystack payment create transaction recipient {} ", createdRecipientResponse.getBody());
                 throw new ApplicationException(createdRecipientResponse.getStatusCodeValue(), "error", "Unprocessed from payment processor");
             }
-            transactionRequest.setRecipient(responseBody.getData().get(0).getRecipientCode());
+            transactionRequest.setRecipient((String) ((Map<String, Object>) (recipientData)).get("recipient_code"));
         }
         final var response = payStackApiServiceProxy.transfer((TransferRequestDTO) request, BEARER + appConfigs.payStackApiKey);
         Objects.requireNonNull(response.getBody());

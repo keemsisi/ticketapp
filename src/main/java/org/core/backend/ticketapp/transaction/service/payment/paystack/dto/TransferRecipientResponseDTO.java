@@ -3,7 +3,7 @@ package org.core.backend.ticketapp.transaction.service.payment.paystack.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -16,7 +16,7 @@ public class TransferRecipientResponseDTO {
     @JsonProperty("message")
     private String message;
     @JsonProperty("data")
-    private List<Recipient> data;
+    private Object data;
     @JsonProperty("meta")
     private Meta meta;
 
@@ -42,9 +42,9 @@ public class TransferRecipientResponseDTO {
     @NoArgsConstructor
     public static class Recipient {
         @JsonProperty("active")
-        private boolean active;
+        private Boolean active;
         @JsonProperty("createdAt")
-        private String createdAt;
+        private LocalDateTime createdAt;
         @JsonProperty("currency")
         private String currency;
         @JsonProperty("description")
@@ -54,9 +54,9 @@ public class TransferRecipientResponseDTO {
         @JsonProperty("email")
         private String email;
         @JsonProperty("id")
-        private int id;
+        private Long id;
         @JsonProperty("integration")
-        private int integration;
+        private Long integration;
         @JsonProperty("metadata")
         private String metadata;
         @JsonProperty("name")
@@ -68,7 +68,7 @@ public class TransferRecipientResponseDTO {
         @JsonProperty("updatedAt")
         private String updatedAt;
         @JsonProperty("is_deleted")
-        private boolean isDeleted;
+        private Boolean isDeleted;
         @JsonProperty("isDeleted")
         private boolean isDeletedAlias; // Handles both variations in the JSON
         @JsonProperty("details")
@@ -90,6 +90,4 @@ public class TransferRecipientResponseDTO {
         @JsonProperty("pageCount")
         private int pageCount;
     }
-
-
 }
