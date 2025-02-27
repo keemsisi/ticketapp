@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.OrderType;
 import org.core.backend.ticketapp.common.enums.Status;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
@@ -14,6 +15,7 @@ import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.service.core.PaymentProcessorType;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
+import org.core.backend.ticketapp.passport.util.UserUtils;
 import org.core.backend.ticketapp.ticket.service.TicketService;
 import org.core.backend.ticketapp.transaction.dto.ApprovePaymentRequestDTO;
 import org.core.backend.ticketapp.transaction.dto.CreatePaymentRequestDTO;
@@ -61,6 +63,8 @@ public class SettlementServiceImpl implements SettlementService {
     @Transactional
     public Transaction processApprovedTransfer(final ApprovePaymentRequestDTO request) throws JsonProcessingException {
         if (request.getType().isEventSettlement()) {
+            UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
+            UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), "settlement_transfer");
             final var paymentRequest = paymentRequestService.getById(request.getPaymentRequestId());
             final var event = eventService.getById(paymentRequest.getEventId());
             final var bankAccountDetails = bankAccountDetailsService.getByUserId(event.getUserId());
