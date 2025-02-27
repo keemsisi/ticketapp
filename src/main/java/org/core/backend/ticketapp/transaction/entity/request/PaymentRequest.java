@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.transaction.entity.wallet.Wallet;
 import org.hibernate.annotations.Type;
@@ -62,4 +63,12 @@ public class PaymentRequest extends AbstractBaseEntity {
 
     @Transient
     private Wallet wallet;
+
+    @PrePersist
+    public void onCreate() {
+        id = ObjectUtils.defaultIfNull(id, UUID.randomUUID());
+        status = ObjectUtils.defaultIfNull(status, PaymentRequestStatus.PENDING);
+        totalPaid = ObjectUtils.defaultIfNull(totalPaid, BigDecimal.ZERO);
+        dateCreated = ObjectUtils.defaultIfNull(dateCreated, LocalDateTime.now());
+    }
 }
