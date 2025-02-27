@@ -15,5 +15,5 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @Query(value = "SELECT SUM(o.amount) FROM orders o " +
             " WHERE o.ticket_id IS NOT NULL AND o.status IS NOT NULL " +
             " AND o.status = 'COMPLETED' and event_id=?1", nativeQuery = true)
-    BigDecimal getTotalEventOrderAmount(final UUID id);
+    BigDecimal getTotalEventOrderAmount(final UUID eventId);
 }
