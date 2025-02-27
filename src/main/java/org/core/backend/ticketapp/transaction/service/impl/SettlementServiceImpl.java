@@ -128,7 +128,9 @@ public class SettlementServiceImpl implements SettlementService {
         transaction.setGateWayMeta(PaymentGatewayMeta.builder().gatewayResponse(jsonResponse).build());
         transaction.setUserId(bankAccountDetails.getUserId());
         transaction.setTenantId(bankAccountDetails.getTenantId());
-        if (request.getType().isWalletWithdrawal() && isPayStackValidAmount(processorResponse.getData().getAmount(), transaction.getAmount())) {
+        if (processorResponse.isStatus()
+                && request.getType().isWalletWithdrawal()
+                && isPayStackValidAmount(processorResponse.getData().getAmount(), transaction.getAmount())) {
             final var walletDebitResponse = walletService.debitWallet(transaction, request.getWallet());
             transaction.setComment("%s was debited successfully from user wallet after processing the payment");
             transaction.setMeta(Map.of("walletDebitResponse", walletDebitResponse));
