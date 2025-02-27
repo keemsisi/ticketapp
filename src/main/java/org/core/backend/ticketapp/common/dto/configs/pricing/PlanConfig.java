@@ -47,10 +47,12 @@ public class PlanConfig {
         final var totalFees = new BigDecimal(String.valueOf(platformFee))
                 .add(new BigDecimal(String.valueOf(processingFee)))
                 .add(new BigDecimal(String.valueOf(tax)))
-                .add(new BigDecimal(String.valueOf(additionalFee)))
+                .add(new BigDecimal(String.valueOf(additionalFee)));
+        final var totalCost = totalFees
                 .add(new BigDecimal(String.valueOf(amount)))
                 .doubleValue();
-        transactionProcessingFeesDTO.setTotalFees(totalFees);
+        transactionProcessingFeesDTO.setTotalCost(totalCost);
+        transactionProcessingFeesDTO.setTotalFees(totalFees.doubleValue());
         transactionProcessingFeesDTO.setPrice(amount);
         return transactionProcessingFeesDTO;
     }

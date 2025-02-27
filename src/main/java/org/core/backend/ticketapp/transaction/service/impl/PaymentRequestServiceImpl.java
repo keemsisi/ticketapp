@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
 import org.core.backend.ticketapp.event.service.EventService;
+import org.core.backend.ticketapp.order.service.OrderService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.transaction.dto.CreatePaymentRequestDTO;
 import org.core.backend.ticketapp.transaction.dto.payment_request.UpdatePaymentRequestRequestDTO;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -27,6 +29,7 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
     private final JwtTokenUtil jwtTokenUtil;
     private final ModelMapper modelMapper;
     private final EventService eventService;
+    private final OrderService orderService;
 
     @Override
     public <R> PaymentRequest create(final R request) {
@@ -38,10 +41,15 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
             if (!event.getUserId().equals(user.getUserId()) || !event.getTenantId().equals(user.getTenantId())) {
                 throw new ApplicationException(403, "not_allowed", "Only event owner can request");
             }
+            final var totalEventAmount = getTotalEventOrderAmount(event.getId());
             record.setEventId(event.getId());
+            record.setTotalAmount(totalEventAmount);
+        } else if (requestDto.getType().isWalletWithdrawal()) {
+            //not revalidating to avoid overhead
+            record.setWalletId(requestDto.getId());//this is validated somewhere else before coming here
+            record.setTotalAmount(requestDto.getAmount());
         }
         record.setId(UUID.randomUUID());
-        record.setWalletId(((CreatePaymentRequestDTO) (request)).getId());
         record.setUserId(user.getUserId());
         record.setTenantId(user.getTenantId());
         record.setDateCreated(LocalDateTime.now());
@@ -85,5 +93,9 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
     @Override
     public PaymentRequest update(final PaymentRequest paymentRequest) {
         return repository.save(paymentRequest);
+    }
+
+    private BigDecimal getTotalEventOrderAmount(final UUID eventId) {
+        return orderService.getTotalEventOrderAmount(eventId);
     }
 }

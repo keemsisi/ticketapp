@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -47,5 +48,10 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id).orElseThrow(() -> new ApplicationException(400, "not_found", "Order not found"));
         order.setDeleted(true);
         orderRepository.save(order);
+    }
+
+    @Override
+    public BigDecimal getTotalEventOrderAmount(UUID eventId) {
+        return orderRepository.getTotalEventOrderAmount(eventId);
     }
 }

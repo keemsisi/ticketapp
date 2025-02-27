@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class TransactionFeesDTO {
     private double tax;
     private double price;
+    private double totalCost; // FEEs  + PRICE
     private double totalFees;
     private double platformFee;
     private double additionalFee;

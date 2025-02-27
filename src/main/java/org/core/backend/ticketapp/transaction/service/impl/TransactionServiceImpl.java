@@ -140,8 +140,7 @@ public class TransactionServiceImpl implements TransactionService {
             headers.set("Content-Type", "application/json");
             final var paymentFees = getConfiguredPaymentFees(request, paymentRequest);
             final var processorPaymentRequest = paymentRequest.clone();
-            final var paymentToProcess = new BigDecimal(String.valueOf(paymentFees.getPrice()))
-                    .add(new BigDecimal(String.valueOf(paymentFees.getTotalFees())));
+            final var paymentToProcess = new BigDecimal(paymentFees.getTotalCost() + "");
             processorPaymentRequest.setAmount(paymentToProcess.multiply(new BigDecimal(String.valueOf(100))).doubleValue());
             paymentRequest.setAmount(paymentToProcess.doubleValue());
             processorPaymentRequest.setCallback_url(String.format(CALLBACK_TEMPLATE, appConfigs.paymentCallbackUrl, orderId));
@@ -201,7 +200,6 @@ public class TransactionServiceImpl implements TransactionService {
         order.setQuantity(quantity);
         order.setAmount(new BigDecimal(String.valueOf(primaryOrderAmount)));
         order.setTotalBatchAmount(new BigDecimal(String.valueOf(totalAmountPaid)));
-        order.setTotalFee(null);//update here for fee processing
         order.setStatus(initRequest.isFree() ? OrderStatus.COMPLETED : OrderStatus.PENDING);
         order.setPaymentLink(data.getAuthorizationUrl());
         order.setCode(data.getAccessCode());
@@ -214,6 +212,7 @@ public class TransactionServiceImpl implements TransactionService {
         order.setSeatSectionId(isPlanTransaction ? null : primary.getSeatSectionId());
         order.setPrimary(true);
         order.setTransactionFees(transactionFeesDTO);
+        order.setTotalFee(new BigDecimal(transactionFeesDTO.getTotalFees() + ""));
         orderService.save(order);
         order.setBatchOrderId(order.getId());
 
