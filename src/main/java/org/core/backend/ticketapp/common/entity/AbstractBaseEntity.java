@@ -58,8 +58,4 @@ public abstract class AbstractBaseEntity {
     @Version
     private Long versionId;
 
-    @JsonIgnore
-    @Transient
-    private String qrCodeLink;
-
 }

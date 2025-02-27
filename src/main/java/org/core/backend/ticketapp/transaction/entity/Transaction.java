@@ -8,11 +8,11 @@ import org.core.backend.ticketapp.common.dto.configs.pricing.TransactionFeesDTO;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.OrderType;
 import org.core.backend.ticketapp.common.enums.Status;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -78,6 +78,10 @@ public class Transaction extends AbstractBaseEntity {
     @Transient
     @Column(name = "sender_account_id")
     private String senderAccountId;
+
+    @JsonIgnore
+    @Transient
+    private String qrCodeLink;
 
     @PrePersist
     public void onCreate() {
