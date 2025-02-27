@@ -65,7 +65,7 @@ public class SettlementServiceImpl implements SettlementService {
     public Transaction processApprovedTransfer(final ApprovePaymentRequestDTO request) throws JsonProcessingException {
         if (request.getType().isEventSettlement()) {
             UserUtils.assertUserHasAllRoles(jwtTokenUtil.getUser().getRoles(),
-                    List.of(AccountType.SUPER_ADMIN.getType(), "settlement_transfer"));
+                    List.of(AccountType.SUPER_ADMIN.getType(), AccountType.SETTLEMENT_TRANSFER.getType()));
             final var paymentRequest = paymentRequestService.getById(request.getPaymentRequestId());
             final var event = eventService.getById(paymentRequest.getEventId());
             final var bankAccountDetails = bankAccountDetailsService.getByUserId(event.getUserId());

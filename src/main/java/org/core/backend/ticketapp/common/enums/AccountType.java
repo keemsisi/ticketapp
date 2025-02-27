@@ -12,7 +12,8 @@ public enum AccountType {
     ORGANIZATION_MERCHANT_USER("organization_merchant_user"),
     TENANT_USER("tenant_user"),
     SYSTEM_ADMIN_USER("system_admin_user"),
-    SUPER_ADMIN("super_admin");
+    SUPER_ADMIN("super_admin"),
+    SETTLEMENT_TRANSFER("settlement_transfer");
     final String type;
 
     AccountType(String type) {
