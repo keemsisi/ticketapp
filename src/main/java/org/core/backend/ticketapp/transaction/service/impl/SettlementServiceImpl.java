@@ -106,7 +106,7 @@ public class SettlementServiceImpl implements SettlementService {
         //TODO: Get the unique ID of the transaction before proceeding here
         // check for idempotency so that double debit or credit will be protected and disallowed!
         final var user = jwtTokenUtil.getUser();
-        final var transferRequest = getTransferRequestDTO(bankAccountDetails, request);
+        final var transferRequest = getRequestDTO(bankAccountDetails, request);
         final var processorResponse = paymentProcessorService.transfer(transferRequest, bankAccountDetails);
         final var jsonResponse = objectMapper.writeValueAsString(processorResponse);
         final var transaction = new Transaction();
@@ -133,6 +133,7 @@ public class SettlementServiceImpl implements SettlementService {
         return transactionService.save(transaction);
     }
 
+    @Deprecated
     private @NotNull TransferRequestDTO getTransferRequestDTO(final BankAccountDetails bankAccountDetails, final PaymentRequest request) {
         final var event = Objects.nonNull(request.getEventId()) ? request.getEvent() : null;
         final var user = jwtTokenUtil.getUser();
