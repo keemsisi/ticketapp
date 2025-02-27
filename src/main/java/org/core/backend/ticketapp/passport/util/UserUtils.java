@@ -10,6 +10,7 @@ import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.springframework.stereotype.Component;
 
 import java.security.InvalidParameterException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -74,8 +75,14 @@ public class UserUtils {
         return true;
     }
 
-    public static boolean userHasRole(List<String> roles, String role) {
+    public static boolean assertUserHasAllRoles(List<String> roles, String role) {
         return roles.contains(role);
+    }
+
+    public static void assertUserHasAllRoles(List<String> userRoles, List<String> roles) {
+        if (!new HashSet<>(userRoles).containsAll(roles)) {
+            throw new ApplicationException(403, "403", "You don't have the right permission to complete this action.");
+        }
     }
 
     public static void assertUserHasAnyRole(final List<String> userRoles, List<String> roles) {

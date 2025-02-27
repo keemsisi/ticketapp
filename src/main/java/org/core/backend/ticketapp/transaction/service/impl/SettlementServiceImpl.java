@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -63,8 +64,8 @@ public class SettlementServiceImpl implements SettlementService {
     @Transactional
     public Transaction processApprovedTransfer(final ApprovePaymentRequestDTO request) throws JsonProcessingException {
         if (request.getType().isEventSettlement()) {
-            UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
-            UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), "settlement_transfer");
+            UserUtils.assertUserHasAllRoles(jwtTokenUtil.getUser().getRoles(),
+                    List.of(AccountType.SUPER_ADMIN.getType(), "settlement_transfer"));
             final var paymentRequest = paymentRequestService.getById(request.getPaymentRequestId());
             final var event = eventService.getById(paymentRequest.getEventId());
             final var bankAccountDetails = bankAccountDetailsService.getByUserId(event.getUserId());
