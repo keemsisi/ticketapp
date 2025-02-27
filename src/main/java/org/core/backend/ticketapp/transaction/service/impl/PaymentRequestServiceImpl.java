@@ -80,8 +80,7 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
 
     @Override
     public void delete(final UUID id) {
-        final var userId = jwtTokenUtil.getUser().getUserId();
-        final var record = repository.findByIdAndUserId(id, userId).orElseThrow(ApplicationExceptionUtils::notFound);
+        final var record = repository.findById(id).orElseThrow(ApplicationExceptionUtils::notFound);
         record.setDeleted(true);
         record.setDateModified(LocalDateTime.now());
         record.setModifiedBy(jwtTokenUtil.getUser().getUserId());
