@@ -85,7 +85,7 @@ public class EventDao extends BaseDao {
         if (Objects.nonNull(request.getUserType()) && request.getUserType().isBuyer() && request.getIsBuyerEvent()) {
             innerQuery.append(String.format("""
                     INNER JOIN ticket tk ON tk.event_id = e.id
-                    AND tk.deleted=false AND tk.user_id = '%s' 
+                    AND tk.deleted=false AND tk.user_id = '%s'
                     """, request.getUserId()));
             seatSectionInnerQuery.append(" AND tk.seat_section = ss.id ");
         }
@@ -277,13 +277,13 @@ public class EventDao extends BaseDao {
     }
 
     private String getUserSubQuery(final EventFilterRequestDTO request) {
-        if (isBuyerEvent(request)) {
+        if (isSellerUserEvent(request)) {
             return " AND e.user_id = '%s' ";
         }
         return " AND e.user_id IS NOT NULL ";
     }
 
-    private boolean isBuyerEvent(final EventFilterRequestDTO request) {
+    private boolean isSellerUserEvent(final EventFilterRequestDTO request) {
         return !request.getIsBuyerEvent() && Objects.nonNull(request.getUserId());
     }
 
