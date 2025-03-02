@@ -24,7 +24,7 @@ public class CreateJobAdvertisementApplicationRequest {
     @NotBlank(message = "resumeUlr max is 5000!")
     @Length(max = 5000, message = "resumeUlr max is 5000!")
     private String resumeUrl;
-    @Length(max = 5000, min = 250, message = "coverLetter min and max is required!")
+    @Length(max = 10000, message = "coverLetter min and max is required!")
     private String coverLetter;
     private String linkedinProfile;
 }

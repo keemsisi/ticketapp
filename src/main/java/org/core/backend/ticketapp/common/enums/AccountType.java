@@ -43,6 +43,14 @@ public enum AccountType {
         );
     }
 
+    public static boolean isTenantUserAccountType(final AccountType accountType) {
+        return List.of(INDIVIDUAL_MERCHANT_USER,
+                        ORGANIZATION_MERCHANT_USER,
+                        ORGANIZATION_BUYER_USER,
+                        TENANT_USER)
+                .contains(accountType);
+    }
+
     public boolean isIndividualOrOrganizationMerchantOwner() {
         return this == INDIVIDUAL_MERCHANT_OWNER || this == ORGANIZATION_MERCHANT_OWNER;
     }

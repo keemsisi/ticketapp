@@ -59,7 +59,8 @@ public class UserController {
         final var request = modelMapper.map(userDto, UserDto.class);
         if (userDto.getAccountType().equals(AccountType.SUPER_ADMIN) || userDto.getAccountType().equals(AccountType.SYSTEM_ADMIN_USER)) {
             UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), "super_admin");
-        } else if (userDto.getUserType().equals(UserType.SELLER) && userDto.getAccountType().equals(AccountType.INDIVIDUAL)) {
+        }
+        if (userDto.getUserType().equals(UserType.SELLER) && userDto.getAccountType().equals(AccountType.INDIVIDUAL)) {
             return new ResponseEntity<>(
                     new GenericApiResponse<>("01", "Seller with Individual account type not allowed!", null),
                     HttpStatus.BAD_REQUEST);
@@ -160,6 +161,24 @@ public class UserController {
         User newRegisteredUser = null;
         var loggedInUser = jwtTokenUtil.getUser();
         UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.ONBOARD_USER);
+        if (Objects.nonNull(userDto.getUserType()) && loggedInUser.getUserType().isBuyerOrSeller()) {
+            if (loggedInUser.getUserType().isSeller() && userDto.getUserType().isBuyer()
+                    || loggedInUser.getUserType().isBuyer() && userDto.getUserType().isSeller()) {
+                return new ResponseEntity<>(
+                        new GenericApiResponse<>("01", "Oops! Not Allowed!", ""),
+                        HttpStatus.FORBIDDEN);
+            }
+            if (!AccountType.isTenantUserAccountType(userDto.getAccountType())) {
+                return new ResponseEntity<>(
+                        new GenericApiResponse<>("01", "Oops! Not Allowed!", ""),
+                        HttpStatus.FORBIDDEN);
+            }
+        }
+        if (userDto.getAccountType() == AccountType.TENANT_USER && !loggedInUser.isAdmin()) {
+            return new ResponseEntity<>(
+                    new GenericApiResponse<>("01", "Oops! Not Allowed! Only super admin account!", ""),
+                    HttpStatus.FORBIDDEN);
+        }
         newRegisteredUser = userService.createUser(userDto, loggedInUser);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null, objectMapper.writeValueAsString(newRegisteredUser), "Initiated a request to register a user under a tenant");
         return new ResponseEntity<>(
