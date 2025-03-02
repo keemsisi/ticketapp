@@ -170,7 +170,7 @@ public class UserController {
                         HttpStatus.FORBIDDEN);
             }
         }
-        if (userDto.getAccountType() == AccountType.TENANT_USER && !loggedInUser.isAdmin()) {
+        if (AccountType.isAdminUser(userDto.getAccountType()) && !loggedInUser.isAdmin()) {
             return new ResponseEntity<>(
                     new GenericApiResponse<>("01", "Oops! Not Allowed! Only super admin account!", ""),
                     HttpStatus.FORBIDDEN);

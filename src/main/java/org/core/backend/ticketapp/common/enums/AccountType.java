@@ -46,8 +46,12 @@ public enum AccountType {
     public static boolean isTenantUserAccountType(final AccountType accountType) {
         return List.of(INDIVIDUAL_MERCHANT_USER,
                         ORGANIZATION_MERCHANT_USER,
-                        ORGANIZATION_BUYER_USER,
-                        TENANT_USER)
+                        ORGANIZATION_BUYER_USER)
+                .contains(accountType);
+    }
+
+    public static boolean isAdminUser(final AccountType accountType) {
+        return List.of(SYSTEM_ADMIN_USER, SUPER_ADMIN)
                 .contains(accountType);
     }
 
