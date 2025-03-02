@@ -129,17 +129,12 @@ public class UserController {
                                              @RequestParam(required = false) String[] sortBy) throws ParseException {
         String _firstName = firstName != null ? firstName.toLowerCase() : null;
         String _lastName = lastName != null ? lastName.toLowerCase() : null;
-        String _email = email;
-        String _dateOn = dateOn;
-        String _startDate = startDate;
-        String _endDate = endDate;
-        String _dateBefore = dateBefore;
-        String _dateAfter = dateAfter;
-
         var loggedInUser = jwtTokenUtil.getUser();
         UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.SUPER_ADMIN);
 
-        Page<User> users = userService.listLockedUsers(_firstName, _lastName, _email, _dateOn, _dateBefore, _dateAfter, _startDate, _endDate, ResponsePageRequest.createPageRequest(pageNumber, pageSize, order, sortBy, true, "created_on"));
+        final var users = userService.listLockedUsers(_firstName,
+                _lastName, email, dateOn, dateBefore, dateAfter, startDate, endDate,
+                ResponsePageRequest.createPageRequest(pageNumber, pageSize, order, sortBy, true, "created_on"));
 
         return new ResponseEntity<>(new GenericApiResponse<>("00", "", users),
                 HttpStatus.OK);
