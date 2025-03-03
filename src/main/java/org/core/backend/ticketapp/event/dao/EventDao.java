@@ -39,12 +39,13 @@ public class EventDao extends BaseDao {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static @org.jetbrains.annotations.NotNull CallableStatementCreatorFactory
+    private @org.jetbrains.annotations.NotNull CallableStatementCreatorFactory
     getCallableStatementCreatorFactory(final String finalBaseQuery,
                                        final StringBuilder subQuery,
                                        final String paginationQuery,
                                        final String userInnerJoin
     ) {
+        final var user = jwtTokenUtil.getUser();
         var eventsQuery = String.format(finalBaseQuery, "e.*", subQuery) + paginationQuery;
         var countQuery = String.format(finalBaseQuery, "count(*) as count", subQuery);
         var eventWistListQuery = String.format(finalBaseQuery, "ew.event_id, ew.id", subQuery);
@@ -60,7 +61,8 @@ public class EventDao extends BaseDao {
         eventWistListQuery = eventWistListQuery
                 .replaceAll(userInnerJoin, "INNER JOIN users u ON u.id = ew.user_id AND u.deleted=false")
                 .replaceFirst(":eventWishedListSubQuery", " RIGHT OUTER JOIN event_wishlist ew ON ew.event_id = e.id ")
-                .replaceFirst(":eventWishedListSubQueryTwo", " AND ew.user_id = u.id AND ew.deleted=false ");
+                .replaceFirst(":eventWishedListSubQueryTwo", String.format(" AND ew.user_id = u.id AND ew.deleted=false %s",
+                        Objects.isNull(user.getUserId()) ? " AND ew.id IS NULL " : String.format(" AND ew.user_id = '%s' ", user.getUserId())));
 
         final var finalQuery = ":eventsQuery;:countQuery;:eventWistListQuery;"
                 .replaceAll(":eventsQuery", eventsQuery)
