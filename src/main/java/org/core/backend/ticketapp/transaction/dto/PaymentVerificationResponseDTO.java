@@ -65,7 +65,7 @@ public class PaymentVerificationResponseDTO {
         private String ipAddress;
 
         @JsonProperty("metadata")
-        private String metadata;
+        private Object metadata;
 
         @JsonProperty("log")
         private Log log;

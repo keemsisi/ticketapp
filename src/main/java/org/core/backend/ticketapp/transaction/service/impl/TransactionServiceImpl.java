@@ -313,7 +313,9 @@ public class TransactionServiceImpl implements TransactionService {
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            final var response = restTemplate.exchange(String.format(PAYSTACK_VERIFY, order.getReference()),
+            final var paymentVerificationUrl = String.format(PAYSTACK_VERIFY, order.getReference());
+            log.info(">>> Payment verification URL : {}" ,paymentVerificationUrl);
+            final var response = restTemplate.exchange(paymentVerificationUrl,
                     HttpMethod.GET, entity, PaymentVerificationResponseDTO.class);
             if (response.getStatusCode().isError()) {
                 log.error(">>> Payment verification was not successful for request {} ", verifyRequestDTO);
