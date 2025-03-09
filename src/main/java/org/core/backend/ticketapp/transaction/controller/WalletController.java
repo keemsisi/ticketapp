@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.dto.GenericApiResponse;
+import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
+import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
@@ -12,6 +14,7 @@ import org.core.backend.ticketapp.transaction.dto.wallet.request.CreateWalletDTO
 import org.core.backend.ticketapp.transaction.dto.wallet.request.WalletUpdateRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.wallet.Wallet;
 import org.core.backend.ticketapp.transaction.service.wallet.WalletService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +49,12 @@ public class WalletController {
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Wallet.class.getTypeName(), null, objectMapper.writeValueAsString(wallet),
                 "Initiated a request to get wallet");
         return new ResponseEntity<>(new GenericApiResponse<>("00", "Resource was found", wallet), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
+        final var result = PagedMapperUtil.map(walletService.getAll(pageable));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched resource", result));
     }
 
     @PreAuthorize("hasAuthority('DELETE_WALLET')")

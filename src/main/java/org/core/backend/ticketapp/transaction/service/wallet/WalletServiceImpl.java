@@ -6,12 +6,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
+import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.transaction.dto.wallet.request.CreateWalletDTO;
 import org.core.backend.ticketapp.transaction.dto.wallet.request.WalletUpdateRequestDTO;
 import org.core.backend.ticketapp.transaction.entity.Transaction;
 import org.core.backend.ticketapp.transaction.entity.wallet.Wallet;
 import org.core.backend.ticketapp.transaction.entity.wallet.WalletType;
 import org.core.backend.ticketapp.transaction.repository.WalletRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,7 @@ public class WalletServiceImpl implements WalletService {
     private static final String REF_TEMPLATE = "WAL_REF_%s";
     private final WalletRepository walletRepository;
     private final CoreUserService coreUserService;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Override
     public Wallet createWallet(final CreateWalletDTO request) {
@@ -125,6 +129,12 @@ public class WalletServiceImpl implements WalletService {
                     .userId(userId).name(RandomStringUtils.randomAlphanumeric(10) + "_" + walletType).build();
             return createWallet(request);
         });
+    }
+
+    @Override
+    public Page<Wallet> getAll(final Pageable pageable) {
+        final var userId = jwtTokenUtil.getUser().getUserId();
+        return walletRepository.findByUserId(userId, pageable);
     }
 
     private Wallet lienAmount(final Wallet wallet, final BigDecimal amount) {
