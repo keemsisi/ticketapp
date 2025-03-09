@@ -88,23 +88,27 @@ public class TicketServiceImpl implements TicketService {
                 if (!jwtTokenUtil.isLoggedIn()) {
                     final var orderExists = orderRepository.existsById(order.getId());
                     if (orderExists) {
-                        final var gender = ticketRequestDTO.getGender();
-                        final var userDto = new UserDto();
-                        userDto.setEmail(ticketRequestDTO.getEmail());
-                        userDto.setFirstName(ticketRequestDTO.getFirstName());
-                        userDto.setLastName(ticketRequestDTO.getLastName());
-                        userDto.setPhone(ticketRequestDTO.getPhoneNumber());
-                        userDto.setGender(Objects.isNull(gender) ? null : gender.toString());
-                        userDto.setUserType(UserType.BUYER);
-                        userDto.setAccountType(AccountType.INDIVIDUAL);
-                        userDto.setPassword(PasswordUtil.generatePassword());
-                        final var user = userService.createUser(userDto, new LoggedInUserDto());
-                        user.setFirstTimeLogin(true);
-                        user.setPasswordExpiryDate(LocalDateTime.now().plusMinutes(1));
-                        user.setModifiedOn(new Date());
-                        user.setModifiedBy(user.getId());
-                        userService.save(user);
-                        ticket.setUserId(user.getId());
+                        final var optionalUser = userService.getMemberByEmail(ticketRequestDTO.getEmail());
+                        if (optionalUser.isEmpty()) {
+                            final var gender = ticketRequestDTO.getGender();
+                            final var userDto = new UserDto();
+                            userDto.setEmail(ticketRequestDTO.getEmail());
+                            userDto.setFirstName(ticketRequestDTO.getFirstName());
+                            userDto.setLastName(ticketRequestDTO.getLastName());
+                            userDto.setPhone(ticketRequestDTO.getPhoneNumber());
+                            userDto.setGender(Objects.isNull(gender) ? null : gender.toString());
+                            userDto.setUserType(UserType.BUYER);
+                            userDto.setAccountType(AccountType.INDIVIDUAL);
+                            userDto.setPassword(PasswordUtil.generatePassword());
+                            final var user = userService.createUser(userDto, new LoggedInUserDto());
+                            user.setFirstTimeLogin(true);
+                            user.setPasswordExpiryDate(LocalDateTime.now().plusMinutes(1));
+                            user.setModifiedOn(new Date());
+                            user.setModifiedBy(user.getId());
+                            userService.save(user);
+                        } else {
+                            ticket.setUserId(optionalUser.get().getId());
+                        }
                     }
                     throw new ApplicationException(400, "not_found", "Order does not exists!");
                 } else {
