@@ -26,7 +26,7 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping(value = "/v1/api/wallets")
+@RequestMapping(value = "/api/v1/wallets")
 public class WalletController {
     private final WalletService walletService;
     private final JwtTokenUtil jwtTokenUtil;
