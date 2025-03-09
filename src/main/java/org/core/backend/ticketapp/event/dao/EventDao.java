@@ -233,7 +233,7 @@ public class EventDao extends BaseDao {
                 " SUM(CASE   WHEN t.type = 'EVENT_TICKET' THEN t.amount ELSE 0 END)                                            total_sales_amount, " +
                 " SUM(CASE   WHEN t.type = 'EVENT_SETTLEMENT' AND t.order_id = e.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_settled_amount, " +
                 // total processed event amount which includes the transaction fees
-                " SUM(CASE   WHEN t.type = 'EVENT_TICKET' AND t.order_id = e.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_event_ticket_amount " +
+                " SUM(CASE   WHEN t.type = 'EVENT_TICKET' AND t.order_id = e.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_event_ticket_amount_with_fees " +
                 " FROM event e INNER  JOIN transaction t ON t.event_id = e.id AND t.deleted = false WHERE  e.deleted = false ");
         final var transactionDateStats = new StringBuilder("SELECT " +
                 " EXTRACT(YEAR FROM t.date_created) AS year, " +

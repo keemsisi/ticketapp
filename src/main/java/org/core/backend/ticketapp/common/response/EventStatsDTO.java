@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.common.response;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.ObjectUtils;
 @Getter
 @Setter
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EventStatsDTO {
     private Long totalOrders;
     private Long totalPending;
@@ -19,7 +21,7 @@ public class EventStatsDTO {
     private Long totalSalesAmount;
     private Double totalSettledAmount;
     private Double totalOrderAmount;
-    private Double totalEventTicketAmount;
+    private Double totalEventTicketAmountWithFees;
 
     @JsonGetter(value = "totalOrders")
     public Long getTotalOrders() {
@@ -46,6 +48,10 @@ public class EventStatsDTO {
         return ObjectUtils.defaultIfNull(totalCancelled, 0L);
     }
 
+    public void setTotalCancelled(Long totalCancelled) {
+        this.totalCancelled = totalCancelled;
+    }
+
     @JsonGetter(value = "totalFailed")
     public Long getTotalFailed() {
         return ObjectUtils.defaultIfNull(totalFailed, 0L);
@@ -61,19 +67,13 @@ public class EventStatsDTO {
         return ObjectUtils.defaultIfNull(totalSettledAmount, 0D);
     }
 
+    @JsonGetter(value = "totalEventTicketAmountWithFees")
+    public Double getTotalEventTicketAmountWithFees() {
+        return totalEventTicketAmountWithFees;
+    }
+
+    @JsonGetter("totalOrderAmount")
     public Double getTotalOrderAmount() {
         return totalOrderAmount;
-    }
-
-    public void setTotalCancelled(Long totalCancelled) {
-        this.totalCancelled = totalCancelled;
-    }
-
-    public Double getTotalEventTicketAmount() {
-        return totalEventTicketAmount;
-    }
-
-    public void setTotalEventTicketAmount(Double totalEventTicketAmount) {
-        this.totalEventTicketAmount = totalEventTicketAmount;
     }
 }
