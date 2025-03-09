@@ -33,7 +33,7 @@ public class WalletController {
     private final ObjectMapper objectMapper;
     private final ActivityLogProcessorUtils activityLogProcessorUtils;
 
-    @PreAuthorize("hasAuthority('CREATE_WALLET')")
+    @PreAuthorize("hasAuthority('SCOPE_wallet_create')")
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericApiResponse<Wallet>> createWallet(@Valid @RequestBody CreateWalletDTO request) throws JsonProcessingException {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), ConstantUtil.SUPER_ADMIN);
@@ -57,7 +57,7 @@ public class WalletController {
         return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched resource", result));
     }
 
-    @PreAuthorize("hasAuthority('DELETE_WALLET')")
+    @PreAuthorize("hasAuthority('SCOPE_wallet_delete')")
     @RequestMapping(value = "/{walletId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericApiResponse<Wallet>> delete(@PathVariable(value = "walletId") UUID walletId) throws JsonProcessingException {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), ConstantUtil.SUPER_ADMIN);
@@ -67,7 +67,7 @@ public class WalletController {
         return new ResponseEntity<>(new GenericApiResponse<>("00", "Wallet delete was successful", wallet), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAuthority('UPDATE_WALLET')")
+    @PreAuthorize("hasAuthority('SCOPE_wallet_update')")
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericApiResponse<Wallet>> update(@Valid @RequestBody WalletUpdateRequestDTO request) throws JsonProcessingException {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), ConstantUtil.SUPER_ADMIN);
