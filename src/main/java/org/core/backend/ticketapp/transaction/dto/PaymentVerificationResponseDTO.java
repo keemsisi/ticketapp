@@ -221,7 +221,7 @@ public class PaymentVerificationResponseDTO {
             private String phone;
 
             @JsonProperty("metadata")
-            private String metadata;
+            private Object metadagta;
 
             @JsonProperty("risk_action")
             private String riskAction;

@@ -188,7 +188,11 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
         }
 
         //password must not have aby of the user name
-        return !password.contains(user.getEmail()) && !password.contains(user.getFirstName()) && !password.contains(user.getLastName());
+        return !password.contains(user.getEmail())
+                && Objects.nonNull(user.getFirstName())
+                && Objects.nonNull(user.getLastName())
+                && !password.contains(user.getFirstName())
+                && !password.contains(user.getLastName());
     }
 
     public User changePassword(User user, ChangePassword changePassword) {

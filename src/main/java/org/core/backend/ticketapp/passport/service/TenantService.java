@@ -92,7 +92,7 @@ public class TenantService extends BaseRepoService<Tenant> {
 
     @Override
     public PagedResponse<?> getOrganizations(final Pageable pageable, final String name) {
-        final var response = repository.getAll(name, pageable);
+        final var response = this.repository.getAll(name, pageable);
         final var content = response.getContent()
                 .stream().map(tenant -> modelMapper.map(tenant, TenantLiteDto.class))
                 .collect(Collectors.toList());

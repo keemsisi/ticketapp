@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 @Validated
@@ -31,7 +32,7 @@ public class OrderController implements ICrudController {
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericApiResponse<?>> create(@RequestBody final InitPaymentOrderRequestDTO requestDTO) {
+    public ResponseEntity<GenericApiResponse<?>> create(@Valid @RequestBody final InitPaymentOrderRequestDTO requestDTO) {
         final var response = transactionService.initializePayment(requestDTO);
         return ResponseEntity.ok(new GenericApiResponse<>("00", "Payment init successful!", response));
     }
