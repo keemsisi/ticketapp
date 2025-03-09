@@ -342,6 +342,9 @@ public class TransactionServiceImpl implements TransactionService {
                                     transaction.getUserId(), data.getPlan(), data.getAmount());
                             updateUserSubscriptionPlan(transaction, order, data);
                         });
+                        order.setStatus(OrderStatus.COMPLETED);
+                        order.setDateModified(LocalDateTime.now());
+                        orderService.save(order);
                         return transaction;
                     }
                     processCreateTicketAndQrCode(transaction, order);
@@ -350,6 +353,9 @@ public class TransactionServiceImpl implements TransactionService {
                     transaction.setProviderStatus(providerStatus);
                     transaction.setDateModified(LocalDateTime.now());
                     transaction.setStatus(Status.INVALID_AMOUNT_PAID);
+                    order.setStatus(OrderStatus.INVALID_AMOUNT_PAID);
+                    order.setDateModified(LocalDateTime.now());
+                    orderService.save(order);
                 }
                 return transaction;
             }
@@ -452,7 +458,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .build();
             trx.setTenantId(order.getTenantId());
             transactionRepository.save(trx);
-            order.setStatus(OrderStatus.COMPLETED);
+            order.setStatus(OrderStatus.VERIFICATION_IN_PROGRESS);
             order.setDateModified(LocalDateTime.now());
             orderService.save(order);
             return Optional.of(trx);
