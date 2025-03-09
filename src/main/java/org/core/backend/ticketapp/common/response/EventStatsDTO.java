@@ -18,6 +18,8 @@ public class EventStatsDTO {
     private Long totalSettlements;
     private Long totalSalesAmount;
     private Double totalSettledAmount;
+    private Double totalOrderAmount;
+    private Double totalEventTicketAmount;
 
     @JsonGetter(value = "totalOrders")
     public Long getTotalOrders() {
@@ -57,5 +59,21 @@ public class EventStatsDTO {
     @JsonGetter(value = "totalSettledAmount")
     public Double getTotalSettledAmount() {
         return ObjectUtils.defaultIfNull(totalSettledAmount, 0D);
+    }
+
+    public Double getTotalOrderAmount() {
+        return totalOrderAmount;
+    }
+
+    public void setTotalCancelled(Long totalCancelled) {
+        this.totalCancelled = totalCancelled;
+    }
+
+    public Double getTotalEventTicketAmount() {
+        return totalEventTicketAmount;
+    }
+
+    public void setTotalEventTicketAmount(Double totalEventTicketAmount) {
+        this.totalEventTicketAmount = totalEventTicketAmount;
     }
 }
