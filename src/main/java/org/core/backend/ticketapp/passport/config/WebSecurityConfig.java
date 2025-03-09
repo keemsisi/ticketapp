@@ -79,6 +79,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/api/v1/customer-form-data/*").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/jobs/advertisements/application").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/tenants/bank-account-details").authenticated()
+                .antMatchers(HttpMethod.GET, "/api/v1/users/password/reset/email").permitAll()
                 .antMatchers(HttpMethod.GET, "/actuator")
                 .hasAuthority("SCOPE_super_admin")
                 .anyRequest().authenticated()
