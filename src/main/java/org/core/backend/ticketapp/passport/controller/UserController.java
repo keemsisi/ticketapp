@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -322,12 +323,12 @@ public class UserController {
         }
     }
 
-    @RequestMapping(value = "/password/reset/email", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> requestPasswordChangeEmail(@RequestParam(value = "email") String email) throws
+    @RequestMapping(value = "/password/reset/email", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> requestPasswordChangeEmail(@RequestParam(value = "email") @NotBlank String email) throws
             NoSuchAlgorithmException, JsonProcessingException {
         User unUpdatedUserAccount = null;
-        Optional<User> userResult = userService.getMemberByEmail(email);
-        if (!userResult.isPresent()) {
+        Optional<User> userResult = userService.getMemberByEmail(email.toLowerCase());
+        if (userResult.isEmpty()) {
             return new ResponseEntity<>(
                     new GenericApiResponse<>("01", "Unable to find member account. Ensure you the email address is correct", null),
                     HttpStatus.FORBIDDEN);
