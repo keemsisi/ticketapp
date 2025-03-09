@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -53,11 +54,17 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public Wallet getWalletById(final UUID walletId) {
-        final var wallet = walletRepository.findById(walletId).orElse(null);
-        if (Objects.isNull(wallet)) {
+        final var user = jwtTokenUtil.getUser();
+        Optional<Wallet> wallet;
+        if (user.isAdmin()) {
+            wallet = walletRepository.findById(walletId);
+        } else {
+            return getWalletByIdAndUserId(walletId, user.getUserId());
+        }
+        if (wallet.isEmpty()) {
             throw new ApplicationException(404, "not_found", "Oops! Wallet not found!");
         }
-        return wallet;
+        return wallet.get();
     }
 
     @Override

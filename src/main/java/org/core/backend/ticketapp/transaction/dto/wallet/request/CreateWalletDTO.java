@@ -16,6 +16,7 @@ public class CreateWalletDTO {
     private String name;
     @NotNull(message = "userId is required")
     private UUID userId;
+    @NotNull
     private WalletType walletType;
     @NotBlank(message = "currency is required")
     private String currency;
