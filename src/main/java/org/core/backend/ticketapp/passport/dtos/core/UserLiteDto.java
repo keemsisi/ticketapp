@@ -47,10 +47,6 @@ public class UserLiteDto {
     @ExcelColumn(columnName = "DOB")
     private LocalDate dob;
 
-    @NotNull(message = "password required!")
-    @NotBlank(message = "password required")
-    private String password;
-
     @ExcelColumn(columnName = "PHONE", failIfAbsent = false)
     private String phone;
 
