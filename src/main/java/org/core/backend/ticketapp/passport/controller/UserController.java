@@ -156,10 +156,8 @@ public class UserController {
         User newRegisteredUser = null;
         var loggedInUser = jwtTokenUtil.getUser();
         UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.ONBOARD_USER);
-        if (Objects.nonNull(userDto.getUserType()) && loggedInUser.getUserType().isBuyerOrSeller()) {
-            if ((loggedInUser.getUserType().isSeller() && userDto.getUserType().isBuyer()
-                    || loggedInUser.getUserType().isBuyer() && userDto.getUserType().isSeller())
-                    || (!AccountType.isTenantUserAccountType(userDto.getAccountType()))) {
+        if (loggedInUser.getUserType().isBuyerOrSeller()) {
+            if (loggedInUser.getUserType() != userDto.getUserType()) {
                 return new ResponseEntity<>(
                         new GenericApiResponse<>("01", "Oops! Not Allowed!", ""),
                         HttpStatus.FORBIDDEN);
