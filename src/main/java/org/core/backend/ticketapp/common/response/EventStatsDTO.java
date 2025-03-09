@@ -48,10 +48,6 @@ public class EventStatsDTO {
         return ObjectUtils.defaultIfNull(totalCancelled, 0L);
     }
 
-    public void setTotalCancelled(Long totalCancelled) {
-        this.totalCancelled = totalCancelled;
-    }
-
     @JsonGetter(value = "totalFailed")
     public Long getTotalFailed() {
         return ObjectUtils.defaultIfNull(totalFailed, 0L);
