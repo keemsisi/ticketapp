@@ -34,14 +34,14 @@ false,
     "additionalFee": [
         {
             "processor": "PayStack",
-            "type": "PERCENTAGE",
+            "type": "FIXED",
             "amount": "0",
             "additionalAmount": "100",
             "currency": "NGN"
         },
         {
             "processor": "PayStack",
-            "type": "PERCENTAGE",
+            "type": "FIXED",
             "amount": "0",
             "additionalAmount": "100",
             "currency": "foreign"
@@ -119,14 +119,14 @@ false,
     "additionalFee": [
         {
             "processor": "PayStack",
-            "type": "PERCENTAGE",
+            "type": "FIXED",
             "amount": "0",
             "additionalAmount": "100",
             "currency": "NGN"
         },
         {
             "processor": "PayStack",
-            "type": "PERCENTAGE",
+            "type": "FIXED",
             "amount": "0",
             "additionalAmount": "100",
             "currency": "foreign"
@@ -204,14 +204,14 @@ false,
     "additionalFee": [
         {
             "processor": "PayStack",
-            "type": "PERCENTAGE",
+            "type": "FIXED",
             "amount": "0",
             "additionalAmount": "100",
             "currency": "NGN"
         },
         {
             "processor": "PayStack",
-            "type": "PERCENTAGE",
+            "type": "FIXED",
             "amount": "0",
             "additionalAmount": "100",
             "currency": "foreign"
