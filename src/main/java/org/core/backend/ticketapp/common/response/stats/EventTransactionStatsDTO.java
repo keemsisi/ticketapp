@@ -9,7 +9,6 @@ import org.apache.commons.lang3.ObjectUtils;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EventTransactionStatsDTO extends EventStatsDTO {
     private Long totalStatusAmount;//all status amounts!
