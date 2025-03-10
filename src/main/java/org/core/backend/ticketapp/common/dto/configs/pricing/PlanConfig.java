@@ -50,6 +50,7 @@ public class PlanConfig {
                 .add(new BigDecimal(String.valueOf(additionalFee)));
         final var totalCost = totalFees
                 .add(new BigDecimal(String.valueOf(amount)))
+                .setScale(2, RoundingMode.CEILING)  // Always round up to 2 decimal places
                 .doubleValue();
         transactionProcessingFeesDTO.setTotalCost(totalCost);
         transactionProcessingFeesDTO.setTotalFees(totalFees.doubleValue());
