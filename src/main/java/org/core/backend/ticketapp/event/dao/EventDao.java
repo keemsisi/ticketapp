@@ -222,7 +222,7 @@ public class EventDao extends BaseDao {
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'COMPLETED' THEN 1 ELSE 0 END)             total_successful, " +
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'CANCELLED' THEN 1 ELSE 0 END)             total_cancelled, " +
                 " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'FAILED' THEN 1 ELSE 0 END)                total_failed, " +
-                " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'COMPLETED' THEN o.amount ELSE 0 END)      total_order_amount " +
+                " SUM(CASE WHEN o.type = 'EVENT_TICKET' AND o.event_id = e.id AND o.status = 'COMPLETED' THEN o.amount ELSE 0 END)      total_completed_order_amount " +
                 " FROM event e INNER  JOIN orders o ON o.event_id = e.id AND o.deleted = false WHERE  e.deleted = false ");
         final var transactionBaseSQL = new StringBuilder("SELECT " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.type   = 'EVENT_SETTLEMENT' AND t.event_id = e.id THEN 1 ELSE 0 END) total_settlements, " +
@@ -230,7 +230,8 @@ public class EventDao extends BaseDao {
                 " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'COMPLETED' THEN 1 ELSE 0 END)                              total_successful, " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'CANCELLED' THEN 1 ELSE 0 END)                              total_cancelled, " +
                 " SUM(CASE   WHEN t.event_id = e.id AND t.status = 'FAILED' THEN 1 ELSE 0 END)                                 total_failed, " +
-                " SUM(CASE   WHEN t.type = 'EVENT_TICKET' THEN t.amount ELSE 0 END)                                            total_sales_amount, " +
+                //include failed, completed, pending, cancelled
+                " SUM(CASE   WHEN t.type = 'EVENT_TICKET' THEN t.amount ELSE 0 END)                                            total_status_amount, " +
                 " SUM(CASE   WHEN t.type = 'EVENT_SETTLEMENT' AND t.order_id = e.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_settled_amount, " +
                 // total processed event amount which includes the transaction fees
                 " SUM(CASE   WHEN t.type = 'EVENT_TICKET' AND t.order_id = e.id AND t.status = 'COMPLETED' THEN t.amount ELSE 0 END) total_event_ticket_amount_with_fees " +

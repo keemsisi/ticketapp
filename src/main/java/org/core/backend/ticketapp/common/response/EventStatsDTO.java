@@ -12,26 +12,10 @@ import org.apache.commons.lang3.ObjectUtils;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EventStatsDTO {
-    private Long totalOrders;
     private Long totalPending;
     private Long totalSuccessful;
     private Long totalCancelled;
     private Long totalFailed;
-    private Long totalSettlements;
-    private Long totalSalesAmount;
-    private Double totalSettledAmount;
-    private Double totalOrderAmount;
-    private Double totalEventTicketAmountWithFees;
-
-    @JsonGetter(value = "totalOrders")
-    public Long getTotalOrders() {
-        return ObjectUtils.defaultIfNull(totalOrders, 0L);
-    }
-
-    @JsonGetter(value = "totalSettlements")
-    public Long getTotalSettlements() {
-        return ObjectUtils.defaultIfNull(totalSettlements, 0L);
-    }
 
     @JsonGetter(value = "totalPending")
     public Long getTotalPending() {
@@ -51,25 +35,5 @@ public class EventStatsDTO {
     @JsonGetter(value = "totalFailed")
     public Long getTotalFailed() {
         return ObjectUtils.defaultIfNull(totalFailed, 0L);
-    }
-
-    @JsonGetter(value = "totalSalesAmount")
-    public Long getTotalSalesAmount() {
-        return ObjectUtils.defaultIfNull(totalSalesAmount, 0L);
-    }
-
-    @JsonGetter(value = "totalSettledAmount")
-    public Double getTotalSettledAmount() {
-        return ObjectUtils.defaultIfNull(totalSettledAmount, 0D);
-    }
-
-    @JsonGetter(value = "totalEventTicketAmountWithFees")
-    public Double getTotalEventTicketAmountWithFees() {
-        return totalEventTicketAmountWithFees;
-    }
-
-    @JsonGetter("totalOrderAmount")
-    public Double getTotalOrderAmount() {
-        return totalOrderAmount;
     }
 }
