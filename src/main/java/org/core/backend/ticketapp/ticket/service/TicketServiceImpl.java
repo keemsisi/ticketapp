@@ -166,7 +166,7 @@ public class TicketServiceImpl implements TicketService {
         var tenantId = jwtTokenUtil.getUser().getTenantId();
         Page<Ticket> response;
 
-        if (requestDTO.tenantId() != null && UserUtils.assertUserHasAllRoles(loggedInUser.getRoles(), AccountType.SUPER_ADMIN.getType())) {
+        if (requestDTO.tenantId() != null && UserUtils.assertUserHasRole(loggedInUser.getRoles(), AccountType.SUPER_ADMIN.getType())) {
             tenantId = requestDTO.tenantId();
             return Objects.nonNull(requestDTO.userId()) ?
                     ticketRepository.findByUserIdAndTenantId(requestDTO.userId(), tenantId, pageRequest) :

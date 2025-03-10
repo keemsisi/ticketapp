@@ -75,10 +75,6 @@ public class UserUtils {
         return true;
     }
 
-    public static boolean assertUserHasAllRoles(List<String> roles, String role) {
-        return roles.contains(role);
-    }
-
     public static void assertUserHasAllRoles(List<String> userRoles, List<String> roles) {
         if (!new HashSet<>(userRoles).containsAll(roles)) {
             throw new ApplicationException(403, "403", "You don't have the right permission to complete this action.");

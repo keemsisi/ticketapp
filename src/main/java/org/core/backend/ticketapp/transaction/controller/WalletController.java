@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -34,10 +35,10 @@ public class WalletController {
     private final ObjectMapper objectMapper;
     private final ActivityLogProcessorUtils activityLogProcessorUtils;
 
-    @PreAuthorize("hasAuthority('SCOPE_wallet') and hasAuthority('SCOPE_wallet_create')")
+    @PreAuthorize("hasAuthority('SCOPE_wallet_create')")
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericApiResponse<Wallet>> createWallet(@Valid @RequestBody CreateWalletDTO request) throws JsonProcessingException {
-        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), ConstantUtil.SUPER_ADMIN);
+        UserUtils.assertUserHasAllRoles(jwtTokenUtil.getUser().getRoles(), List.of(ConstantUtil.SUPER_ADMIN, ConstantUtil.WALLET));
         final var wallet = walletService.createWallet(request);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Wallet.class.getTypeName(), null, objectMapper.writeValueAsString(wallet),
                 "Initiated a request to create wallet");
@@ -58,20 +59,20 @@ public class WalletController {
         return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched resource", result));
     }
 
-    @PreAuthorize("hasAuthority('SCOPE_wallet') and hasAuthority('SCOPE_wallet_delete')")
+    @PreAuthorize("hasAuthority('SCOPE_wallet_delete')")
     @RequestMapping(value = "/{walletId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericApiResponse<Wallet>> delete(@PathVariable(value = "walletId") UUID walletId) throws JsonProcessingException {
-        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), ConstantUtil.SUPER_ADMIN);
+        UserUtils.assertUserHasAllRoles(jwtTokenUtil.getUser().getRoles(), List.of(ConstantUtil.SUPER_ADMIN, ConstantUtil.WALLET));
         final var wallet = walletService.deleteWalletById(walletId);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Wallet.class.getTypeName(), null, objectMapper.writeValueAsString(wallet),
                 "Initiated a request to delete");
         return new ResponseEntity<>(new GenericApiResponse<>("00", "Wallet delete was successful", wallet), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAuthority('SCOPE_wallet') and hasAuthority('SCOPE_wallet_update')")
+    @PreAuthorize("hasAuthority('SCOPE_wallet_update')")
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericApiResponse<Wallet>> update(@Valid @RequestBody WalletUpdateRequestDTO request) throws JsonProcessingException {
-        UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), ConstantUtil.SUPER_ADMIN);
+        UserUtils.assertUserHasAllRoles(jwtTokenUtil.getUser().getRoles(), List.of(ConstantUtil.SUPER_ADMIN, ConstantUtil.WALLET));
         final var wallet = walletService.updateWallet(request);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Wallet.class.getTypeName(), null, objectMapper.writeValueAsString(wallet),
                 "Initiated a request to update wallet");
