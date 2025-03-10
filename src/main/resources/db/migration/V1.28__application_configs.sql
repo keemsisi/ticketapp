@@ -35,14 +35,14 @@ false,
         {
             "processor": "PayStack",
             "type": "FIXED",
-            "amount": "0",
+            "amount": "100",
             "additionalAmount": "100",
             "currency": "NGN"
         },
         {
             "processor": "PayStack",
             "type": "FIXED",
-            "amount": "0",
+            "amount": "100",
             "additionalAmount": "100",
             "currency": "foreign"
         }
@@ -120,14 +120,14 @@ false,
         {
             "processor": "PayStack",
             "type": "FIXED",
-            "amount": "0",
+            "amount": "100",
             "additionalAmount": "100",
             "currency": "NGN"
         },
         {
             "processor": "PayStack",
             "type": "FIXED",
-            "amount": "0",
+            "amount": "100",
             "additionalAmount": "100",
             "currency": "foreign"
         }
@@ -205,14 +205,14 @@ false,
         {
             "processor": "PayStack",
             "type": "FIXED",
-            "amount": "0",
+            "amount": "100",
             "additionalAmount": "100",
             "currency": "NGN"
         },
         {
             "processor": "PayStack",
             "type": "FIXED",
-            "amount": "0",
+            "amount": "100",
             "additionalAmount": "100",
             "currency": "foreign"
         }
