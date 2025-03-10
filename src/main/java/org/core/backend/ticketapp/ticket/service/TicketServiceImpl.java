@@ -109,8 +109,9 @@ public class TicketServiceImpl implements TicketService {
                         } else {
                             ticket.setUserId(optionalUser.get().getId());
                         }
+                    } else {
+                        throw new ApplicationException(400, "not_found", "Order does not exists!");
                     }
-                    throw new ApplicationException(400, "not_found", "Order does not exists!");
                 } else {
                     ticket.setUserId(order.getUserId());
                 }
