@@ -29,20 +29,22 @@ public class PlanConfig {
         final var platformFee = this.platformFee.stream()
                 .filter(fee -> fee.getProcessor().equalsIgnoreCase(processor.name().toLowerCase()) && fee.getCurrency().equalsIgnoreCase(currency))
                 .map(platFee -> getAmountToCharge(platFee.getType(), platFee.getAmount(), amount))
-                .mapToDouble(value -> value).sum();
+                .mapToDouble(BigDecimal::doubleValue).sum();
         transactionProcessingFeesDTO.setPlatformFee(platformFee);
         final var processingFee = this.paymentProcessingFee.stream()
                 .filter(fee -> fee.getProcessor().equalsIgnoreCase(processor.name().toLowerCase()) && fee.getCurrency().equalsIgnoreCase(currency))
                 .map(proFee -> getAmountToCharge(proFee.getType(), proFee.getAmount(), amount))
-                .mapToDouble(value -> value).sum();
+                .mapToDouble(BigDecimal::doubleValue).sum();
         transactionProcessingFeesDTO.setProcessingFee(processingFee);
         final var tax = this.tax.stream()
                 .filter(taxFee -> taxFee.getProcessor().equalsIgnoreCase(processor.name().toLowerCase()) && taxFee.getCurrency().equalsIgnoreCase(currency))
-                .map(texFee1 -> getAmountToCharge(texFee1.getType(), texFee1.getAmount(), amount)).mapToDouble(value -> value).sum();
+                .map(texFee1 -> getAmountToCharge(texFee1.getType(), texFee1.getAmount(), amount))
+                .mapToDouble(BigDecimal::doubleValue).sum();
         transactionProcessingFeesDTO.setTax(tax);
         final var additionalFee = this.additionalFee.stream()
                 .filter(taxFee -> taxFee.getProcessor().equalsIgnoreCase(processor.name().toLowerCase()) && taxFee.getCurrency().equalsIgnoreCase(currency))
-                .map(texFee1 -> getAmountToCharge(texFee1.getType(), texFee1.getAmount(), amount)).mapToDouble(value -> value).sum();
+                .map(texFee1 -> getAmountToCharge(texFee1.getType(), texFee1.getAmount(), amount))
+                .mapToDouble(BigDecimal::doubleValue).sum();
         transactionProcessingFeesDTO.setAdditionalFee(additionalFee);
         final var totalFees = new BigDecimal(String.valueOf(platformFee))
                 .add(new BigDecimal(String.valueOf(processingFee)))
@@ -58,17 +60,15 @@ public class PlanConfig {
         return transactionProcessingFeesDTO;
     }
 
-    private double getAmountToCharge(final FeeType feeType, final String value, final double amount) {
+    private BigDecimal getAmountToCharge(final FeeType feeType, final String value, final double amount) {
         if (Objects.requireNonNull(feeType) == FeeType.PERCENTAGE) {
-            final var percentageVal = Double.parseDouble(value) / 100;
-            final var val =  percentageVal * amount;
-            return val;
+            final var percentageVal = new BigDecimal(value).divide(new BigDecimal("100"));
+            return percentageVal.multiply(new BigDecimal(String.valueOf(amount)));
         } else if (Objects.requireNonNull(feeType) == FeeType.FIXED) {
-            final var percentageVal = new BigDecimal(String.valueOf(value));
-            return percentageVal.doubleValue();
+            return new BigDecimal(String.valueOf(value));
         } else if (Objects.requireNonNull(feeType) == FeeType.RANGE) {
-            return 0; //not implemented at the moment
+            return BigDecimal.ZERO; //not implemented at the moment
         }
-        return 0;
+        return BigDecimal.ZERO;
     }
 }
