@@ -6,10 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.core.backend.ticketapp.common.dto.Page;
 import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
-import org.core.backend.ticketapp.common.response.stats.EventStatsDTO;
-import org.core.backend.ticketapp.common.response.stats.EventStatsResponseDTO;
-import org.core.backend.ticketapp.common.response.stats.EventTicketStatsDTO;
-import org.core.backend.ticketapp.common.response.stats.EventTransactionDateStatsDTO;
+import org.core.backend.ticketapp.common.response.stats.*;
 import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.passport.dao.BaseDao;
 import org.core.backend.ticketapp.passport.mapper.EventWishedListDTO;
@@ -277,8 +274,8 @@ public class EventDao extends BaseDao {
         final var finalQuery = String.format("%s;%s;%s", orderBaseSQL, transactionBaseSQL, transactionDateStats);
         final var cscFactory = new CallableStatementCreatorFactory(finalQuery);
         final var returnedParams = List.<SqlParameter>of(
-                new SqlReturnResultSet("order_stats", BeanPropertyRowMapper.newInstance(EventStatsDTO.class)),
-                new SqlReturnResultSet("transaction_stats", BeanPropertyRowMapper.newInstance(EventStatsDTO.class)),
+                new SqlReturnResultSet("order_stats", BeanPropertyRowMapper.newInstance(EventOrderStatsDTO.class)),
+                new SqlReturnResultSet("transaction_stats", BeanPropertyRowMapper.newInstance(EventTransactionStatsDTO.class)),
                 new SqlReturnResultSet("transaction_date_stats", BeanPropertyRowMapper.newInstance(EventTransactionDateStatsDTO.class)));
         final var csc = cscFactory.newCallableStatementCreator(new HashMap<>());
         assert getJdbcTemplate() != null;
