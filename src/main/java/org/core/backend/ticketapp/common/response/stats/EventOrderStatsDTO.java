@@ -20,7 +20,7 @@ public class EventOrderStatsDTO extends EventStatsDTO {
         return ObjectUtils.defaultIfNull(totalOrders, 0L);
     }
 
-    @JsonGetter("totalOrderAmount")
+    @JsonGetter("totalCompletedOrderAmount")
     public Double getTotalCompletedOrderAmount() {
         return ObjectUtils.defaultIfNull(totalCompletedOrderAmount, 0D);
     }
