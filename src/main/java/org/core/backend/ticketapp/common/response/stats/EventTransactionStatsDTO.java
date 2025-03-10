@@ -23,7 +23,7 @@ public class EventTransactionStatsDTO extends EventStatsDTO {
     }
 
 
-    @JsonGetter(value = "totalSalesAmount")
+    @JsonGetter(value = "totalStatusAmount")
     public Long getTotalSalesAmount() {
         return ObjectUtils.defaultIfNull(totalStatusAmount, 0L);
     }
