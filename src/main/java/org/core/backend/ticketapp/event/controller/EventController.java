@@ -5,7 +5,7 @@ import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.Page;
 import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
-import org.core.backend.ticketapp.common.response.EventStatsResponseDTO;
+import org.core.backend.ticketapp.common.response.stats.EventStatsResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.CreateEventRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;

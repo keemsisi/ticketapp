@@ -1,4 +1,4 @@
-package org.core.backend.ticketapp.common.response;
+package org.core.backend.ticketapp.common.response.stats;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
