@@ -154,6 +154,7 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> registerUser(@Validated @RequestBody UserDto userDto) throws JsonProcessingException {
+        //update here to only assign the role the user has!
         User newRegisteredUser = null;
         var loggedInUser = jwtTokenUtil.getUser();
         UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.ONBOARD_USER);
@@ -163,7 +164,7 @@ public class UserController {
                         new GenericApiResponse<>("01", "Oops! Not Allowed!", ""),
                         HttpStatus.FORBIDDEN);
             }
-            if (AccountType.isTenantUserAccountType(userDto.getAccountType())) {
+            if (!AccountType.isTenantUserAccountType(userDto.getAccountType())) {
                 return new ResponseEntity<>(
                         new GenericApiResponse<>("01", "Oops! Only Organization/Individual user can be created!", ""),
                         HttpStatus.FORBIDDEN);
