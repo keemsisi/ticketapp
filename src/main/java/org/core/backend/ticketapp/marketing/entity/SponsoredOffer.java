@@ -9,6 +9,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -43,7 +44,7 @@ public class SponsoredOffer extends AbstractBaseEntity {
     private UUID eventId;
 
     @Column(name = "discount")
-    private Double discount;
+    private BigDecimal discount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "discount_type", columnDefinition = "varchar(15) default 'PERCENTAGE'")

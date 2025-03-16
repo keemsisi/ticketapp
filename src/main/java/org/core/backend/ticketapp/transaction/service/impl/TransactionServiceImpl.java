@@ -16,6 +16,8 @@ import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.service.EventSeatSectionService;
 import org.core.backend.ticketapp.event.service.EventService;
+import org.core.backend.ticketapp.marketing.entity.SponsoredOffer;
+import org.core.backend.ticketapp.marketing.service.SponsoredOfferService;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.service.OrderService;
 import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
@@ -47,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -75,6 +78,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final ActivityLogPublisherUtil activityLogPublisherUtil;
     private final ModelMapper modelMapper;
     private final ApplicationConfigRepository applicationConfigRepository;
+    private final SponsoredOfferService sponsoredOfferService;
 
     @Override
     public Page<Transaction> getAll(final Pageable pageable) {
@@ -133,7 +137,20 @@ public class TransactionServiceImpl implements TransactionService {
                     }
                 }
             }
+            final var initialAmount = new BigDecimal(String.valueOf(paymentRequest.getAmount()));
+            var discountAmount = BigDecimal.ZERO;
+            if (ObjectUtils.isNotEmpty(request.getDiscountCode())) {
+                final var sponsoredOfferOptional = sponsoredOfferService.findByCode(request.getDiscountCode());
+                if (sponsoredOfferOptional.isPresent()) {
+                    final var sponsoredOffer = sponsoredOfferOptional.get();
+                    if (sponsoredOffer.getDiscountType() == SponsoredOffer.DiscountType.PERCENTAGE) {
+                        discountAmount = initialAmount.multiply(sponsoredOffer.getDiscount().divide(new BigDecimal(100), RoundingMode.DOWN));
+                    }
+                }
+            }
+            paymentRequest.setAmount(initialAmount.subtract(discountAmount).doubleValue());
             paymentFees = getConfiguredPaymentFees(event, request, paymentRequest);
+            paymentFees.setPriceDiscount(discountAmount.doubleValue());
         }
         ResponseEntity<PaymentInitResponseDTO> response = null;
         try {
@@ -142,9 +159,9 @@ public class TransactionServiceImpl implements TransactionService {
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
             final var processorPaymentRequest = paymentRequest.clone();
-            final var paymentToProcess = new BigDecimal(paymentFees.getTotalCost() + "");
-            processorPaymentRequest.setAmount(paymentToProcess.multiply(new BigDecimal(String.valueOf(100))).doubleValue());
-            paymentRequest.setAmount(paymentToProcess.doubleValue());
+            final var paymentAmountToProcess = new BigDecimal(paymentFees.getTotalCost() + "");
+            processorPaymentRequest.setAmount(paymentAmountToProcess.multiply(new BigDecimal(String.valueOf(100))).doubleValue());
+            paymentRequest.setAmount(paymentAmountToProcess.doubleValue());
             processorPaymentRequest.setCallback_url(String.format(CALLBACK_TEMPLATE, appConfigs.paymentCallbackUrl, orderId));
             final var entity = new HttpEntity<>(processorPaymentRequest, headers);
             log.info("PAYSTACK - PAYMENT -REQUEST: {}", objectMapper.writeValueAsString(processorPaymentRequest));

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -64,5 +65,11 @@ public class SponsoredOfferServiceImpl implements SponsoredOfferService {
     @Override
     public SponsoredOffer getById(final UUID id) {
         return repository.findById(id).orElseThrow(ApplicationExceptionUtils::notFound);
+    }
+
+    @Override
+    public Optional<SponsoredOffer> findByCode(final String code) {
+        return repository.findByCode(code);
+
     }
 }
