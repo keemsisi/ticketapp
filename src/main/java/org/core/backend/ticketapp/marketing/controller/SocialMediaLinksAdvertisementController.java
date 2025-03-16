@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -39,8 +40,8 @@ public class SocialMediaLinksAdvertisementController {
     private final JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericApiResponse<SocialMediaLinkAdvertisement>> create(@Validated @RequestBody CreateSocialLinksRequest request) throws Exception {
-        final var result = service.create(request);
+    public ResponseEntity<GenericApiResponse<List<SocialMediaLinkAdvertisement>>> create(@Validated @RequestBody CreateSocialLinksRequest request) throws Exception {
+        final var result = service.createAll(request);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), SocialMediaLinkAdvertisement.class.getTypeName(), null, objectMapper.writeValueAsString(result),
                 "Initiated a request to follow create social media link advert");
         return new ResponseEntity<>(new GenericApiResponse<>("00", "Social links created successfully", result), HttpStatus.CREATED);

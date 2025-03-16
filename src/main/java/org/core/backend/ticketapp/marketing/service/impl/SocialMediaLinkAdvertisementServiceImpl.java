@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.marketing.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
+import org.core.backend.ticketapp.marketing.dto.social.CreateSocialLinksRequest;
 import org.core.backend.ticketapp.marketing.dto.social.FilterSearchSocialMediaLinksRequest;
 import org.core.backend.ticketapp.marketing.dto.social.UpdateSocialLinksRequest;
 import org.core.backend.ticketapp.marketing.entity.SocialMediaLinkAdvertisement;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -26,12 +29,20 @@ public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkA
     private final ModelMapper modelMapper;
 
     @Override
-    public <R> SocialMediaLinkAdvertisement create(final R request) {
-        final var record = modelMapper.map(request, SocialMediaLinkAdvertisement.class);
-        record.setUserId(jwtTokenUtil.getUser().getUserId());
-        record.setTenantId(jwtTokenUtil.getUser().getTenantId());
-        record.setDateCreated(LocalDateTime.now());
-        return repository.save(record);
+    public <R> List<SocialMediaLinkAdvertisement> createAll(final R request) {
+        final var _request = modelMapper.map(request, CreateSocialLinksRequest.class);
+        final var newRecord = new ArrayList<SocialMediaLinkAdvertisement>();
+        _request.getMedia().forEach(media -> {
+            final var record = new SocialMediaLinkAdvertisement();
+            record.setUserId(jwtTokenUtil.getUser().getUserId());
+            record.setTenantId(jwtTokenUtil.getUser().getTenantId());
+            record.setSocialMedia(media.getSocialMedia());
+            record.setHandle(media.getHandle());
+            record.setProfileLink(media.getProfileLink());
+            record.setDateCreated(LocalDateTime.now());
+            newRecord.add(record);
+        });
+        return repository.saveAll(newRecord);
     }
 
     @Override
