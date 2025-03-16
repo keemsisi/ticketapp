@@ -144,7 +144,7 @@ public class TransactionServiceImpl implements TransactionService {
                 if (sponsoredOfferOptional.isPresent()) {
                     final var sponsoredOffer = sponsoredOfferOptional.get();
                     if (sponsoredOffer.getDiscountType() == SponsoredOffer.DiscountType.PERCENTAGE) {
-                        discountAmount = initialAmount.multiply(sponsoredOffer.getDiscount().divide(new BigDecimal(100), RoundingMode.DOWN));
+                        discountAmount = initialAmount.multiply(sponsoredOffer.getDiscount().divide(new BigDecimal("100.0"), RoundingMode.HALF_UP));
                     }
                 }
             }
