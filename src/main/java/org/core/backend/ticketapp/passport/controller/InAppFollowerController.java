@@ -3,8 +3,7 @@ package org.core.backend.ticketapp.passport.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.core.backend.ticketapp.common.dto.GenericApiResponse;
-import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
-import org.core.backend.ticketapp.common.dto.PagedResponse;
+import org.core.backend.ticketapp.common.dto.Page;
 import org.core.backend.ticketapp.marketing.dto.social.CreateInAppFollowerRequest;
 import org.core.backend.ticketapp.marketing.dto.social.UpdateInAppFollowerRequest;
 import org.core.backend.ticketapp.passport.dtos.follower.FilterInAppFollowerRequestDTO;
@@ -42,8 +41,8 @@ public class InAppFollowerController {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
-        final var result = PagedMapperUtil.map(service.getAll(pageable));
+    public ResponseEntity<GenericApiResponse<Page<?>>> getAll(final FilterInAppFollowerRequestDTO filter, final Pageable pageable) {
+        final var result = service.getAllV1(filter, pageable);
         return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched resource", result));
     }
 
@@ -60,8 +59,8 @@ public class InAppFollowerController {
     }
 
     @RequestMapping(value = "/followers", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getFollowers(final FilterInAppFollowerRequestDTO request, final Pageable pageable) {
-        final var result = PagedMapperUtil.map(service.getAllV2(request, pageable));
+    public ResponseEntity<GenericApiResponse<Page<?>>> getFollowers(final FilterInAppFollowerRequestDTO request, final Pageable pageable) {
+        final var result = service.getAllV2(request, pageable);
         return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully updated resource!", result));
     }
 

@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.passport.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.core.backend.ticketapp.common.dto.Page;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
 import org.core.backend.ticketapp.marketing.common.FollowerStatus;
 import org.core.backend.ticketapp.marketing.dao.InAppFollowerDAOService;
@@ -12,13 +13,11 @@ import org.core.backend.ticketapp.passport.service.InAppFollowerService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -41,9 +40,11 @@ public class InAppFollowerServiceImpl implements InAppFollowerService {
     }
 
     @Override
-    public Page<InAppFollower> getAll(final Pageable pageable) {
-        final var userId = jwtTokenUtil.getUser().getUserId();
-        return Objects.nonNull(userId) ? repository.findAll(userId, pageable) : repository.findAll(pageable);
+    public Page<InAppFollower> getAllV1(final FilterInAppFollowerRequestDTO filter, final Pageable pageable) {
+        final var user = jwtTokenUtil.getUser();
+        filter.setType(FilterInAppFollowerRequestDTO.FollowType.FOLLOWING);
+        filter.setUserId(user.getUserId());
+        return inAppFollowerDAOService.filterSearchFollowers(filter, pageable);
     }
 
     @Override
@@ -52,7 +53,8 @@ public class InAppFollowerServiceImpl implements InAppFollowerService {
         if (!user.isAdmin()) {
             request.setUserId(user.getUserId());
         }
-        return repository.findAllByUserId(request.getUserId(), pageable);
+        request.setType(FilterInAppFollowerRequestDTO.FollowType.FOLLOWERS);
+        return inAppFollowerDAOService.filterSearchFollowers(request, pageable);
     }
 
     @Override

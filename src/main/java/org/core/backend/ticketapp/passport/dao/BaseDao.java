@@ -2,11 +2,17 @@ package org.core.backend.ticketapp.passport.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.core.backend.ticketapp.common.dto.Page;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.CallableStatementCreatorFactory;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
+import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,4 +63,5 @@ public class BaseDao<T> extends JdbcDaoSupport {
     String buildDynamicWhereClause(Map<String, String> params) {
         return "";
     }
+
 }
