@@ -28,6 +28,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -81,6 +82,9 @@ public class PlanServiceImpl implements PlanService {
             final var entity = new HttpEntity<>(createPlanRequest, headers);
             final var features = request.getFeatures();
             request.setFeatures(null);
+            request.setAmount(new BigDecimal(String.valueOf(request.getAmount()))
+                    .multiply(new BigDecimal(100))
+                    .setScale(0, RoundingMode.DOWN).doubleValue());
             final var response = restTemplate.exchange(PAYSTACK_PLAN_BASE_URL, HttpMethod.POST, entity, PlanCreateResponseDTO.class);
             final var newPlan = getPlan(response);
             newPlan.setFeatures(features);

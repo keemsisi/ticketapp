@@ -40,4 +40,5 @@ public class TenantLiteDto {
     private String description;
     private List<SocialMediaDTO> socialMediaHandles;
     private List<String> services;
+    private UUID userId;
 }
