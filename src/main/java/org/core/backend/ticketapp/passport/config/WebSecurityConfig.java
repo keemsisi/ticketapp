@@ -71,7 +71,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/api/v1/sponsored-offers").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/event-promotions").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/social-media-links/advertisements").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/v1/social-media-links/event-seat-sections/*").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/event-seat-sections/*").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/jobs/advertisements").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/jobs/advertisements/application/*").permitAll()
                 .antMatchers(HttpMethod.PATCH, "/api/v1/jobs/advertisements/application").permitAll()
