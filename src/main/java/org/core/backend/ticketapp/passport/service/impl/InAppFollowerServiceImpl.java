@@ -6,7 +6,6 @@ import org.core.backend.ticketapp.marketing.common.FollowerStatus;
 import org.core.backend.ticketapp.marketing.dao.InAppFollowerDAOService;
 import org.core.backend.ticketapp.marketing.dto.social.UpdateInAppFollowerRequest;
 import org.core.backend.ticketapp.passport.dtos.follower.FilterInAppFollowerRequestDTO;
-import org.core.backend.ticketapp.passport.dtos.follower.InAppFollowerResponseDTO;
 import org.core.backend.ticketapp.passport.entity.InAppFollower;
 import org.core.backend.ticketapp.passport.repository.InAppFollowerRepository;
 import org.core.backend.ticketapp.passport.service.InAppFollowerService;
@@ -48,10 +47,10 @@ public class InAppFollowerServiceImpl implements InAppFollowerService {
     }
 
     @Override
-    public Page<InAppFollowerResponseDTO> getAllV2(final FilterInAppFollowerRequestDTO request, final Pageable pageable) {
+    public Page<InAppFollower> getAllV2(final FilterInAppFollowerRequestDTO request, final Pageable pageable) {
         final var userId = jwtTokenUtil.getUser().getUserId();
         request.setUserId(userId);
-        return inAppFollowerDAOService.filterSearch(request);
+        return repository.findAllByUserId(userId, pageable);
     }
 
     @Override

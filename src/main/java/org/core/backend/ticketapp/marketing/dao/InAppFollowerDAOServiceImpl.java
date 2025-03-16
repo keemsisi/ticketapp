@@ -26,7 +26,7 @@ public class InAppFollowerDAOServiceImpl extends BaseDao implements InAppFollowe
     }
 
     @Override
-    public Page<InAppFollowerResponseDTO> filterSearch(FilterInAppFollowerRequestDTO request) {
+    public Page<InAppFollowerResponseDTO> filterSearch(final FilterInAppFollowerRequestDTO request) {
         return null;
     }
 }

@@ -45,9 +45,16 @@ public class InAppFollower extends AbstractBaseEntity {
     @Column(name = "status", columnDefinition = "varchar(255) default 'FOLLOWED'")
     private FollowerStatus status;
 
+    @Transient
+    private String firstName;
+    @Transient
+    private String lastName;
+    @Transient
+    private String middleName;
+
     @PrePersist
     public void onCreate() {
-       this.id =  ObjectUtils.defaultIfNull(this.id , UUID.randomUUID());
-       this.dateCreated =  ObjectUtils.defaultIfNull(this.dateCreated , LocalDateTime.now());
+        this.id = ObjectUtils.defaultIfNull(this.id, UUID.randomUUID());
+        this.dateCreated = ObjectUtils.defaultIfNull(this.dateCreated, LocalDateTime.now());
     }
 }
