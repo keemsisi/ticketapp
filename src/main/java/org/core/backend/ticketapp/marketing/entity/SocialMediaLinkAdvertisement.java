@@ -43,8 +43,8 @@ public class SocialMediaLinkAdvertisement extends AbstractBaseEntity {
     private String handle;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "social_media", columnDefinition = "varchar(100)")
-    private SocialMedia socialMedia;
+    @Column(name = "social_media_type", columnDefinition = "varchar(100)")
+    private SocialMedia socialMediaType;
 
 
     @PrePersist

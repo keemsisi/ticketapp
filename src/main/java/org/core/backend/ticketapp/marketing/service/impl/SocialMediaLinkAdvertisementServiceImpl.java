@@ -36,7 +36,7 @@ public class SocialMediaLinkAdvertisementServiceImpl implements SocialMediaLinkA
             final var record = new SocialMediaLinkAdvertisement();
             record.setUserId(jwtTokenUtil.getUser().getUserId());
             record.setTenantId(jwtTokenUtil.getUser().getTenantId());
-            record.setSocialMedia(media.getSocialMedia());
+            record.setSocialMediaType(media.getSocialMediaType());
             record.setHandle(media.getHandle());
             record.setProfileLink(media.getProfileLink());
             record.setDateCreated(LocalDateTime.now());

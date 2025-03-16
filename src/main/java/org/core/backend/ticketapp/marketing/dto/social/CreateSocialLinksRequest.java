@@ -29,6 +29,6 @@ public class CreateSocialLinksRequest {
         @NotBlank
         private String handle;
         @NotNull
-        private SocialMedia socialMedia;
+        private SocialMedia socialMediaType;
     }
 }
