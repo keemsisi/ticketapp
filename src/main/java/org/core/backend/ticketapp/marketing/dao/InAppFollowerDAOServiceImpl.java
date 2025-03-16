@@ -73,7 +73,7 @@ public class InAppFollowerDAOServiceImpl extends BaseDao implements InAppFollowe
                 """.replaceAll(":baseQuery", baseSQL);
         final var response = executeQueryWithCount(selectQuery + countQuery, InAppFollower.class);
         final var results = (List<InAppFollower>) response.get("result");
-        final var count = response.get("count");
+        final var count = ((List<LongWrapper>) response.get("count")).size();
 
         final var pagedResults = new Page<InAppFollower>();
         pagedResults.setContent(results);
@@ -83,7 +83,7 @@ public class InAppFollowerDAOServiceImpl extends BaseDao implements InAppFollowe
         pagedResults.setReqSize(pageable.getPageSize());
         pagedResults.setLast(results.isEmpty());
         pagedResults.setNumberOfElements(results.size());
-        pagedResults.setTotalElements((Long) count);
+        pagedResults.setTotalElements(count);
         return pagedResults;
     }
 
