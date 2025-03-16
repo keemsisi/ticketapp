@@ -21,7 +21,9 @@ public interface InAppFollowerRepository extends JpaRepository<InAppFollower, UU
     @Query(value = "SELECT * FROM in_app_follower WHERE id = ?1 AND user_id = ?2 AND deleted = false ", nativeQuery = true)
     Optional<InAppFollower> findById(final @NotNull UUID uuid, final @NotNull UUID userId);
 
-    @Query(value = "SELECT * FROM in_app_follower WHERE user_id = ?1 AND deleted = false ", nativeQuery = true)
+    @Query(value = "SELECT * FROM in_app_follower iaf  " +
+            " INNER JOIN users u ON u.id = iaf.user_id AND u.deleted=false " +
+            " WHERE iaf.user_id = ?1 AND iaf.deleted = false ", nativeQuery = true)
     Page<InAppFollower> findAll(final @NotNull UUID userId, final @NotNull Pageable pageable);
 
     @NotNull
