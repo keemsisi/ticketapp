@@ -60,7 +60,7 @@ public class InAppFollowerDAOServiceImpl extends BaseDao implements InAppFollowe
         assert getJdbcTemplate() != null;
         var baseSQL = getFollowBaseQuery(request);
         var selectQuery = """
-                SELECT iaf.*, u.first_name, u.last_name, u.middle_name
+                SELECT iaf.*, u.first_name, u.last_name, u.middle_name, u.email
                 :baseQuery
                 ORDER BY iaf.date_created DESC OFFSET :offSet LIMIT :limit;
                 """
