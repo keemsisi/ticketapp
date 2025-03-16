@@ -140,7 +140,7 @@ public class TransactionServiceImpl implements TransactionService {
             final var initialAmount = new BigDecimal(String.valueOf(paymentRequest.getAmount()));
             var discountAmount = BigDecimal.ZERO;
             if (ObjectUtils.isNotEmpty(request.getDiscountCode())) {
-                final var sponsoredOfferOptional = sponsoredOfferService.findByCode(request.getDiscountCode());
+                final var sponsoredOfferOptional = sponsoredOfferService.findByCode(event.getId(), request.getDiscountCode());
                 if (sponsoredOfferOptional.isPresent()) {
                     final var sponsoredOffer = sponsoredOfferOptional.get();
                     if (sponsoredOffer.getDiscountType() == SponsoredOffer.DiscountType.PERCENTAGE) {

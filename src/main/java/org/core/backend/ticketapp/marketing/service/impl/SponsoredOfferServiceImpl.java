@@ -68,8 +68,8 @@ public class SponsoredOfferServiceImpl implements SponsoredOfferService {
     }
 
     @Override
-    public Optional<SponsoredOffer> findByCode(final String code) {
-        return repository.findByCode(code);
+    public Optional<SponsoredOffer> findByCode(final UUID eventId, final String code) {
+        return repository.findByCode(eventId, code);
 
     }
 }

@@ -19,6 +19,6 @@ public interface SponsoredOfferRepository extends JpaRepository<SponsoredOffer, 
     @Query(value = "SELECT * FROM sponsored_offer WHERE id = ?1 AND user_id = ?2 AND deleted = false ", nativeQuery = true)
     Optional<SponsoredOffer> findById(UUID id, UUID userId);
 
-    @Query(value = "SELECT * FROM sponsored_offer WHERE code = ?1 AND deleted = false ", nativeQuery = true)
-    Optional<SponsoredOffer> findByCode(String code);
+    @Query(value = "SELECT * FROM sponsored_offer WHERE event_id=?1 AND code=?1 AND deleted = false ", nativeQuery = true)
+    Optional<SponsoredOffer> findByCode(UUID eventId, String code);
 }
