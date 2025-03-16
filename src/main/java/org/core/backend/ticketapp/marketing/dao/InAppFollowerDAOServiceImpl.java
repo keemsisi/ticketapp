@@ -62,7 +62,7 @@ public class InAppFollowerDAOServiceImpl extends BaseDao implements InAppFollowe
         var selectQuery = """
                 SELECT iaf.*, u.first_name, u.last_name, u.middle_name
                 :baseQuery
-                ORDER BY e.date_created DESC OFFSET :offSet LIMIT :limit;
+                ORDER BY iaf.date_created DESC OFFSET :offSet LIMIT :limit;
                 """
                 .replaceAll(":baseQuery", baseSQL)
                 .replaceAll(":limit", String.valueOf(limit))
