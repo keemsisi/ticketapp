@@ -46,11 +46,20 @@ public class InAppFollower extends AbstractBaseEntity {
     private FollowerStatus status;
 
     @Transient
+    @Column(name = "first_name")
     private String firstName;
+
     @Transient
+    @Column(name = "last_name")
     private String lastName;
+
     @Transient
+    @Column(name = "middle_name")
     private String middleName;
+
+    @Transient
+    @Column(name = "email")
+    private String email;
 
     @PrePersist
     public void onCreate() {

@@ -60,7 +60,7 @@ public class InAppFollowerController {
     }
 
     @RequestMapping(value = "/followers", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getFollowers(final @RequestBody FilterInAppFollowerRequestDTO request, final Pageable pageable) {
+    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getFollowers(final FilterInAppFollowerRequestDTO request, final Pageable pageable) {
         final var result = PagedMapperUtil.map(service.getAllV2(request, pageable));
         return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully updated resource!", result));
     }

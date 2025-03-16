@@ -48,9 +48,11 @@ public class InAppFollowerServiceImpl implements InAppFollowerService {
 
     @Override
     public Page<InAppFollower> getAllV2(final FilterInAppFollowerRequestDTO request, final Pageable pageable) {
-        final var userId = jwtTokenUtil.getUser().getUserId();
-        request.setUserId(userId);
-        return repository.findAllByUserId(userId, pageable);
+        final var user = jwtTokenUtil.getUser();
+        if (!user.isAdmin()) {
+            request.setUserId(user.getUserId());
+        }
+        return repository.findAllByUserId(request.getUserId(), pageable);
     }
 
     @Override
