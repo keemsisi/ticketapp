@@ -6,14 +6,11 @@ import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
 import org.core.backend.ticketapp.marketing.dto.social.CreateInAppFollowerRequest;
-import org.core.backend.ticketapp.marketing.dto.social.FilterSearchFollowers;
 import org.core.backend.ticketapp.marketing.dto.social.UpdateInAppFollowerRequest;
 import org.core.backend.ticketapp.passport.dtos.follower.FilterInAppFollowerRequestDTO;
-import org.core.backend.ticketapp.passport.dtos.follower.InAppFollowerResponseDTO;
 import org.core.backend.ticketapp.passport.entity.InAppFollower;
 import org.core.backend.ticketapp.passport.service.InAppFollowerService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -63,8 +60,8 @@ public class InAppFollowerController {
     }
 
     @RequestMapping(value = "/followers", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericApiResponse<Page<InAppFollowerResponseDTO>>> getFollowers(final @RequestBody FilterInAppFollowerRequestDTO request, final Pageable pageable) {
-        final var result = service.getAllV2(request, pageable);
+    public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getFollowers(final @RequestBody FilterInAppFollowerRequestDTO request, final Pageable pageable) {
+        final var result = PagedMapperUtil.map(service.getAllV2(request, pageable));
         return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully updated resource!", result));
     }
 
