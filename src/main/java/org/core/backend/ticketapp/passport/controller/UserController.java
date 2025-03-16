@@ -66,6 +66,10 @@ public class UserController {
                     new GenericApiResponse<>("01", "Seller with Individual account type not allowed!", null),
                     HttpStatus.BAD_REQUEST);
         }
+        if (!AccountType.allowedForUserOnboarding().contains(userDto.getAccountType())) {
+            throw new ApplicationException(400, "not_allowed", String.format("Oops! Only this account type are allowed : %s",
+                    AccountType.allowedForUserOnboarding()));
+        }
         final var newRegisteredUser = userService.createUser(request, new LoggedInUserDto());
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null,
                 objectMapper.writeValueAsString(newRegisteredUser), "Initiated a request to register a user under a tenant");

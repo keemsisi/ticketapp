@@ -258,10 +258,7 @@ public class CoreUserService extends BaseRepoService<User> implements UserDetail
     public User createUser(final UserDto userDto, final LoggedInUserDto loggedInUser) throws JsonProcessingException {
         final var user = new User();
         final var userType = userDto.getAccountType();
-        if (!AccountType.allowedForUserOnboarding().contains(userDto.getAccountType())) {
-            throw new ApplicationException(400, "not_allowed", String.format("Oops! Only this account type are allowed : %s",
-                    AccountType.allowedForUserOnboarding()));
-        } else if (userDto.getAccountType().equals(AccountType.ORGANIZATION_BUYER_OWNER) ||
+        if (userDto.getAccountType().equals(AccountType.ORGANIZATION_BUYER_OWNER) ||
                 userDto.getAccountType().equals(AccountType.ORGANIZATION_MERCHANT_OWNER) ||
                 userDto.getAccountType().equals(AccountType.INDIVIDUAL_MERCHANT_OWNER)) {
             if (StringUtils.isBlank(userDto.getBusinessName())) {
