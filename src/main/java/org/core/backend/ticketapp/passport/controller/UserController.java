@@ -163,6 +163,11 @@ public class UserController {
                         new GenericApiResponse<>("01", "Oops! Not Allowed!", ""),
                         HttpStatus.FORBIDDEN);
             }
+            if (AccountType.isTenantUserAccountType(userDto.getAccountType())) {
+                return new ResponseEntity<>(
+                        new GenericApiResponse<>("01", "Oops! Only Organization/Individual user can be created!", ""),
+                        HttpStatus.FORBIDDEN);
+            }
         }
         if (AccountType.isAdminUser(userDto.getAccountType()) && !loggedInUser.isAdmin()) {
             return new ResponseEntity<>(
