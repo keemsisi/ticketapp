@@ -22,4 +22,5 @@ public class InitPaymentOrderRequestDTO {
     private List<BasePaymentOrderRequestDTO> secondary = new ArrayList<>();
     @JsonIgnore
     private boolean free = false;
+    private String discountCode;
 }

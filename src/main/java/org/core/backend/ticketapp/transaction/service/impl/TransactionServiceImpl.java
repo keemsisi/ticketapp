@@ -12,6 +12,7 @@ import org.core.backend.ticketapp.common.dto.configs.pricing.TransactionFeesDTO;
 import org.core.backend.ticketapp.common.enums.*;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.exceptions.ApplicationExceptionUtils;
+import org.core.backend.ticketapp.event.entity.Event;
 import org.core.backend.ticketapp.event.entity.EventSeatSection;
 import org.core.backend.ticketapp.event.service.EventSeatSectionService;
 import org.core.backend.ticketapp.event.service.EventService;
@@ -99,6 +100,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .callback(appConfigs.callback)
                 .channels(appConfigs.channels)
                 .build();
+        TransactionFeesDTO paymentFees = new TransactionFeesDTO();//default
         if (ObjectUtils.isNotEmpty(primary.getPlan()) && ObjectUtils.isEmpty(primary.getEventId())) {
             isPlanPayment = true;
             final var plan = planService.getByCode(primary.getPlan());
@@ -131,6 +133,7 @@ public class TransactionServiceImpl implements TransactionService {
                     }
                 }
             }
+            paymentFees = getConfiguredPaymentFees(event, request, paymentRequest);
         }
         ResponseEntity<PaymentInitResponseDTO> response = null;
         try {
@@ -138,7 +141,6 @@ public class TransactionServiceImpl implements TransactionService {
             final var headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
-            final var paymentFees = getConfiguredPaymentFees(request, paymentRequest);
             final var processorPaymentRequest = paymentRequest.clone();
             final var paymentToProcess = new BigDecimal(paymentFees.getTotalCost() + "");
             processorPaymentRequest.setAmount(paymentToProcess.multiply(new BigDecimal(String.valueOf(100))).doubleValue());
@@ -168,13 +170,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
-    private TransactionFeesDTO getConfiguredPaymentFees(final InitPaymentOrderRequestDTO request, final InitPaymentGateWayRequestDTO paymentRequest) {
-        final var userDto = getOrCreateNewUser(request.getPrimary());
-        final var plan = planService.getById(UUID.fromString(userDto.getPlanId()));//get the tenant, so we can retrieve the subscription plan id
-        final var planName = String.format("%s%s", plan.getName().toUpperCase(), "_PLAN");
-        final var applicationConfigs = applicationConfigRepository.findByName(planName).orElseThrow(ApplicationExceptionUtils::notFound);
-        final var planConfig = objectMapper.convertValue(applicationConfigs.getData(), PlanConfig.class);
-        return planConfig.getTransactionFeesDto(paymentRequest.getAmount(), PaymentProcessorType.PAYSTACK, "NGN");
+    private TransactionFeesDTO getConfiguredPaymentFees(final Event event, final InitPaymentOrderRequestDTO request, final InitPaymentGateWayRequestDTO paymentRequest) {
+        return getTransactionFees(event, paymentRequest.getAmount(), PaymentProcessorType.PAYSTACK, "NGN");
     }
 
     private OrderResponseDto getOrders(
@@ -553,4 +550,23 @@ public class TransactionServiceImpl implements TransactionService {
         order.setTicketId(ticket.getId());
         orderService.save(order);
     }
+
+    @Override
+    public TransactionFeesDTO getTransactionFees(final UUID eventSeatSectionId, final PaymentProcessorType type, final String currency) {
+        final var eventSeatSection = eventSeatSectionService.getById(eventSeatSectionId);
+        final var event = eventService.getById(eventSeatSection.getEventId());
+        return getTransactionFees(event, eventSeatSection.getPrice(), type, currency);
+    }
+
+    @Override
+    public TransactionFeesDTO getTransactionFees(final Event event, final double amount, final PaymentProcessorType type, final String currency) {
+        final var user = coreUserService.getUserById(event.getUserId()).orElseThrow();
+        final var planId = user.getDefaultPlanId();
+        final var plan = planService.getById(planId);//get the tenant, so we can retrieve the subscription plan id
+        final var planName = String.format("%s%s", plan.getName().toUpperCase(), "_PLAN");
+        final var applicationConfigs = applicationConfigRepository.findByName(planName).orElseThrow(ApplicationExceptionUtils::notFound);
+        final var planConfig = objectMapper.convertValue(applicationConfigs.getData(), PlanConfig.class);
+        return planConfig.getTransactionFeesDto(amount, PaymentProcessorType.PAYSTACK, "NGN");
+    }
+
 }

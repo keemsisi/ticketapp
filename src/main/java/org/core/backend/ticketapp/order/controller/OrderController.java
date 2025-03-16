@@ -2,12 +2,14 @@ package org.core.backend.ticketapp.order.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.core.backend.ticketapp.common.controller.ICrudController;
 import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.dto.PagedMapperUtil;
 import org.core.backend.ticketapp.common.dto.PagedResponse;
-import org.core.backend.ticketapp.common.controller.ICrudController;
+import org.core.backend.ticketapp.common.dto.configs.pricing.TransactionFeesDTO;
 import org.core.backend.ticketapp.order.entity.Order;
 import org.core.backend.ticketapp.order.service.OrderService;
+import org.core.backend.ticketapp.passport.service.core.PaymentProcessorType;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.transaction.dto.InitPaymentOrderRequestDTO;
 import org.core.backend.ticketapp.transaction.service.TransactionService;
@@ -41,6 +43,12 @@ public class OrderController implements ICrudController {
     public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
         final var orders = PagedMapperUtil.map(orderService.getAll(pageable));
         return new ResponseEntity<>(new GenericApiResponse<>("00", "All orders", orders), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/fees/event-seat-section/{eventSeatSectionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GenericApiResponse<TransactionFeesDTO>> getEventSeatSectionFees(@PathVariable UUID eventSeatSectionId) {
+        final var feesDTO = transactionService.getTransactionFees(eventSeatSectionId, PaymentProcessorType.PAYSTACK, "NGN");
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Fees calculation fetched successfully", feesDTO), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
