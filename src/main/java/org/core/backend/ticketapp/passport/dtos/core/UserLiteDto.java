@@ -86,6 +86,9 @@ public class UserLiteDto {
 
     private String businessName;
 
+    @NotNull(message = "password is required")
+    private String password;
+
     public boolean isIndividualMerchant() {
         return accountType == AccountType.INDIVIDUAL_MERCHANT_OWNER;
     }
