@@ -78,13 +78,13 @@ public class PlanServiceImpl implements PlanService {
             final var headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + appConfigs.payStackApiKey);
             headers.set("Content-Type", "application/json");
-            final var createPlanRequest = mapper.convertValue(request, PayStackPlanCreateRequestDTO.class);
-            final var entity = new HttpEntity<>(createPlanRequest, headers);
-            final var features = request.getFeatures();
             request.setFeatures(null);
             request.setAmount(new BigDecimal(String.valueOf(request.getAmount()))
                     .multiply(new BigDecimal(100))
                     .setScale(0, RoundingMode.DOWN).doubleValue());
+            final var createPlanRequest = mapper.convertValue(request, PayStackPlanCreateRequestDTO.class);
+            final var entity = new HttpEntity<>(createPlanRequest, headers);
+            final var features = request.getFeatures();
             final var response = restTemplate.exchange(PAYSTACK_PLAN_BASE_URL, HttpMethod.POST, entity, PlanCreateResponseDTO.class);
             final var newPlan = getPlan(response);
             newPlan.setFeatures(features);
