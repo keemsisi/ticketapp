@@ -27,17 +27,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class PlanController implements ICrudController {
     private final PlanService planService;
     private final JwtTokenUtil jwtTokenUtil;
+    private final static String FETCHED_SUCCESS_MESSAGE = "Successfully fetched plans";
+    private final static String PLAN_SUCCESS_MESSAGE = "Plan created successfully";
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericApiResponse<Plan>> create(@Validated @RequestBody PlanCreateRequestDTO request) throws Exception {
         UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), AccountType.SUPER_ADMIN.getType());
         final var plan = planService.createPlan(request);
-        return new ResponseEntity<>(new GenericApiResponse<>("00", "Plan created successfully", plan), HttpStatus.CREATED);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", PLAN_SUCCESS_MESSAGE, plan), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericApiResponse<PagedResponse<?>>> getAll(final Pageable pageable) {
         final var plans = PagedMapperUtil.map(planService.getAllPlans(pageable));
-        return ResponseEntity.ok().body(new GenericApiResponse<>("00", "Successfully fetched plans", plans));
+        return ResponseEntity.ok().body(new GenericApiResponse<>("00", FETCHED_SUCCESS_MESSAGE, plans));
     }
 }
