@@ -42,6 +42,8 @@ public class PlanServiceImpl implements PlanService {
     private final ObjectMapper mapper;
     private final AppConfigs appConfigs;
     private final RestTemplate restTemplate;
+    private final static String AUTHORIZATION_HEADER_NAME = "Authorization";
+    private final static String BEARER = "Bearer";
 
     private static @NotNull Plan getPlan(final ResponseEntity<PlanCreateResponseDTO> response) {
         if (response.getStatusCode().isError()) {
@@ -101,7 +103,7 @@ public class PlanServiceImpl implements PlanService {
         try {
             final var client = HttpClientBuilder.create().build();
             HttpGet httpGet = new HttpGet(PAYSTACK_PLAN_BASE_URL);
-            httpGet.setHeader("Authorization", "Bearer " + appConfigs.payStackApiKey);
+            httpGet.setHeader(AUTHORIZATION_HEADER_NAME, BEARER + appConfigs.payStackApiKey);
             StringBuilder result = new StringBuilder();
             HttpResponse response = client.execute(httpGet);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
