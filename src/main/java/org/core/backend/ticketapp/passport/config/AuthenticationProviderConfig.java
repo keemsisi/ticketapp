@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.passport.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -21,15 +22,16 @@ import java.util.Map;
 import java.util.Objects;
 
 @Configuration
-@Slf4j
+@AllArgsConstructor
 public class AuthenticationProviderConfig implements AuthenticationProvider {
 
     private static final String AUTH_2FA = "_AUTH_2FA";
+    private static final String BAD_CREDENTIAL_MSG = "bad_credentials";
+    private static final String INVALID_USERNAME_PASSWORD_TEMPLATE =
+            "invalid username or password, just %d attempts left.";
     private static final String DEFAULT_EXT = "+234";
-    @Autowired
-    private CoreUserService userService;
-    @Autowired
-    private RedisService redisService;
+    private final CoreUserService userService;
+    private final RedisService redisService;
 
     @SneakyThrows(value = JsonProcessingException.class)
     @Override
@@ -62,7 +64,7 @@ public class AuthenticationProviderConfig implements AuthenticationProvider {
             return new UsernamePasswordAuthenticationToken(user, password, null);
         }
         userService.updateFailedLogin(user);
-        throw new ApplicationException(401, "bad_credentials", String.format("invalid username or password, just %d attempts left.", user.getAccountLockoutThresholdCount() - user.getLoginAttempt() + 1));
+        throw new ApplicationException(401, BAD_CREDENTIAL_MSG, String.format(INVALID_USERNAME_PASSWORD_TEMPLATE, user.getAccountLockoutThresholdCount() - user.getLoginAttempt() + 1));
     }
 
     @Override
