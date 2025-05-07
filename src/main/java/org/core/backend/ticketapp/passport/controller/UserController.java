@@ -87,7 +87,7 @@ public class UserController {
                     new GenericApiResponse<>("01", "No user with the id '" + id + "' found", ""),
                     HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(new GenericApiResponse<>("00", "", user.get()),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", null, user.get()),
                 HttpStatus.OK);
     }
 
