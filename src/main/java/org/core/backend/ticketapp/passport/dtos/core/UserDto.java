@@ -1,6 +1,7 @@
 package org.core.backend.ticketapp.passport.dtos.core;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.thecarisma.CopyProperty;
 import lombok.Getter;
@@ -10,6 +11,8 @@ import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
 import javax.persistence.Convert;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -34,10 +37,10 @@ public class UserDto extends UserLiteDto {
     private DateTime lastChangePasswordDate;
     private List<UserRole> roles;
     private boolean firstTimeLogin;
-    private String adminRegisterKey;
-    private boolean isSupervisor;
-    private boolean isSuperAdmin;
     private Calendar passwordExpiryDate;
     private DateTime lockDate;
     private int loginAttempt;
+    private String password;
+    @JsonIgnore
+    private UUID tenantId;
 }

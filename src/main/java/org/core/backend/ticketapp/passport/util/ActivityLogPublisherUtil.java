@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.core.backend.ticketapp.passport.dtos.HttpServletRequestProperty;
 import org.core.backend.ticketapp.passport.entity.ActivityLog;
+import org.core.backend.ticketapp.passport.service.core.AppConfigs;
 import org.core.backend.ticketapp.passport.service.core.activitylog.IActivityLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,8 @@ public class ActivityLogPublisherUtil {
     private ObjectMapper objectMapper;
     @Autowired
     private IActivityLog iActivityLog;
+    @Autowired
+    private AppConfigs configs;
 
     public void publishActivityLog(HttpServletRequestProperty httpServletRequest, String oldDataJSON, Object newData, UUID userId, String typeName, String actionDescription) {
         log.info("----||||PROCESSING USER ACTIVITY LOG INSIDE ANOTHER THREAD||||---- {}", Thread.currentThread().getName());
@@ -37,6 +40,29 @@ public class ActivityLogPublisherUtil {
                     .remoteAddress(httpServletRequest.getRemoteAddr())
                     .remoteHost(httpServletRequest.getRemoteHost())
                     .remotePort(httpServletRequest.getRemotePort())
+                    .newDataCreated(objectMapper.writeValueAsString(newData))
+                    .userId(userId)
+                    .entityTypeName(typeName)
+                    .build();
+            iActivityLog.save(message);
+            log.info("----||||USER[{}] ACTIVITY TRACKED||||----", userId);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void saveActivityLog(final UUID userId, String typeName, String oldDataJSON, Object newData, String actionDescription) {
+        log.info("----||||PROCESSING USER ACTIVITY LOG INSIDE ANOTHER THREAD||||---- {}", Thread.currentThread().getName());
+        try {
+            final var message = ActivityLog.builder()
+                    .activityDescription(actionDescription)
+                    .dateCreated(LocalDateTime.now())
+                    .oldDataModified(oldDataJSON)
+                    .id(UUID.randomUUID())
+                    .remoteAddress("system")
+                    .remoteHost("system")
+                    .remotePort(configs.port)
                     .newDataCreated(objectMapper.writeValueAsString(newData))
                     .userId(userId)
                     .entityTypeName(typeName)

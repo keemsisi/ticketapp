@@ -5,10 +5,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.thecarisma.ExcelColumn;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+import org.core.backend.ticketapp.common.enums.AccountType;
+import org.core.backend.ticketapp.common.enums.Gender;
+import org.core.backend.ticketapp.common.enums.SubscriptionStatus;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -47,6 +53,14 @@ public class LoggedInUserDto {
     @JsonProperty("last_name")
     private String lastName;
 
+    @ExcelColumn(columnName = "Plan ID")
+    @JsonProperty("plan_id")
+    private String planId;
+
+    @ExcelColumn(columnName = "Plan Type")
+    @JsonProperty("plan_type")
+    private String planType;
+
     private String profilePictureLocation;
 
     @ExcelColumn(columnName = "Phone", failIfAbsent = false)
@@ -55,15 +69,39 @@ public class LoggedInUserDto {
     private String department;
 
     private String unit;
+    private Gender gender;
+
 
     private List<String> roles = new ArrayList<>();
 
     private List<String> scope = new ArrayList<>();
+
+    @JsonProperty("account_type")
+    @ExcelColumn(columnName = "account_type", failIfAbsent = false)
+    private AccountType accountType;
+
+    @JsonProperty("subscription_status")
+    private SubscriptionStatus subscriptionStatus;
+
+    @JsonProperty("subscription_expiry_date")
+    private LocalDateTime subscriptionExpiryDate;
+
+    @JsonProperty("user_type")
+    @ExcelColumn(columnName = "user_type", failIfAbsent = false)
+    private UserType userType;
 
     public UUID getUserId() {
         if (Objects.isNull(userId)) {
             return defaultUserId;
         }
         return userId;
+    }
+
+    public String getFullName() {
+        return String.format("%s %s %s", firstName, StringUtils.defaultIfBlank(middleName, ""), lastName);
+    }
+
+    public boolean isAdmin() {
+        return getRoles().contains("super_admin") || getRoles().contains("admin");
     }
 }

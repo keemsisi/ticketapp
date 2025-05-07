@@ -39,3 +39,6 @@ build/
 .DS_Store
 log
 out
+/bin/
+
+src/main/resources/credentials.json

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
-import org.core.backend.ticketapp.common.enums.TimeZoneEnum;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -26,7 +26,19 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Table(name = "event")
+@Table(name = "event", indexes = {
+        @Index(name = "ix_event_title_ix", columnList = "title"),
+        @Index(name = "ix_event_description_ix", columnList = "description"),
+        @Index(name = "ix_event_street_address_ix", columnList = "street_address"),
+        @Index(name = "ix_event_location_ix", columnList = "location"),
+        @Index(name = "ix_event_categories_ix", columnList = "categories"),
+        @Index(name = "ix_event_ticket_type_ix", columnList = "ticket_type"),
+        @Index(name = "ix_event_event_date_ix", columnList = "event_date"),
+        @Index(name = "ix_event_is_public_ix", columnList = "is_public"),
+        @Index(name = "ix_event_end_date_ix", columnList = "end_date"),
+        @Index(name = "ix_event_theme_ix", columnList = "theme"),
+        @Index(name = "ix_event_date_created_ix", columnList = "date_created")
+})
 @Builder
 @TypeDefs({@TypeDef(name = "JSONB", typeClass = JsonBinaryType.class)})
 public class Event extends AbstractBaseEntity {
@@ -37,6 +49,7 @@ public class Event extends AbstractBaseEntity {
     @NotBlank
     private String title;
     @NotBlank
+    @Column(columnDefinition = "varchar(1000)")
     private String description;
 
     @Column(name = "physical_event", columnDefinition = "bool", nullable = false)
@@ -50,6 +63,12 @@ public class Event extends AbstractBaseEntity {
 
     @Column(name = "max_per_user")
     private int maxPerUser;
+
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
+
+    @Column(name = "theme")
+    private String theme;
 
     @NotNull
     private String location;
@@ -68,11 +87,10 @@ public class Event extends AbstractBaseEntity {
     @Column(columnDefinition = "bool default false")
     private boolean recurring = false;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "time_zone")
-    private TimeZoneEnum timeZone = TimeZoneEnum.WAT;
+    @Column(name = "time_zone", columnDefinition = "varchar(65) not null default 'Africa/Lagos'")
+    private String timeZone = "Africa/Lagos";
 
-    @Column(name = "event_date", nullable = false)
+    @Column(name = "event_date", columnDefinition = "timestamptz", nullable = false)
     private LocalDateTime eventDate;
 
     @Column(name = "user_id", nullable = false)
@@ -93,10 +111,22 @@ public class Event extends AbstractBaseEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<EventSeatSection> seatSections;
 
+    @Column(name = "type")
+    private String type;
+
+    @Column(name = "is_public", columnDefinition = "boolean not null default true")
+    private boolean isPublic;
+
+    @Column(name = "link", columnDefinition = "varchar(1024)")
+    private String link;
+
+    @Column(name = "calendar_id", columnDefinition = "varchar(250)")
+    private String calendarId;
+
     @PrePersist
     public void onCreate() {
-        if (approvalStatus == null) approvalStatus = ApprovalStatus.APPROVED;
-        if (id == null) id = UUID.randomUUID();
-        if (dateCreated == null) LocalDateTime.now();
+        this.id = ObjectUtils.defaultIfNull(this.id, UUID.randomUUID());
+        this.approvalStatus = ObjectUtils.defaultIfNull(this.approvalStatus, ApprovalStatus.APPROVED);
+        this.dateCreated = ObjectUtils.defaultIfNull(this.dateCreated, LocalDateTime.now());
     }
 }

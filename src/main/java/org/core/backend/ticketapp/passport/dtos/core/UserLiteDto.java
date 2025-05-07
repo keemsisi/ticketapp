@@ -1,8 +1,10 @@
 package org.core.backend.ticketapp.passport.dtos.core;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.github.thecarisma.CopyProperty;
 import io.github.thecarisma.ExcelColumn;
 import lombok.*;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.UserType;
 
 import javax.persistence.Column;
@@ -18,8 +20,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserLiteDto {
-    @NotNull
-    private UserType type;
+    @NotNull(message = "account type required!")
+    @JsonAlias(value = "type")
+    private AccountType accountType;
 
     @CopyProperty(ignore = true)
     private UUID id;
@@ -38,11 +41,11 @@ public class UserLiteDto {
 
     @ExcelColumn(columnName = "LAST NAME")
     private String lastName;
+
     private String profilePictureLocation;
 
     @ExcelColumn(columnName = "DOB")
     private LocalDate dob;
-    private String password;
 
     @ExcelColumn(columnName = "PHONE", failIfAbsent = false)
     private String phone;
@@ -77,4 +80,25 @@ public class UserLiteDto {
 
     @ExcelColumn(columnName = "LGA OF ORIGIN", failIfAbsent = false)
     private String lgaOfOrigin;
+
+    @NotNull(message = "usertype is requires")
+    private UserType userType;
+
+    private String businessName;
+
+    @NotNull(message = "password is required")
+    private String password;
+
+    public boolean isIndividualMerchant() {
+        return accountType == AccountType.INDIVIDUAL_MERCHANT_OWNER;
+    }
+
+    public boolean isOrganizationMerchant() {
+        return accountType == AccountType.ORGANIZATION_MERCHANT_OWNER;
+    }
+
+    public boolean isOrganizationBuyer() {
+        return accountType == AccountType.ORGANIZATION_BUYER_OWNER;
+    }
+
 }

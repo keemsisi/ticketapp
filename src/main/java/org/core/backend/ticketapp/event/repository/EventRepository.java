@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,6 +18,18 @@ public interface EventRepository extends JpaRepository<Event, UUID>, PagingAndSo
     @NotNull
     @Query(value = "SELECT e.* FROM event e WHERE e.id = ?1 AND e.deleted=false", nativeQuery = true)
     Optional<Event> findById(final @NotNull UUID id);
+
+    @NotNull
+    @Query(value = "SELECT e.* FROM event e WHERE e.id IN ?1 AND e.deleted=false", nativeQuery = true)
+    List<Event> findAllById(final @NotNull List<UUID> id);
+
+    @NotNull
+    @Query(value = "SELECT e.* FROM event e WHERE e.id IN ?1 AND e.user_id = ?2 AND e.deleted=false", nativeQuery = true)
+    List<Event> findAllById(final @NotNull List<UUID> id,final @NotNull UUID userId);
+
+    @NotNull
+    @Query(value = "SELECT e.* FROM event e WHERE e.id = ?1 AND e.tenant_id=?2 AND e.deleted=false", nativeQuery = true)
+    Optional<Event> findById(final @NotNull UUID id, final UUID tenantId);
 
     @Query(value = "SELECT e.* FROM event e WHERE e.ticket_type = ?1 AND e.deleted=false", nativeQuery = true)
     Page<Event> getByEventTicketType(@NotNull String eventTicketType, final Pageable pageRequest);

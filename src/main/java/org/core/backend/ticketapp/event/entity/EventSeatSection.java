@@ -5,10 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
-import org.hibernate.annotations.OptimisticLockType;
-import org.hibernate.annotations.OptimisticLocking;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.type.PostgresUUIDType;
 
@@ -25,7 +24,6 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @TypeDef(name = "UUID", typeClass = PostgresUUIDType.class)
 @Table(name = "event_seat_sections", indexes = {@Index(name = "ix_tbl_event_seat_secs_type_event_id_user_id_uq", columnList = "type,event_id,user_id", unique = true)})
-@OptimisticLocking(type = OptimisticLockType.VERSION)
 public class EventSeatSection extends AbstractBaseEntity {
     @Column(name = "event_id")
     private UUID eventId;
@@ -63,8 +61,8 @@ public class EventSeatSection extends AbstractBaseEntity {
 
     @PrePersist
     public void onCreate() {
-        if (id == null) id = UUID.randomUUID();
-        if (dateCreated == null) LocalDateTime.now();
-        this.approvalStatus = ApprovalStatus.APPROVED;
+        this.id = ObjectUtils.defaultIfNull(this.id, UUID.randomUUID());
+        this.approvalStatus = ObjectUtils.defaultIfNull(this.approvalStatus, ApprovalStatus.APPROVED);
+        this.dateCreated = ObjectUtils.defaultIfNull(this.dateCreated, LocalDateTime.now());
     }
 }

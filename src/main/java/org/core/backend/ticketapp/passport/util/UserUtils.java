@@ -4,10 +4,13 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import org.apache.commons.lang3.StringUtils;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
+import org.core.backend.ticketapp.passport.dtos.core.LoggedInUserDto;
 import org.springframework.stereotype.Component;
 
 import java.security.InvalidParameterException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -65,8 +68,15 @@ public class UserUtils {
         }
     }
 
-    public static void assertUserHasRole(List<String> roles, String role) {
+    public static boolean assertUserHasRole(List<String> roles, String role) {
         if (!roles.contains(role)) {
+            throw new ApplicationException(403, "403", "You don't have the right permission to complete this action.");
+        }
+        return true;
+    }
+
+    public static void assertUserHasAllRoles(List<String> userRoles, List<String> roles) {
+        if (!new HashSet<>(userRoles).containsAll(roles)) {
             throw new ApplicationException(403, "403", "You don't have the right permission to complete this action.");
         }
     }
@@ -153,6 +163,24 @@ public class UserUtils {
         if (Objects.nonNull(userId) && !userId.equals(JwtTokenUtil.getAuthUser().getUserId())) {
             UserUtils.assertUserHasRole(user.getRoles(), "system_admin");
         }
+    }
+
+    public static void containsActionName(String actionName) {
+        var jwtTokenUtil = new JwtTokenUtil();
+        if (!(((List<String>) jwtTokenUtil.getClaimByKey("scope")).contains(actionName))) {
+            throw new ApplicationException(403, "forbidden", "Oops! You don't have right permission over this resource");
+        }
+    }
+
+    public static UUID getTenantId(final LoggedInUserDto user, UUID requestTenantId) {
+        if (Objects.nonNull(user.getUserType()) && user.getUserType().isBuyerOrSeller()
+                && (Objects.nonNull(requestTenantId) && !user.getTenantId().equals(requestTenantId))
+                && !UserUtils.userHasAnyRole(user.getRoles(), AccountType.getAllowedSystemAdminAccountType())) {
+            throw new ApplicationException(403, "forbidden", "Oops! you can't access this resource!");
+        } else if (Objects.nonNull(user.getUserType()) && user.getUserType().isBuyerOrSeller()) {
+            return user.getTenantId();
+        }
+        return requestTenantId;
     }
 
 //    public static void canAccessResource(final UUID userId) {

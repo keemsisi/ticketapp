@@ -8,6 +8,9 @@ import io.github.thecarisma.ExcelColumn;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
@@ -193,22 +196,32 @@ public class User implements UserDetails {
     @Transient
     private String department;
     @Transient
-    private int passwordExpirationInDays;
+    private Integer passwordExpirationInDays;
     @Transient
-    private int accountLockoutDurationInMinutes;
+    private Integer accountLockoutDurationInMinutes;
     @Transient
-    private int inactivePeriodInMinutes;
+    private Integer inactivePeriodInMinutes;
     @Transient
-    private int accountLockoutThresholdCount;
+    private Integer accountLockoutThresholdCount;
     @Transient
-    private boolean twoFaEnabled = false;
+    private Boolean twoFaEnabled = false;
+
+    @JsonIgnore
     @Version
     @Column(name = "version", columnDefinition = "numeric(19,2) default 0")
     private Long version;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "account_type")
+    private AccountType accountType;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private UserType type;
+
+    @Column(name = "default_plan_id")
+    private UUID defaultPlanId;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -241,6 +254,10 @@ public class User implements UserDetails {
     }
 
     public String getFullName() {
-        return String.format("%s %s %s", lastName, middleName, firstName);
+        return String.format("%s %s %s", lastName, StringUtils.defaultIfBlank(middleName, ""), firstName);
+    }
+
+    public Boolean isTwoFaEnabled() {
+        return ObjectUtils.defaultIfNull(twoFaEnabled,false);
     }
 }

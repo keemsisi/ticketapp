@@ -44,8 +44,7 @@ public class SocketIOClientConnectionHandler implements ISocketIOClientEventHand
     private final PasswordEncoder bCryptPasswordEncoder;
 
     @OnConnect
-    @SuppressWarnings("unchecked")
-    public void onConnect(SocketIOClient client) {
+    public void onConnect(final SocketIOClient client) {
         try {
             var token = client.getHandshakeData().getSingleUrlParam("userAuth");
             var userNamePasswordBase64Exploded = new String(Base64.getDecoder().decode(token)).split(":");
@@ -59,18 +58,19 @@ public class SocketIOClientConnectionHandler implements ISocketIOClientEventHand
 
             String userId = user.getId().toString();
             UUID userUUID = UUID.fromString(userId);
+            UUID tenantId = user.getTenantId();
             List<String> userScope = permissions.getActions();
             permissions.setPassword(null);
             var userData = objectMapper.writeValueAsString(permissions);
 
-            Optional<User> userFound = userRepository.findByUUID(userUUID);
+            final var userFound = userRepository.findByUUID(userUUID);
             if (userFound.isPresent()) {
-                Optional<NotificationSubscriber> notificationSubscriber = notificationSubscriberRepository.findByUserId(userFound.get().getId());
+                final var notificationSubscriber = notificationSubscriberRepository.findByUserId(userFound.get().getId());
                 if (notificationSubscriber.isPresent()) {
                     updateExistingSubscriber(notificationSubscriber.get(), userData, client, userScope);
-                    sendAllUnreadNotificationsToUser(client, userUUID, userScope, userData);
+                    sendAllUnreadNotificationsToUser(client, userUUID, userScope, userData, tenantId);
                 } else {
-                    sendAllUnreadNotificationsToUser(client, userUUID, userScope, userData);
+                    sendAllUnreadNotificationsToUser(client, userUUID, userScope, userData, tenantId);
                     storeNewSubscriber(userUUID, userData, client, userScope);
                 }
             } else {
@@ -84,20 +84,22 @@ public class SocketIOClientConnectionHandler implements ISocketIOClientEventHand
         }
     }
 
-    private void sendAllUnreadNotificationsToUser(SocketIOClient client, UUID userId, List<String> userScope, String userData) {
-        client.sendEvent("new_notification", notificationRepository.getAllUserUnreadNotificationsUnPaged(userId, userScope).stream().parallel().map(notification -> {
-            Message message = new Message();
-            MessageDto messageDto = new MessageDto(notification.getId(),
-                    notification.getRequestedBy(), notification.getRequestedByName(), notification.getActionName(),
-                    java.sql.Timestamp.valueOf(notification.getDateCreated()),
-                    notification.getModuleId(), new Date(), notification.getApprovalStatus(),
-                    NotificationType.SUBSCRIPTION, null,
-                    notification.getDescription(), notification.getProcessorStatus(),
-                    notification.getProcessorRemark());
-            message.setMessage("Unread notification");
-            message.setData(messageDto);
-            return message;
-        }).collect(Collectors.toList()));
+    private void sendAllUnreadNotificationsToUser(SocketIOClient client, UUID userId, List<String> userScope, String userData, UUID tenantId) {
+        client.sendEvent("new_notification", notificationRepository
+                .getAllUserUnreadNotificationsUnPaged(userId, userScope, tenantId)
+                .stream().parallel().map(notification -> {
+                    Message message = new Message();
+                    MessageDto messageDto = new MessageDto(notification.getId(),
+                            notification.getRequestedBy(), notification.getRequestedByName(), notification.getActionName(),
+                            java.sql.Timestamp.valueOf(notification.getDateCreated()),
+                            notification.getModuleId(), new Date(), notification.getApprovalStatus(),
+                            NotificationType.APPROVAL, null,
+                            notification.getDescription(), notification.getProcessorStatus(),
+                            notification.getProcessorRemark(), notification.getTenantId());
+                    message.setMessage("Unread notification");
+                    message.setData(messageDto);
+                    return message;
+                }).collect(Collectors.toList()));
         log.info("USER_ID:{} SESSION_ID {} ", userId, client.getSessionId());
     }
 

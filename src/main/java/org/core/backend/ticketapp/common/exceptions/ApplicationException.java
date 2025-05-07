@@ -29,4 +29,8 @@ public class ApplicationException extends RuntimeException{
         this.httpStatus = httpStatus;
         this.data = data;
     }
+
+    public static ApplicationException notFoundException() {
+        return new ApplicationException(404, "not_found", "Resource not found!");
+    }
 }

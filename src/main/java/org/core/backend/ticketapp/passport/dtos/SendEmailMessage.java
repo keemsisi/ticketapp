@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.core.backend.ticketapp.common.mailchimp.To;
+import org.core.backend.ticketapp.passport.service.core.mail.mailchimp.dto.To;
 
 import java.util.List;
 

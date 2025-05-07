@@ -5,12 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.core.backend.ticketapp.common.enums.Status;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OptimisticLockType;
+import org.hibernate.annotations.OptimisticLocking;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -20,27 +24,41 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @MappedSuperclass
+@OptimisticLocking(type = OptimisticLockType.VERSION)
 public abstract class AbstractBaseEntity {
     @Id
-    @Column(columnDefinition = "UUID NOT NULL default uuid_generate_v1()")
+    @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4() NOT NULL")
     protected UUID id;
-    @Column(columnDefinition = "timestamptz with time zone DEFAULT CURRENT_DATE NOT NULL", updatable = false)
+
+    @CreationTimestamp
+    @Column(name = "date_created", columnDefinition = "timestamptz DEFAULT CURRENT_DATE NOT NULL", updatable = false)
     protected LocalDateTime dateCreated;
+
     @Column(updatable = false, name = "user_id")
     protected UUID userId;
-    @Column(columnDefinition = "timestamptz with time zone")
+
+    @Column(columnDefinition = "timestamptz")
     protected LocalDateTime dateModified;
+
     protected UUID modifiedBy;
+
     @NotNull
     @Column(columnDefinition = "SERIAL UNIQUE", insertable = false, updatable = false)
     protected long index;
+
     @NotNull
     @Column(columnDefinition = "bool default false")
     protected boolean deleted;
+
     @JsonIgnore
     @Column(columnDefinition = "bigint default(0)")
     private long version;
+
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Column(name = "tenant_id", columnDefinition = "uuid default null")
     private UUID tenantId;
+
+    @Version
+    private Long versionId;
+
 }

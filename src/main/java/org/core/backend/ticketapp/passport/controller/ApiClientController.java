@@ -1,6 +1,6 @@
 package org.core.backend.ticketapp.passport.controller;
 
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dtos.core.ClientDto;
 import org.core.backend.ticketapp.passport.entity.Client;
@@ -34,12 +34,12 @@ public class ApiClientController {
         var user = jwtTokenUtil.getUser();
         if (!user.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
+                    new GenericApiResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
                     HttpStatus.UNAUTHORIZED);
         }
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Client.class.getTypeName(), null, null, "Initiated a request to create an API client");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "client created successfully.",
+                new GenericApiResponse<>("00", "client created successfully.",
                         clientService.create(clientDto, user)),
                 HttpStatus.OK);
     }
@@ -47,7 +47,7 @@ public class ApiClientController {
     @RequestMapping(value = "/{clientId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getById(@PathVariable UUID clientId) throws Exception {
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "client record retrieved successfully.",
+                new GenericApiResponse<>("00", "client record retrieved successfully.",
                         clientService.getClientById(clientId)),
                 HttpStatus.OK);
     }

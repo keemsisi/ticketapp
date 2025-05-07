@@ -5,7 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.thecarisma.FatalObjCopierException;
 import lombok.AllArgsConstructor;
-import org.core.backend.ticketapp.common.GenericResponse;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
+import org.core.backend.ticketapp.common.enums.AccountType;
 import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.exceptions.ApplicationException;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -56,14 +58,23 @@ public class UserController {
     @RequestMapping(value = "/onboard", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> userOnboarding(@Validated @RequestBody UserLiteDto userDto) throws JsonProcessingException {
         final var request = modelMapper.map(userDto, UserDto.class);
-        if (userDto.getType().equals(UserType.SUPER_ADMIN) || userDto.getType().equals(UserType.SYSTEM_ADMIN_USER)) {
+        if (userDto.getAccountType().equals(AccountType.SUPER_ADMIN) || userDto.getAccountType().equals(AccountType.SYSTEM_ADMIN_USER)) {
             UserUtils.assertUserHasRole(jwtTokenUtil.getUser().getRoles(), "super_admin");
+        }
+        if (userDto.getUserType().equals(UserType.SELLER) && userDto.getAccountType().equals(AccountType.INDIVIDUAL)) {
+            return new ResponseEntity<>(
+                    new GenericApiResponse<>("01", "Seller with Individual account type not allowed!", null),
+                    HttpStatus.BAD_REQUEST);
+        }
+        if (!AccountType.allowedForUserOnboarding().contains(userDto.getAccountType())) {
+            throw new ApplicationException(400, "not_allowed", String.format("Oops! Only this account type are allowed : %s",
+                    AccountType.allowedForUserOnboarding()));
         }
         final var newRegisteredUser = userService.createUser(request, new LoggedInUserDto());
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null,
                 objectMapper.writeValueAsString(newRegisteredUser), "Initiated a request to register a user under a tenant");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "The user has been successfully registered", ""),
+                new GenericApiResponse<>("00", "The user has been successfully registered", ""),
                 HttpStatus.OK);
     }
 
@@ -73,10 +84,10 @@ public class UserController {
         Optional<User> user = userService.getUserById(id);
         if (!user.isPresent()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "No user with the id '" + id + "' found", ""),
+                    new GenericApiResponse<>("01", "No user with the id '" + id + "' found", ""),
                     HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(new GenericResponse<>("00", "", user.get()),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", null, user.get()),
                 HttpStatus.OK);
     }
 
@@ -103,7 +114,7 @@ public class UserController {
         Page<User> users = userService.listUsers(_firstName, _lastName, _middleName,
                 email, gender, phone, ResponsePageRequest.createPageRequest(pageNumber, pageSize, order, sortBy, true, "created_on"));
 
-        return new ResponseEntity<>(new GenericResponse<>("00", "", users),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", users),
                 HttpStatus.OK);
     }
 
@@ -123,19 +134,14 @@ public class UserController {
                                              @RequestParam(required = false) String[] sortBy) throws ParseException {
         String _firstName = firstName != null ? firstName.toLowerCase() : null;
         String _lastName = lastName != null ? lastName.toLowerCase() : null;
-        String _email = email;
-        String _dateOn = dateOn;
-        String _startDate = startDate;
-        String _endDate = endDate;
-        String _dateBefore = dateBefore;
-        String _dateAfter = dateAfter;
-
         var loggedInUser = jwtTokenUtil.getUser();
         UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.SUPER_ADMIN);
 
-        Page<User> users = userService.listLockedUsers(_firstName, _lastName, _email, _dateOn, _dateBefore, _dateAfter, _startDate, _endDate, ResponsePageRequest.createPageRequest(pageNumber, pageSize, order, sortBy, true, "created_on"));
+        final var users = userService.listLockedUsers(_firstName,
+                _lastName, email, dateOn, dateBefore, dateAfter, startDate, endDate,
+                ResponsePageRequest.createPageRequest(pageNumber, pageSize, order, sortBy, true, "created_on"));
 
-        return new ResponseEntity<>(new GenericResponse<>("00", "", users),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", users),
                 HttpStatus.OK);
     }
 
@@ -145,36 +151,54 @@ public class UserController {
                                        @RequestParam(required = false) String middleName) throws ParseException {
         List<User> userEntities = userService.findUsers(firstName, lastName, middleName);
 
-        return new ResponseEntity<>(new GenericResponse<>("00", "", userEntities),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", userEntities),
                 HttpStatus.OK);
     }
 
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> registerUser(@Validated @RequestBody UserDto userDto) throws JsonProcessingException {
+        //update here to only assign the role the user has!
         User newRegisteredUser = null;
         var loggedInUser = jwtTokenUtil.getUser();
         UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.ONBOARD_USER);
+        if (loggedInUser.getUserType().isBuyerOrSeller()) {
+            if (loggedInUser.getUserType() != userDto.getUserType()) {
+                return new ResponseEntity<>(
+                        new GenericApiResponse<>("01", "Oops! Not Allowed!", ""),
+                        HttpStatus.FORBIDDEN);
+            }
+            if (!AccountType.isTenantUserAccountType(userDto.getAccountType())) {
+                return new ResponseEntity<>(
+                        new GenericApiResponse<>("01", "Oops! Only Organization/Individual user can be created!", ""),
+                        HttpStatus.FORBIDDEN);
+            }
+        }
+        if (AccountType.isAdminUser(userDto.getAccountType()) && !loggedInUser.isAdmin()) {
+            return new ResponseEntity<>(
+                    new GenericApiResponse<>("01", "Oops! Not Allowed! Only super admin account!", ""),
+                    HttpStatus.FORBIDDEN);
+        }
         newRegisteredUser = userService.createUser(userDto, loggedInUser);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null, objectMapper.writeValueAsString(newRegisteredUser), "Initiated a request to register a user under a tenant");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "The user has been successfully registered", ""),
+                new GenericApiResponse<>("00", "The user has been successfully registered", ""),
                 HttpStatus.OK);
     }
 
-    @RequestMapping(value = "{userId}/email/registration/resend", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> resendRegistrationEmail(@PathVariable(value = "userId") UUID userId) {
+    @RequestMapping(value = "/email/registration/resend", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> resendRegistrationEmail() {
         var loggedInUser = jwtTokenUtil.getUser();
         UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.SUPER_ADMIN);
-        Optional<User> userResult = userService.getUserById(userId);
+        Optional<User> userResult = userService.getUserById(jwtTokenUtil.getUser().getUserId());
         if (!userResult.isPresent()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Unable to find member account. Ensure you are logged into the system", ""),
+                    new GenericApiResponse<>("01", "Unable to find member account. Ensure you are logged into the system", ""),
                     HttpStatus.BAD_REQUEST);
         }
         var response = userService.sendRegistrationEmail(userResult.get());
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null, null, "Initiated a request to resend registration email");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Invitation email resent to user.", response), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Invitation email resent to user.", response), HttpStatus.OK);
     }
 
 
@@ -182,13 +206,13 @@ public class UserController {
     public ResponseEntity<?> userFullProfile(@RequestHeader(name = "Authorization", defaultValue = "Bearer ", required = true) String authorization) {
         var loggedInUser = jwtTokenUtil.getUser();
         var user = userService.getUserById(loggedInUser.getUserId());
-        return new ResponseEntity<>(new GenericResponse<>("00", "", user), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", user), HttpStatus.OK);
     }
 
     @RequestMapping(value = "{userId}/avatar", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getUserAvatar(@PathVariable(value = "userId") UUID userId) {
         var userResult = userDao.getUserAvatar(userId);
-        return new ResponseEntity<>(new GenericResponse<>("00", "", userResult.get()), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", userResult.get()), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/lock", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -202,7 +226,7 @@ public class UserController {
 
         if (userResult.isEmpty()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Unable to find member with the id '" +
+                    new GenericApiResponse<>("01", "Unable to find member with the id '" +
                             body.get("id") + "'", ""),
                     HttpStatus.NOT_FOUND);
         }
@@ -222,7 +246,7 @@ public class UserController {
 
         String lockMsg = (Boolean) body.get("lock") ? "This account has been successfully locked" : "This account has been successfully unlocked";
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUserAccount), "Initiated a request to get a user Avatar");
-        return new ResponseEntity<>(new GenericResponse<>("00", lockMsg,
+        return new ResponseEntity<>(new GenericApiResponse<>("00", lockMsg,
                 null), HttpStatus.OK);
     }
 
@@ -234,7 +258,7 @@ public class UserController {
         Optional<User> userResult = userService.getUserById(UUID.fromString((String) body.get("id")));
         if (userResult.isEmpty()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Unable to find member with the id '" +
+                    new GenericApiResponse<>("01", "Unable to find member with the id '" +
                             body.get("id") + "'", ""),
                     HttpStatus.FORBIDDEN);
         }
@@ -243,7 +267,7 @@ public class UserController {
         unUpdatedUserAccount.setDeactivated((Boolean) body.get("deactivate"));
         updatedUserAccount = userService.save(unUpdatedUserAccount);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUserAccount), "Initiated a request to get a user Avatar");
-        return new ResponseEntity<>(new GenericResponse<>("00", "This account has been successfully activate or deactivate",
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "This account has been successfully activate or deactivate",
                 null), HttpStatus.OK);
     }
 
@@ -257,14 +281,14 @@ public class UserController {
 
         if (userResult.isEmpty()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Unable to find member account. Ensure you are logged into the system", ""),
+                    new GenericApiResponse<>("01", "Unable to find member account. Ensure you are logged into the system", ""),
                     HttpStatus.FORBIDDEN);
         }
         oldDataJSON = objectMapper.writeValueAsString(userResult.get());
         updatedUserAccount = userService.updateUser(userResult.get(), userDto);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUserAccount), "Initiated a request to update your profile");
 
-        return new ResponseEntity<>(new GenericResponse<>("00", "", updatedUserAccount), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", updatedUserAccount), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -275,13 +299,15 @@ public class UserController {
         Optional<User> userResult = userService.getUserById(userId);
         if (userResult.isEmpty()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Unable to find member account. Ensure you are logged into the system", ""),
+                    new GenericApiResponse<>("01", "Unable to find member account. Ensure you are logged into the system", ""),
                     HttpStatus.FORBIDDEN);
         }
+        final var loggedInUser = jwtTokenUtil.getUser();
+        UserUtils.assertUserHasRole(loggedInUser.getRoles(), ConstantUtil.SUPER_ADMIN);
         oldDataJSON = objectMapper.writeValueAsString(userResult.get());
         updatedUserAccount = userService.updateUser(userResult.get(), userDto);
-        activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUserAccount), "Initiated a request to update profile");
-        return new ResponseEntity<>(new GenericResponse<>("00", "", updatedUserAccount), HttpStatus.OK);
+        activityLogProcessorUtils.processActivityLog(loggedInUser.getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUserAccount), "Initiated a request to update profile");
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", updatedUserAccount), HttpStatus.OK);
     }
 
 
@@ -295,32 +321,32 @@ public class UserController {
             Optional<User> userResult = userService.getUserById(user.getUserId());
             if (!userResult.isPresent()) {
                 return new ResponseEntity<>(
-                        new GenericResponse<>("01", "Unable to find member account. Ensure you are logged into the system", ""),
+                        new GenericApiResponse<>("01", "Unable to find member account. Ensure you are logged into the system", ""),
                         HttpStatus.FORBIDDEN);
             }
             unUpdatedUserAccount = userResult.get();
             oldDataJSON = objectMapper.writeValueAsString(unUpdatedUserAccount);
             updatedUserAccount = userService.updateUserPicture(unUpdatedUserAccount, file);
-            return new ResponseEntity<>(new GenericResponse<>("00", "", updatedUserAccount), HttpStatus.OK);
+            return new ResponseEntity<>(new GenericApiResponse<>("00", "", updatedUserAccount), HttpStatus.OK);
         } finally {
             activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUserAccount), "Initiated a request to update a user profile");
         }
     }
 
-    @RequestMapping(value = "/password/reset/email", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> requestPasswordChangeEmail(@RequestParam(value = "email") String email) throws
+    @RequestMapping(value = "/password/reset/email", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> requestPasswordChangeEmail(@RequestParam(value = "email") @NotBlank String email) throws
             NoSuchAlgorithmException, JsonProcessingException {
         User unUpdatedUserAccount = null;
-        Optional<User> userResult = userService.getMemberByEmail(email);
-        if (!userResult.isPresent()) {
+        Optional<User> userResult = userService.getMemberByEmail(email.toLowerCase());
+        if (userResult.isEmpty()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Unable to find member account. Ensure you the email address is correct", null),
+                    new GenericApiResponse<>("01", "Unable to find member account. Ensure you the email address is correct", null),
                     HttpStatus.FORBIDDEN);
         }
         unUpdatedUserAccount = userResult.get();
         userService.sendPasswordResetEmail(userResult.get());
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId() == null ? UUID.randomUUID() : jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), objectMapper.writeValueAsString(unUpdatedUserAccount), null, "Initiated a request to reset a user password using email to fetch the account to be updated");
-        return new ResponseEntity<>(new GenericResponse<>("00", "The password reset detail has been sent to your email", null),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "The password reset detail has been sent to your email", null),
                 HttpStatus.OK);
     }
 
@@ -333,7 +359,7 @@ public class UserController {
 
         if (emailVerification.get().isTokenUsed()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "The verification token has already been used", null),
+                    new GenericApiResponse<>("01", "The verification token has already been used", null),
                     HttpStatus.ALREADY_REPORTED);
         }
 
@@ -341,13 +367,13 @@ public class UserController {
 
         if (!user.isPresent()) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Unable to find member account", null),
+                    new GenericApiResponse<>("01", "Unable to find member account", null),
                     HttpStatus.FORBIDDEN);
         }
 
         if (!userService.passwordAdhereToPolicy(user.get(), resetPassword.getPassword())) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "The password does not adhere to the system policy", null),
+                    new GenericApiResponse<>("01", "The password does not adhere to the system policy", null),
                     HttpStatus.BAD_REQUEST);
         }
 
@@ -362,7 +388,7 @@ public class UserController {
         emailVerificationService.changeVerificationStatus(emailVerification.get(), true);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUserAccount), "Initiated a request to reset user account password");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "Your password has been reset successfully", null),
+                new GenericApiResponse<>("00", "Your password has been reset successfully", null),
                 HttpStatus.OK);
     }
 
@@ -376,26 +402,26 @@ public class UserController {
 
         if (!userService.passwordAdhereToPolicy(user.get(), changePassword.getNewPassword())) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "The password does not adhere to the system policy", ""),
+                    new GenericApiResponse<>("01", "The password does not adhere to the system policy", ""),
                     HttpStatus.BAD_REQUEST);
         }
 
         if (!new BCryptPasswordEncoder().matches(changePassword.getOldPassword(), user.get().getPassword())) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Kindly confirm that your old password is correct.", ""),
+                    new GenericApiResponse<>("01", "Kindly confirm that your old password is correct.", ""),
                     HttpStatus.UNAUTHORIZED);
         }
 
         if (new BCryptPasswordEncoder().matches(changePassword.getNewPassword(), user.get().getPassword())) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "You cannot use an old password. Set a new one", ""),
+                    new GenericApiResponse<>("01", "You cannot use an old password. Set a new one", ""),
                     HttpStatus.BAD_REQUEST);
         }
         unUpdatedUserAccount = user.get();
         oldDataJSON = objectMapper.writeValueAsString(unUpdatedUserAccount);
         updatedUser = userService.changePassword(user.get(), changePassword);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUser), "Initiated a request to change user account password");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Password changed successfully", null),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Password changed successfully", null),
                 HttpStatus.OK);
     }
 
@@ -415,25 +441,25 @@ public class UserController {
 
         if (!userService.passwordAdhereToPolicy(user, renewPassword.getNewPassword())) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "The password does not adhere to the system policy", ""),
+                    new GenericApiResponse<>("01", "The password does not adhere to the system policy", ""),
                     HttpStatus.BAD_REQUEST);
         }
 
         if (!new BCryptPasswordEncoder().matches(renewPassword.getOldPassword(), user.getPassword())) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "Invalid username or password", ""),
+                    new GenericApiResponse<>("01", "Invalid username or password", ""),
                     HttpStatus.UNAUTHORIZED);
         }
 
         if (new BCryptPasswordEncoder().matches(renewPassword.getNewPassword(), user.getPassword())) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("01", "You cannot use an old password. Set a new one", ""),
+                    new GenericApiResponse<>("01", "You cannot use an old password. Set a new one", ""),
                     HttpStatus.BAD_REQUEST);
         }
 
         updatedUserAccount = userService.renewPassword(user, renewPassword);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), oldDataJSON, objectMapper.writeValueAsString(updatedUserAccount), "Initiated a request to change user account password");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Password changed successfully", null),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Password changed successfully", null),
                 HttpStatus.OK);
     }
 
@@ -441,15 +467,15 @@ public class UserController {
     public ResponseEntity<?> findManagers(@RequestHeader("Authorization") String authorization) throws
             ParseException {
         List<User> userEntities = userService.findManagers();
-        return new ResponseEntity<>(new GenericResponse<>("00", "", userEntities),
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "", userEntities),
                 HttpStatus.OK);
     }
 
-    @RequestMapping(value = "{userId}/actions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/actions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getActionsByUserId(@PathVariable(value = "userId") UUID userId) {
-        var userActions = userDao.getUserActionsById(userId);
+        var userActions = userDao.getUserActionsById(jwtTokenUtil.getUser().getUserId());
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "User actions retrieved successfully.", userActions),
+                new GenericApiResponse<>("00", "User actions retrieved successfully.", userActions),
                 HttpStatus.OK);
     }
 
@@ -457,15 +483,15 @@ public class UserController {
     public ResponseEntity<?> getRolesByUserId() {
         var userRoles = userDao.getUserRolesById(jwtTokenUtil.getUser().getUserId());
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "User roles retrieved successfully.", userRoles),
+                new GenericApiResponse<>("00", "User roles retrieved successfully.", userRoles),
                 HttpStatus.OK);
     }
 
-    @RequestMapping(value = "{userId}/groups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getGroupsByUserId(@PathVariable(value = "userId") UUID userId) {
-        var userGroups = userDao.getUserGroupsByUserId(userId);
+    @RequestMapping(value = "/groups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getGroupsByUserId() {
+        var userGroups = userDao.getUserGroupsByUserId(jwtTokenUtil.getUser().getUserId());
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "User actions retrieved successfully.", userGroups),
+                new GenericApiResponse<>("00", "User actions retrieved successfully.", userGroups),
                 HttpStatus.OK);
     }
 
@@ -477,7 +503,7 @@ public class UserController {
         users = userService.createUserFromExcel(user, file);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), User.class.getTypeName(), null, objectMapper.writeValueAsString(users), "Initiated a request to fetch a user groups");
         return new ResponseEntity<>(
-                new GenericResponse<>("00", "User records uploaded successfully.", users),
+                new GenericApiResponse<>("00", "User records uploaded successfully.", users),
                 HttpStatus.OK);
     }
 }

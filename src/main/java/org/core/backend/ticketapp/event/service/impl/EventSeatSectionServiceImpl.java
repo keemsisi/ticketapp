@@ -12,6 +12,7 @@ import org.core.backend.ticketapp.event.service.EventSeatSectionService;
 import org.core.backend.ticketapp.event.service.IService;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.core.backend.ticketapp.passport.util.UserUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +46,9 @@ public class EventSeatSectionServiceImpl implements EventSeatSectionService, ISe
         return seatSectionRepository.saveAll(eventSeatSections);
     }
 
+
     @Override
+    @Cacheable(value = "ticketAppCache", key = "#id")
     public EventSeatSection getById(final UUID id) {
         return seatSectionRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(404, "not_found", "Event seat section not found"));
@@ -66,6 +69,16 @@ public class EventSeatSectionServiceImpl implements EventSeatSectionService, ISe
         seatSection.setCapacity(seatSectionReq.capacity());
         seatSection.setApprovalStatus(ApprovalStatus.APPROVED);
         return seatSectionRepository.save(seatSection);
+    }
+
+    @Override
+    public List<EventSeatSection> getAllByIds(final List<UUID> seatSectionsIds) {
+        return seatSectionRepository.findAllById(seatSectionsIds);
+    }
+
+    @Override
+    public List<EventSeatSection> getByEventId(UUID eventId) {
+        return seatSectionRepository.getAllByEventId(eventId);
     }
 
     public void delete(UUID id) {

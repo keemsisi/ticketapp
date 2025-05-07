@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
 import org.core.backend.ticketapp.common.entity.AbstractBaseEntity;
 
 import javax.persistence.*;
@@ -25,7 +26,7 @@ public class EventWishList extends AbstractBaseEntity {
 
     @PrePersist
     protected void onCreate() {
-        if (id == null) id = UUID.randomUUID();
-        if (dateCreated == null) LocalDateTime.now();
+        this.id = ObjectUtils.defaultIfNull(this.id, UUID.randomUUID());
+        this.dateCreated = ObjectUtils.defaultIfNull(this.dateCreated, LocalDateTime.now());
     }
 }

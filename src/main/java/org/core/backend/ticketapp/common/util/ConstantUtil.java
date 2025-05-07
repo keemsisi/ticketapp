@@ -2,6 +2,7 @@ package org.core.backend.ticketapp.common.util;
 
 public class ConstantUtil {
     public static final String SUPER_ADMIN = "super_admin";
+    public static final String WALLET = "wallet";
     public static final String ONBOARD_USER = "onboard_user";
     public static final String USER = "user";
     public static final String SUCCESS_CODE = "00";

@@ -3,7 +3,7 @@ package org.core.backend.ticketapp.common.response;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-import org.core.backend.ticketapp.common.FieldError;
+import org.core.backend.ticketapp.common.dto.FieldError;
 
 import java.util.List;
 

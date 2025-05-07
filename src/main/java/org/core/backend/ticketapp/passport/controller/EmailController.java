@@ -2,10 +2,9 @@ package org.core.backend.ticketapp.passport.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.core.backend.ticketapp.common.GenericResponse;
-import org.core.backend.ticketapp.common.mailchimp.MailRequest;
-import org.core.backend.ticketapp.common.mailchimp.SendMessage;
-import org.core.backend.ticketapp.passport.service.MailChimpService;
+import org.core.backend.ticketapp.common.dto.GenericApiResponse;
+import org.core.backend.ticketapp.passport.service.core.mail.mailchimp.dto.MailRequest;
+import org.core.backend.ticketapp.passport.service.core.mail.EmailService;
 import org.core.backend.ticketapp.passport.util.ActivityLogProcessorUtils;
 import org.core.backend.ticketapp.passport.util.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmailController {
 
     @Autowired
-    private MailChimpService mailChimpService;
+    private EmailService emailService;
     @Autowired
     private ActivityLogProcessorUtils activityLogProcessorUtils;
     @Autowired
@@ -33,13 +32,8 @@ public class EmailController {
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> send(@RequestBody MailRequest request) throws JsonProcessingException {
-        var message = SendMessage.builder()
-                .subject(request.getSubject())
-                .html(request.getHtml())
-                .to(request.getTo())
-                .build();
-        mailChimpService.send(message);
+        emailService.send(request);
         activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), EmailController.class.getTypeName(), objectMapper.writeValueAsString(request), null, "Initiated a request to send mail");
-        return new ResponseEntity<>(new GenericResponse<>("00", "Email sent successfully", null), HttpStatus.OK);
+        return new ResponseEntity<>(new GenericApiResponse<>("00", "Email sent successfully", null), HttpStatus.OK);
     }
 }

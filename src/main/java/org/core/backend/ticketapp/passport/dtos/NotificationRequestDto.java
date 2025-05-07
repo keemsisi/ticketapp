@@ -46,6 +46,7 @@ public class NotificationRequestDto {
     private String description;
     private UUID notificationForUserId;
     @Enumerated(EnumType.STRING)
-    private NotificationType notificationType; // RELIEF_REQUEST, SUBSCRIPTION
+    private NotificationType notificationType; // RELIEF_REQUEST, EVENT
     private String subAction;
+    private String tenantId;
 }

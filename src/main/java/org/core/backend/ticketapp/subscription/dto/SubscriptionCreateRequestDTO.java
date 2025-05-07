@@ -1,0 +1,20 @@
+package org.core.backend.ticketapp.subscription.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class SubscriptionCreateRequestDTO {
+    private UUID vendorId;
+    private String planCode;
+}

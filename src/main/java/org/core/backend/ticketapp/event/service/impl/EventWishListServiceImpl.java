@@ -24,14 +24,24 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
 ) implements EventWishListService {
     @Override
     public <R> EventWishList create(R request) {
+        if (jwtTokenUtil.getUser().getUserType().isSeller()) {
+            throw new ApplicationException(403, "not_allowed", "Seller not allowed to add to wishlist!");
+        }
         final var req = (CreateEventWishListDTO) request;
         final var event = eventService.getById(req.getEventId());
         final var userId = jwtTokenUtil.getUser().getUserId();
         final var existingEventWishList = repository.getByEventIdAndUserId(event.getId(), userId);
-        if (!existingEventWishList.isEmpty()) {
+        if (existingEventWishList.isPresent() && !existingEventWishList.get().isDeleted()) {
             throw new ApplicationException(400, "already_exists", "Event already exists as wishlist!");
+        } else {
+            if (existingEventWishList.isPresent()) {
+                final var eventWishList = existingEventWishList.get();
+                eventWishList.setDeleted(false);
+                return repository.save(eventWishList);
+            }
         }
         final var eventWishList = new EventWishList(event.getId(), userId);
+        eventWishList.setDateCreated(LocalDateTime.now());
         return repository.save(eventWishList);
     }
 
@@ -55,5 +65,11 @@ public record EventWishListServiceImpl(EventWishListRepository repository,
     @Override
     public Page<EventWishList> getAll(Pageable pageable) {
         return repository.findAll(pageable);
+    }
+
+    @Override
+    public Page<EventWishList> getUserWisList(final Pageable pageable) {
+        final var user = jwtTokenUtil.getUser();
+        return repository.findAll(user.getUserId(), pageable);
     }
 }

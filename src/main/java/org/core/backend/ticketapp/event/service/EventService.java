@@ -2,9 +2,12 @@ package org.core.backend.ticketapp.event.service;
 
 import org.core.backend.ticketapp.common.enums.EventTicketType;
 import org.core.backend.ticketapp.common.request.events.EventFilterRequestDTO;
+import org.core.backend.ticketapp.common.response.stats.EventStatsResponseDTO;
+import org.core.backend.ticketapp.common.response.stats.EventTicketStatsDTO;
 import org.core.backend.ticketapp.event.dao.EventResponseDTO;
 import org.core.backend.ticketapp.event.dto.AssignCategoryToEventRequestDTO;
-import org.core.backend.ticketapp.event.dto.EventCreateRequestDTO;
+import org.core.backend.ticketapp.event.dto.CreateEventRequestDTO;
+import org.core.backend.ticketapp.event.dto.EventStatRequestDTO;
 import org.core.backend.ticketapp.event.dto.EventUpdateRequestDTO;
 import org.core.backend.ticketapp.event.entity.Event;
 import org.springframework.data.domain.Page;
@@ -14,13 +17,15 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EventService {
-    Event create(final EventCreateRequestDTO requestDTO);
+    Event create(final CreateEventRequestDTO requestDTO) throws Exception;
 
     List<Event> getAll();
 
-    Page<EventResponseDTO> searchEvents(final EventFilterRequestDTO filterRequest);
+    org.core.backend.ticketapp.common.dto.Page<EventResponseDTO> searchEvents(final EventFilterRequestDTO filterRequest);
 
     Event getById(final UUID id);
+
+    List<Event> getAllByIds(final List<UUID> id);
 
     Page<Event> getByEventTicketType(EventTicketType eventTicketType, Pageable pageable);
 
@@ -29,4 +34,10 @@ public interface EventService {
     Event update(final EventUpdateRequestDTO requestDTO);
 
     Event assignCategory(AssignCategoryToEventRequestDTO request);
+
+    EventTicketStatsDTO getEventTicketStats(UUID eventId);
+
+    EventStatsResponseDTO getEventStats(final EventStatRequestDTO request);
+
+    Event save(Event event);
 }

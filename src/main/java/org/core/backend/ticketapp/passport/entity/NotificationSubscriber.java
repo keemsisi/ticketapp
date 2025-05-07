@@ -93,6 +93,9 @@ public class NotificationSubscriber {
     @Column(nullable = false, name = "current_seen_remote_address")
     private String currentSeenRemoteAddress;
 
+    @Column(nullable = false, name = "tenant_id")
+    private UUID tenantId;
+
     @Type(type = "LIST-ARRAY")
     @Column(nullable = false, name = "subscriber_scope", columnDefinition = "text[]")
     private List<String> subscriberScope = Collections.emptyList();

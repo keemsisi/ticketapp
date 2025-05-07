@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.core.backend.ticketapp.common.enums.ApprovalStatus;
-import org.core.backend.ticketapp.common.enums.EventCategoryEnum;
 import org.core.backend.ticketapp.common.enums.EventTicketType;
+import org.core.backend.ticketapp.common.enums.UserType;
 import org.core.backend.ticketapp.common.request.AbstractFilterRequestDTO;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 enum EventType {
@@ -25,7 +26,7 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date startDateApproved;
     private ApprovalStatus approvalStatus;
-    private String eventCategory;
+    private List<String> eventCategory;
     private UUID seatSectionId;
     private String seatSectionType; // eventTicketType each seat has section type
     private Double startPrice;
@@ -40,6 +41,8 @@ public class EventFilterRequestDTO extends AbstractFilterRequestDTO {
     private String description;
     private EventTicketType eventTicketType;
     private UUID userId;
+    private UserType userType;
     private UUID tenantId;
+    private Boolean isBuyerEvent = Boolean.FALSE;
 
 }

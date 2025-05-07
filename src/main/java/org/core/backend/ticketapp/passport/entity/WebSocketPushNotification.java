@@ -48,6 +48,9 @@ public class WebSocketPushNotification {
     @Column(name = "session_id",nullable = false)
     private UUID sessionId;
 
+    @Column(nullable = false, name = "tenant_id")
+    private UUID tenantId;
+
     @PrePersist
     private void onCreate() {
         if (dateCreated == null)

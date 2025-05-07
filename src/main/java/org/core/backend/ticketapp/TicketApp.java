@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @EnableAutoConfiguration
-@EnableAsync
+@EnableAsync(proxyTargetClass = true)
 @EnableFeignClients
 public class TicketApp {
 
@@ -21,7 +21,6 @@ public class TicketApp {
         SpringApplication.run(TicketApp.class, args);
     }
 
-    //prototype , singleton , request , session , custom, application, websocket
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();

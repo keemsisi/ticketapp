@@ -44,11 +44,13 @@ public class EventResponseDTO {
     private String streetAddress;
     private HashSet<String> categories;
     private String eventBanner;
+    private String theme;
     private boolean recurring;
-    private TimeZoneEnum timeZone;
+    private String timeZone;
     private LocalDateTime eventDate;
     private ApprovalStatus approvalStatus;
     private EventTicketType ticketType;
     private boolean approvalRequired;
     private List<EventSeatSection> seatSections;
+    private boolean isWishedList;
 }

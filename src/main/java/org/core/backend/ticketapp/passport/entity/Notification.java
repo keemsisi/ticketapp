@@ -45,6 +45,9 @@ public class Notification {
     @Column(nullable = false)
     private UUID requestedBy;
 
+    @Column(name = "tenant_id", columnDefinition = "uuid not null")
+    private UUID tenantId;
+
     @Type(type = "JSONB")
     @Column(name = "new_data", columnDefinition = "JSONB")
     private String newData;
