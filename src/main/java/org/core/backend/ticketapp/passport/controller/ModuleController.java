@@ -1,6 +1,5 @@
 package org.core.backend.ticketapp.passport.controller;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.core.backend.ticketapp.common.GenericResponse;
@@ -31,6 +30,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Controller for handling module-related operations.
+ */
 @RestController
 @RequestMapping("/api/v1/modules")
 public class ModuleController {
@@ -54,12 +56,23 @@ public class ModuleController {
     @Autowired
     private UserModuleRepository userModuleRepository;
 
+    /**
+     * Retrieve a list of all modules.
+     *
+     * @return ResponseEntity containing a GenericResponse with a list of all modules.
+     */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
         List<Module> modules = moduleRepository.findAll();
         return new ResponseEntity<>(new GenericResponse<>("00", "", modules), HttpStatus.OK);
     }
 
+    /**
+     * Retrieve a specific module by its ID.
+     *
+     * @param moduleId UUID of the module to retrieve.
+     * @return ResponseEntity containing a GenericResponse with the module details.
+     */
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getById(@PathVariable(value = "id") UUID moduleId) {
         Optional<Module> module = moduleRepository.findById(moduleId);
@@ -70,6 +83,13 @@ public class ModuleController {
         return new ResponseEntity<>(new GenericResponse<>("00", "", module.get()), HttpStatus.OK);
     }
 
+    /**
+     * Create a new module based on the provided ModuleDto.
+     *
+     * @param moduleDto DTO containing the module information.
+     * @return ResponseEntity containing a GenericResponse with the newly created module.
+     * @throws JsonProcessingException if there is an error processing JSON.
+     */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> create(@Validated @RequestBody ModuleDto moduleDto) throws JsonProcessingException {
         Module newModuleCreated = null;
@@ -88,6 +108,14 @@ public class ModuleController {
         return new ResponseEntity<>(new GenericResponse<>("00", "Successfully added the new module", newModuleCreated), HttpStatus.OK);
     }
 
+    /**
+     * Update an existing module's details.
+     *
+     * @param moduleId  UUID of the module to update.
+     * @param moduleDto DTO containing the updated module information.
+     * @return ResponseEntity containing a GenericResponse with the updated module.
+     * @throws JsonProcessingException if there is an error processing JSON.
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable(value = "id") UUID moduleId, @Valid @RequestBody ModuleDto moduleDto) throws JsonProcessingException {
         Module _module = null;
@@ -111,6 +139,13 @@ public class ModuleController {
         return new ResponseEntity<>(new GenericResponse<>("00", "Successfully updated the module", _module), HttpStatus.OK);
     }
 
+    /**
+     * Delete an existing module by its ID.
+     *
+     * @param moduleId UUID of the module to delete.
+     * @return ResponseEntity containing a GenericResponse with the deleted module.
+     * @throws JsonProcessingException if there is an error processing JSON.
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> delete(@PathVariable(value = "id") UUID moduleId) throws JsonProcessingException {
         Module oldModule = null;
@@ -126,6 +161,13 @@ public class ModuleController {
         return new ResponseEntity<>(new GenericResponse<>("00", "Successfully deleted the role", module.get()), HttpStatus.OK);
     }
 
+    /**
+     * Assign users to a module.
+     *
+     * @param moduleDto DTO containing user-module information.
+     * @return ResponseEntity containing a GenericResponse with the new user-module assignment.
+     * @throws JsonProcessingException if there is an error processing JSON.
+     */
     @RequestMapping(value = "/users", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> assignUsersToModule(@Validated @RequestBody UserModuleDto moduleDto) throws JsonProcessingException {
         UserModule module = null;
@@ -142,10 +184,15 @@ public class ModuleController {
         return new ResponseEntity<>(new GenericResponse<>("00", "Successfully added the new module", null), HttpStatus.OK);
     }
 
+    /**
+     * Retrieve users assigned to a specific module.
+     *
+     * @param moduleId UUID of the module whose users are to be retrieved.
+     * @return ResponseEntity containing a GenericResponse with the list of user modules.
+     */
     @RequestMapping(value = "{moduleId}/users", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> GetUsersUnderGivenModule(@PathVariable(value = "moduleId") UUID moduleId) {
         var userModules = moduleDao.getUserModulesByModuleId(moduleId);
         return new ResponseEntity<>(new GenericResponse<>("00", "User modules retrieved successfully.", userModules), HttpStatus.OK);
     }
-
 }
