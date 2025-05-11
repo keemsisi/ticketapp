@@ -1,19 +1,15 @@
 package org.core.backend.ticketapp.passport.controller;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.thecarisma.FatalObjCopierException;
 import org.core.backend.ticketapp.common.GenericResponse;
 import org.core.backend.ticketapp.common.util.ConstantUtil;
 import org.core.backend.ticketapp.passport.dao.GroupDao;
-import org.core.backend.ticketapp.passport.dtos.core.CreateGroupActionDto;
 import org.core.backend.ticketapp.passport.dtos.core.GroupDto;
 import org.core.backend.ticketapp.passport.dtos.core.UserGroupDto;
 import org.core.backend.ticketapp.passport.dtos.group.CreateGroupDTO;
 import org.core.backend.ticketapp.passport.entity.Group;
-import org.core.backend.ticketapp.passport.entity.GroupActions;
-import org.core.backend.ticketapp.passport.entity.GroupUsers;
 import org.core.backend.ticketapp.passport.repository.GroupUserRepository;
 import org.core.backend.ticketapp.passport.service.core.CoreUserService;
 import org.core.backend.ticketapp.passport.service.core.GroupActionService;
@@ -32,9 +28,14 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Date;
+import java.util.Optional;
+import java.util.UUID;
 
-
+/**
+ * GroupController handles all the operations related to groups, including creating, updating, deleting,
+ * assigning users, and assigning actions to groups.
+ */
 @RestController
 @RequestMapping("/api/v1/groups")
 public class GroupController {
@@ -62,9 +63,17 @@ public class GroupController {
 
     @Autowired
     private ActivityLogProcessorUtils activityLogProcessorUtils;
+
     @Autowired
     private ObjectMapper objectMapper;
 
+    /**
+     * Creates a new group along with associated actions and users.
+     *
+     * @param createGroupDTO DTO containing the group information, action IDs, and user IDs
+     * @return ResponseEntity with the status of the creation process
+     * @throws JsonProcessingException if JSON processing fails
+     */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> create(@Valid @RequestBody CreateGroupDTO createGroupDTO) throws JsonProcessingException {
         Group response = null;
@@ -94,6 +103,15 @@ public class GroupController {
                 HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all groups, optionally filtered by name.
+     *
+     * @param authorization Authorization header
+     * @param name          Optional name filter for the groups
+     * @param pageable      Pageable object for pagination
+     * @return ResponseEntity containing the list of groups
+     * @throws ParseException if the date parsing fails
+     */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll(@RequestHeader(name = "Authorization", defaultValue = "Bearer ", required = true) String authorization, @RequestParam(required = false) String name, Pageable pageable) throws ParseException {
         String _name = name != null ? name.toLowerCase() : null;
@@ -104,6 +122,15 @@ public class GroupController {
                 HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a specific group by its ID, including associated actions and users.
+     *
+     * @param authorization Authorization header
+     * @param groupId       The ID of the group
+     * @param pageable      Pageable object for pagination
+     * @return ResponseEntity containing the group details
+     * @throws ParseException if the date parsing fails
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getById(@RequestHeader(name = "Authorization", defaultValue = "Bearer ", required = true) String authorization, @PathVariable(value = "id") UUID groupId, Pageable pageable) throws ParseException {
         var loggedInUser = jwtTokenUtil.getUser();
@@ -130,6 +157,15 @@ public class GroupController {
                 HttpStatus.OK);
     }
 
+    /**
+     * Updates an existing group with new data, including group actions and user assignments.
+     *
+     * @param groupId        The ID of the group to update
+     * @param createGroupDTO DTO containing the updated group information, action IDs, and user IDs
+     * @return ResponseEntity containing the status of the update process
+     * @throws FatalObjCopierException if an error occurs during object copying
+     * @throws JsonProcessingException if JSON processing fails
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable(value = "id") UUID groupId, @Valid @RequestBody CreateGroupDTO createGroupDTO) throws FatalObjCopierException, JsonProcessingException {
         Group _group = null;
@@ -172,7 +208,13 @@ public class GroupController {
                 HttpStatus.OK);
     }
 
-
+    /**
+     * Deletes a group by its ID.
+     *
+     * @param groupId The ID of the group to delete
+     * @return ResponseEntity containing the status of the deletion process
+     * @throws JsonProcessingException if JSON processing fails
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> delete(@PathVariable(value = "id") UUID groupId) throws JsonProcessingException {
         boolean isDeleted = false;
@@ -192,102 +234,36 @@ public class GroupController {
             oldDataJSON = objectMapper.writeValueAsString(group.get());
             groupService.deleteByUUID(groupId);
             isDeleted = true;
-            activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Group.class.getTypeName(), oldDataJSON, String.format("{\"groupId\": %s,\"isDeleted\": %s}", groupId, isDeleted), "Initiated a request to delete a group");
+            activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Group.class.getTypeName(), oldDataJSON, String.format("{\"groupId\": %s,\"isDeleted\": %s}", groupId.toString(), isDeleted), "Initiated a request to delete a group");
+        }
+        return new ResponseEntity<>(new GenericResponse<>("00", "Group deleted successfully.", ""),
+                HttpStatus.OK);
+    }
+
+    /**
+     * Assigns users to a group.
+     *
+     * @param groupId      The ID of the group
+     * @param userGroupDto DTO containing the user IDs to assign
+     * @return ResponseEntity with the status of the user assignment
+     */
+    @RequestMapping(value = "/{id}/users", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> assignUsers(@PathVariable(value = "id") UUID groupId, @RequestBody UserGroupDto userGroupDto) {
+        var loggedInUser = jwtTokenUtil.getUser();
+
+        if (!loggedInUser.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
             return new ResponseEntity<>(
-                    new GenericResponse<>("00", "Group has been successfully deleted.", ""),
+                    new GenericResponse<>("01", "Action denied because you are not a SUPER ADMIN.", ""),
+                    HttpStatus.NOT_FOUND);
+        }
+
+        boolean isUsersAssigned = groupUserService.create(userGroupDto.getUserIds(), groupId, loggedInUser);
+        if (isUsersAssigned) {
+            return new ResponseEntity<>(new GenericResponse<>("00", "Users successfully assigned to the group.", ""),
                     HttpStatus.OK);
         } else {
-            activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Group.class.getTypeName(), oldDataJSON, String.format("{\"groupId\": %s,\"isDeleted\": %s}", groupId, isDeleted), "Initiated a request to delete a group");
-            return new ResponseEntity<>(
-                    new GenericResponse<>("400", "Group does not exists.", ""),
-                    HttpStatus.OK);
+            return new ResponseEntity<>(new GenericResponse<>("01", "Failed to assign users to the group.", ""),
+                    HttpStatus.BAD_REQUEST);
         }
-    }
-
-    @RequestMapping(value = "users", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> assignUsersToGroups(@Valid @RequestBody UserGroupDto userGroupDtos) throws
-            JsonProcessingException {
-        List<GroupUsers> userGroups = null;
-        var loggedInUser = jwtTokenUtil.getUser();
-        userGroups = new ArrayList<GroupUsers>();
-        for (var userId : userGroupDtos.getUserIds()) {
-            var groupUser = new GroupUsers();
-            groupUser.setGroupId(userGroupDtos.getGroupId());
-            groupUser.setUserId(userId);
-            groupUser.setId(UUID.randomUUID());
-            groupUser.setCreatedBy(loggedInUser.getUserId());
-            groupUser.setCreatedOn(new Date());
-            userGroups.add(groupUser);
-        }
-        groupUserRepository.saveAllAndFlush(userGroups);
-        activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), Group.class.getTypeName(), null, objectMapper.writeValueAsString(userGroups), "Initiated a request to delete a group");
-        return new ResponseEntity<>(
-                new GenericResponse<>("00", "Successfully added user to new groups",
-                        null),
-                HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "users", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteUsersFromGroups(@Valid @RequestBody UserGroupDto userGroupDtos) throws
-            JsonProcessingException {
-        boolean isDeleted;
-        var loggedInUser = jwtTokenUtil.getUser();
-        if (!loggedInUser.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
-            return new ResponseEntity<>(
-                    new GenericResponse<>("", "Action denied because you are not a SUPER ADMIN.", ""),
-                    HttpStatus.NOT_FOUND);
-        }
-
-        for (var userId : userGroupDtos.getUserIds()) {
-            groupUserRepository.deleteByUserIdGroupId(userGroupDtos.getGroupId(), userId);
-        }
-        isDeleted = true;
-        List<GroupUsers> groupUsers = groupUserRepository.findByGroupId(userGroupDtos.getGroupId());
-        activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), GroupUsers.class.getTypeName(), objectMapper.writeValueAsString(groupUsers), String.format("{\"groupId\": %s,\"isDeleted\": %s, \"deletedGroupUsers\":%s}", userGroupDtos.getGroupId(), isDeleted, groupUsers), "Initiated a request to delete a group");
-        return new ResponseEntity<>(
-                new GenericResponse<>("00", "Successfully removed user(s) from group",
-                        null),
-                HttpStatus.OK);
-
-    }
-
-    @RequestMapping(value = "actions", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> assignActionsToGroups(@Valid @RequestBody CreateGroupActionDto groupAction) throws
-            JsonProcessingException {
-        boolean newActionsAssignedToGroups = false;
-        try {
-            var loggedInUser = jwtTokenUtil.getUser();
-            newActionsAssignedToGroups = groupActionService.create(groupAction.getActionIds(), groupAction.getGroupId(), loggedInUser);
-            return new ResponseEntity<>(
-                    new GenericResponse<>("00", "Successfully added actions to group",
-                            null),
-                    HttpStatus.OK);
-        } finally {
-            String newDataJSON = null;
-            if (newActionsAssignedToGroups) newDataJSON = objectMapper.writeValueAsString(groupAction);
-            activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), GroupActions.class.getTypeName(), null, newDataJSON, "Initiated a request to delete a group");
-        }
-    }
-
-    @RequestMapping(value = "actions", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteActionsFromGroups(@Valid @RequestBody CreateGroupActionDto groupActionDto) throws
-            JsonProcessingException {
-        boolean isDeleted = false;
-        var loggedInUser = jwtTokenUtil.getUser();
-        if (!loggedInUser.getRoles().contains(ConstantUtil.SUPER_ADMIN)) {
-            return new ResponseEntity<>(
-                    new GenericResponse<>("", "Action denied because you are not a SUPER ADMIN.", ""),
-                    HttpStatus.NOT_FOUND);
-        }
-
-        for (var actionId : groupActionDto.getActionIds()) {
-            groupActionService.deleteByUserIdGroupId(groupActionDto.getGroupId(), actionId);
-        }
-        isDeleted = true;
-        activityLogProcessorUtils.processActivityLog(jwtTokenUtil.getUser().getUserId(), GroupActions.class.getTypeName(), objectMapper.writeValueAsString(groupActionDto), String.format("{\"groupId\": %s,\"isDeleted\": %s, \"actionIds\":%s}", groupActionDto.getGroupId(), isDeleted, groupActionDto.getActionIds()), "Initiated a request to delete a group");
-        return new ResponseEntity<>(
-                new GenericResponse<>("00", "Successfully removed actions(s) from group",
-                        null),
-                HttpStatus.OK);
     }
 }
